@@ -1,7 +1,11 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  /* config options here */
+/** @type {import("next").NextConfig} */
+const nextConfig = {
+  output: "export",
+  trailingSlash: true,  // 👈 FIX para Hostinger
+  distDir: "out",       // 👈 Donde exporta todo
+  images: {
+    unoptimized: true,  // 👈 NECESARIO para export
+  },
 };
 
-export default nextConfig;
+module.exports = nextConfig;

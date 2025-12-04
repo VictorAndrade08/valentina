@@ -1,15 +1,25 @@
+/* Tailwind */
 @import "tailwindcss";
 
+/* =============================
+   VARIABLES DE COLORES
+============================= */
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* FUENTES PRINCIPALES DEL DISEÑO */
+  --font-boruino: "Oswald", sans-serif;
+  --font-bebas: "Bebas Neue", sans-serif;
+  --font-body: "Montserrat", sans-serif;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-body);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -19,8 +29,34 @@
   }
 }
 
+/* =============================
+   CLASES DE TIPOGRAFÍA (IMPORTANTE)
+============================= */
+
+.font-boruino {
+  font-family: var(--font-boruino);
+}
+
+.font-bebas {
+  font-family: var(--font-bebas);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+/* =============================
+   BODY GLOBAL
+============================= */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html, body {
+  overflow-x: hidden;
 }
