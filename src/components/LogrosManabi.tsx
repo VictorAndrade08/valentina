@@ -14,6 +14,7 @@ type BlogroData = {
   iconKey: string;
   title: string;
   body: string;
+  image?: string;
 };
 
 const fallbackBlogros: BlogroData[] = [
@@ -32,6 +33,8 @@ const fallbackBlogros: BlogroData[] = [
       "• Plaza memorial San Gregorio\n" +
       "• Sistema de agua potable para Chone\n\n" +
       "Protegimos los fondos y aseguramos que la reconstrucción avance donde más se necesita.",
+    image:
+      "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2025/12/ALIVIO-FINANCIERO-BIESS.webp",
   },
   {
     id: "02",
@@ -40,6 +43,8 @@ const fallbackBlogros: BlogroData[] = [
     body:
       "Impulsamos una reforma para que el canon del Puerto de Manta deje de ir al Presupuesto General del Estado y se quede directamente en el Municipio y la Prefectura.\n\n" +
       "Esto garantiza que USD 1.859.830 se inviertan en obras e infraestructura para los mantenses.",
+    image:
+      "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2025/12/ALIVIO-FINANCIERO-BIESS.webp",
   },
   {
     id: "03",
@@ -51,6 +56,8 @@ const fallbackBlogros: BlogroData[] = [
       "• USD 50 millones para Portoviejo\n" +
       "• USD 28 millones para Montecristi\n\n" +
       "Estos proyectos garantizan agua segura y digna para miles de familias.",
+    image:
+      "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2025/12/ALIVIO-FINANCIERO-BIESS.webp",
   },
   {
     id: "04",
@@ -59,6 +66,8 @@ const fallbackBlogros: BlogroData[] = [
     body:
       "Impulsamos la ampliación del cupo de GLP para todo el país, permitiendo que Portoviejo abra nuevas estaciones de servicio.\n\n" +
       "Este incremento garantiza disponibilidad del GLP y un ahorro de alrededor de USD 20 diarios para miles de familias y transportistas.",
+    image:
+      "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2025/12/ALIVIO-FINANCIERO-BIESS.webp",
   },
   {
     id: "05",
@@ -70,6 +79,8 @@ const fallbackBlogros: BlogroData[] = [
       "• El centro de salud de Danzarín está concluido\n" +
       "• Higuerón y Playa Prieta tienen un 90% de avance\n\n" +
       "Estas obras, junto al mantenimiento de unidades médicas, superan el millón de dólares en inversión.",
+    image:
+      "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2025/12/ALIVIO-FINANCIERO-BIESS.webp",
   },
 ];
 
@@ -78,7 +89,7 @@ const BLOGROS_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vTYKQwKNfKrrKl6J91u7X26Yr8cQxsalFeHIjnZfxjDaHcgS5JYPn_KzHt5naz_-yFXfLidX96gr_yg/pub?gid=57984147&single=true&output=csv";
 
 // ================================
-// PARSER CSV (MISMO QUE EN LEYES)
+// PARSER CSV
 // ================================
 function parseCsv(text: string): string[][] {
   const rows: string[][] = [];
@@ -172,7 +183,10 @@ export default function LogrosManabi() {
           const iconKey = (cols[1] ?? "").toString().trim().toLowerCase();
           const title = (cols[2] ?? "").toString().trim();
           const body = (cols[3] ?? "").toString().trim();
-          const sectionTitleCol = (cols[4] ?? "").toString().trim();
+
+          // 👉 Tu Excel: A=id, B=iconKey, C=title, D=body, E=image, F=sectionTitle
+          const image = (cols[4] ?? "").toString().trim();
+          const sectionTitleCol = (cols[5] ?? "").toString().trim();
 
           if (!foundSectionTitle && sectionTitleCol) {
             foundSectionTitle = sectionTitleCol;
@@ -185,6 +199,7 @@ export default function LogrosManabi() {
             iconKey,
             title,
             body,
+            image,
           });
         }
 
@@ -206,7 +221,7 @@ export default function LogrosManabi() {
         {/* TÍTULO */}
         <div className="text-center mb-20">
           <h2 className="text-[#6F2C91] font-[var(--font-boruino)] text-[clamp(2.2rem,4vw,3.4rem)] font-extrabold uppercase tracking-tight">
-            {sectionTitle}
+          {sectionTitle}
           </h2>
           <div className="w-[120px] h-[6px] bg-[#EAE84B] mx-auto mt-4 rounded-full" />
         </div>
@@ -225,6 +240,14 @@ export default function LogrosManabi() {
                 <p className="font-[var(--font-body)] text-gray-700 leading-relaxed whitespace-pre-line">
                   {item.body}
                 </p>
+
+                {item.image && (
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="mt-6 w-full max-w-[720px] rounded-2xl shadow-lg object-cover"
+                  />
+                )}
               </div>
             </div>
           ))}

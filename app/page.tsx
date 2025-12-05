@@ -17,38 +17,46 @@ import InstagramFeedValentina from "@/components/InstagramFeedValentina";
 // ⭐ FEED TIKTOK
 import TikTokFeedValentina from "@/components/TikTokFeedValentina";
 
+// ⭐ BOTÓN FLOTANTE BUZÓN
+import BuzonFloatingCTA from "@/components/BuzonFloatingCTA";
+
 export default function Home() {
   return (
-    <main className="w-full overflow-x-hidden bg-white">
-      {/* HERO PRINCIPAL */}
-      <Hero />
+    <>
+      <main className="w-full overflow-x-hidden bg-white">
+        {/* HERO PRINCIPAL */}
+        <Hero />
 
-      {/* SECCIÓN HOLA SOY */}
-      <AboutBio />
+        {/* SECCIÓN HOLA SOY */}
+        <AboutBio />
 
-      {/* NOTICIAS LEYES */}
-      <Leyes />
+        {/* NOTICIAS LEYES */}
+        <Leyes />
 
-      {/* BANNER ORGULLO */}
-      <FraseOrgullo />
+        {/* BANNER ORGULLO */}
+        <FraseOrgullo />
 
-      {/* LOGROS MANABÍ */}
-      <LogrosManabi />
+        {/* LOGROS MANABÍ */}
+        <LogrosManabi />
 
-      {/* FEED DE INSTAGRAM */}
-      <InstagramFeedValentina />
+        {/* FEED DE INSTAGRAM */}
+        <InstagramFeedValentina />
 
-      {/* FEED DE TIKTOK */}
-      <TikTokFeedValentina />
+        {/* FEED DE TIKTOK */}
+        <TikTokFeedValentina />
 
-      {/* ⭐ INICIATIVAS LEGISLATIVAS */}
-      <IniciativasLegislativas />
+        {/* ⭐ INICIATIVAS LEGISLATIVAS */}
+        <IniciativasLegislativas />
 
-      {/* AGENDA INTERNACIONAL */}
-      <AgendaInternacional />
+        {/* AGENDA INTERNACIONAL */}
+        <AgendaInternacional />
 
-      {/* BUZÓN CIUDADANO */}
-      <BuzonCiudadano />
-    </main>
+        {/* BUZÓN CIUDADANO */}
+        <BuzonCiudadano />
+      </main>
+
+      {/* BOTÓN FLOTANTE HACIA #buzon */}
+      <BuzonFloatingCTA />
+    </>
   );
 }

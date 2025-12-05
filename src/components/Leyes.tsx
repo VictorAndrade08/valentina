@@ -126,8 +126,11 @@ export default function Leyes() {
   const [leyes, setLeyes] = useState<LeyData[]>(fallbackLeyes);
   const [modalData, setModalData] = useState<LeyData | null>(null);
 
-  // título dinámico con fallback
+  // título y subtítulo dinámicos con fallback
   const [sectionTitle, setSectionTitle] = useState("NOTICIAS LEYES");
+  const [sectionSubtitle, setSectionSubtitle] = useState(
+    "Las leyes y decisiones que ya están cambiando la vida de miles de ecuatorianos."
+  );
 
   // 👉 control de cuántas noticias se muestran
   const [visibleCount, setVisibleCount] = useState(9);
@@ -158,13 +161,17 @@ export default function Leyes() {
         const header = rows[0];
         const dataRows = rows.slice(1);
 
-        // índice de columna "sectionTitle"
+        // índices de columnas especiales
         const sectionTitleIndex = header.findIndex(
           (col) => col.trim().toLowerCase() === "sectiontitle"
+        );
+        const sectionSubtitleIndex = header.findIndex(
+          (col) => col.trim().toLowerCase() === "sectionsubtitle"
         );
 
         const parsed: LeyData[] = [];
         let dynamicSectionTitle = "";
+        let dynamicSectionSubtitle = "";
 
         for (const cols of dataRows) {
           if (cols.length < 2) continue;
@@ -193,6 +200,13 @@ export default function Leyes() {
               .trim();
             if (candidate) dynamicSectionTitle = candidate;
           }
+
+          if (!dynamicSectionSubtitle && sectionSubtitleIndex !== -1) {
+            const candidate = (cols[sectionSubtitleIndex] ?? "")
+              .toString()
+              .trim();
+            if (candidate) dynamicSectionSubtitle = candidate;
+          }
         }
 
         if (parsed.length > 0) {
@@ -201,6 +215,7 @@ export default function Leyes() {
           setVisibleCount((prev) => Math.min(9, parsed.length));
         }
         if (dynamicSectionTitle) setSectionTitle(dynamicSectionTitle);
+        if (dynamicSectionSubtitle) setSectionSubtitle(dynamicSectionSubtitle);
       })
       .catch((err) => {
         console.error("Error cargando CSV de leyes:", err);
@@ -220,6 +235,10 @@ export default function Leyes() {
               {sectionTitle}
             </h2>
             <div className="w-[120px] h-[6px] bg-[#EAE84B] mx-auto mt-3 rounded-full" />
+            {/* SUBTÍTULO */}
+            <p className="mt-4 max-w-[820px] mx-auto text-gray-700 font-[var(--font-body)] text-[15px] sm:text-[16px] leading-relaxed">
+              {sectionSubtitle}
+            </p>
           </div>
 
           {/* GRID DE CARDS */}
