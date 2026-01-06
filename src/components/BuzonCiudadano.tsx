@@ -1,6 +1,13 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { Oswald } from "next/font/google";
+import { FaPaperclip, FaTrash, FaCheckCircle, FaLock } from "react-icons/fa";
+
+const oswald = Oswald({
+  subsets: ["latin"],
+  weight: ["700"],
+});
 
 type FormState = {
   nombre: string;
@@ -26,21 +33,18 @@ export default function BuzonCiudadano() {
   );
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Helpers de sanitización
   const onlyLetters = (value: string) =>
     value.replace(/[^a-zA-ZÁÉÍÓÚáéíóúÑñüÜ\s]/g, "");
 
   const onlyPhoneChars = (value: string) =>
-    value.replace(/[^0-9+]/g, ""); // permite números y +
+    value.replace(/[^0-9+]/g, "");
 
   const handleChange =
     (field: keyof FormState, mode: "text" | "letters" | "phone" = "text") =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       let value = e.target.value;
-
       if (mode === "letters") value = onlyLetters(value);
       if (mode === "phone") value = onlyPhoneChars(value);
-
       setFormState((prev) => ({ ...prev, [field]: value }));
     };
 
@@ -50,8 +54,6 @@ export default function BuzonCiudadano() {
       setFileName("Ningún archivo seleccionado");
       return;
     }
-
-    // Validación rápida en front (igual está validado en el plugin)
     const allowed = ["image/jpeg", "image/png", "application/pdf"];
     if (!allowed.includes(file.type)) {
       alert("Solo se permiten imágenes JPG/PNG o PDF.");
@@ -59,14 +61,12 @@ export default function BuzonCiudadano() {
       setFileName("Ningún archivo seleccionado");
       return;
     }
-
     if (file.size > 1024 * 1024) {
       alert("El archivo supera el límite de 1MB.");
       e.target.value = "";
       setFileName("Ningún archivo seleccionado");
       return;
     }
-
     setFileName(file.name);
   };
 
@@ -79,21 +79,15 @@ export default function BuzonCiudadano() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    // evita envíos duplicados
     if (loading) return;
-
-    // validación rápida en front: todo obligatorio
     const { nombre, canton, correo, whatsapp, asunto, mensaje } = formState;
     if (!nombre || !canton || !correo || !whatsapp || !asunto || !mensaje) {
       alert("Por favor completa todos los campos antes de enviar.");
       return;
     }
-
     setLoading(true);
     const formElement = e.currentTarget;
     const formData = new FormData(formElement);
-
     try {
       const res = await fetch(
         "https://peachpuff-cod-624982.hostingersite.com/wp-json/buzon/v1/guardar",
@@ -102,19 +96,12 @@ export default function BuzonCiudadano() {
           body: formData,
         }
       );
-
       const data = await res.json();
-
       if (data.status === "ok") {
         alert("¡Gracias! Tu mensaje ha sido enviado.");
         formElement.reset();
         setFormState({
-          nombre: "",
-          canton: "",
-          correo: "",
-          whatsapp: "",
-          asunto: "",
-          mensaje: "",
+          nombre: "", canton: "", correo: "", whatsapp: "", asunto: "", mensaje: "",
         });
         clearFile();
       } else {
@@ -123,38 +110,40 @@ export default function BuzonCiudadano() {
     } catch (error) {
       alert("Error enviando los datos.");
     }
-
     setLoading(false);
   };
 
   return (
-    <section id="buzon" className="bg-white py-20 border-t border-gray-200">
-      <div className="container mx-auto px-4">
-        {/* HEADER */}
-        <div className="text-center mb-10">
-          <h2 className="text-[clamp(2.4rem,5vw,3.4rem)] text-[#6F2C91] font-[var(--font-boruino)] font-extrabold uppercase tracking-tight">
-            BUZÓN CIUDADANO
+    <section id="buzon" className="bg-[#FBFBFD] py-24 border-t border-gray-100">
+      <div className="max-w-[1400px] mx-auto px-6">
+        
+        {/* HEADER MEJORADO */}
+        <div className="text-center mb-16">
+          <h2 className={`${oswald.className} text-[clamp(2.5rem,5vw,4.5rem)] text-[#1D1D1F] font-black uppercase leading-[0.85] mb-6`}>
+            BUZÓN <span className="text-[#6F2C91]">CIUDADANO</span>
           </h2>
 
-          <div className="inline-block mt-2 px-6 py-1 bg-[#EAE84B] text-[#6F2C91] font-[var(--font-bebas)] text-[2.4rem]">
+          <div className="inline-block px-8 py-3 bg-[#EAE84B] text-[#6F2C91] font-black text-2xl md:text-3xl rounded-2xl shadow-sm rotate-[-1deg]">
             TU VOZ SÍ IMPORTA
           </div>
 
-          <p className="max-w-[700px] mx-auto mt-5 text-gray-700 text-[1.1rem] leading-relaxed font-[var(--font-body)]">
-            Este es un espacio para escucharte. Puedes compartir problemas de tu
-            comunidad, propuestas, denuncias o historias que debamos conocer.
-            Cada mensaje cuenta.
+          <p className="max-w-[750px] mx-auto mt-8 text-[#86868B] text-lg md:text-xl leading-relaxed font-medium">
+            Este es un espacio para escucharte. Comparte tus propuestas, denuncias o historias.
+            Tu participación es la base de nuestra gestión.
           </p>
         </div>
 
-        {/* FORM */}
-        <div className="max-w-[850px] mx-auto bg-white p-10 rounded-xl shadow-xl border-t-[6px] border-[#EAE84B]">
-          <form onSubmit={handleSubmit} encType="multipart/form-data" noValidate>
-            {/* NOMBRE + CANTÓN */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-5">
-              <div>
-                <label className="form-label">
-                  Nombre completo <span className="text-red-500">*</span>
+        {/* FORMULARIO MEJORADO */}
+        <div className="max-w-[900px] mx-auto bg-white p-8 md:p-14 rounded-[3rem] shadow-2xl relative overflow-hidden">
+          {/* Acento lateral */}
+          <div className="absolute top-0 left-0 w-full h-3 bg-[#EAE84B]" />
+          
+          <form onSubmit={handleSubmit} encType="multipart/form-data" noValidate className="space-y-8">
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-2">
+                <label className="form-label flex items-center gap-2">
+                   Nombre completo <span className="text-red-500 font-bold">*</span>
                 </label>
                 <input
                   name="nombre"
@@ -165,12 +154,11 @@ export default function BuzonCiudadano() {
                   onChange={handleChange("nombre", "letters")}
                   className="form-input"
                 />
-                <p className="helper-text">Solo letras y espacios.</p>
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <label className="form-label">
-                  Cantón / Provincia <span className="text-red-500">*</span>
+                  Cantón / Provincia <span className="text-red-500 font-bold">*</span>
                 </label>
                 <input
                   name="canton"
@@ -181,15 +169,13 @@ export default function BuzonCiudadano() {
                   onChange={handleChange("canton", "letters")}
                   className="form-input"
                 />
-                <p className="helper-text">Ejemplo: Portoviejo, Manabí.</p>
               </div>
             </div>
 
-            {/* CORREO + WHATSAPP */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-5">
-              <div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-2">
                 <label className="form-label">
-                  Correo electrónico <span className="text-red-500">*</span>
+                  Correo electrónico <span className="text-red-500 font-bold">*</span>
                 </label>
                 <input
                   name="correo"
@@ -200,14 +186,11 @@ export default function BuzonCiudadano() {
                   onChange={handleChange("correo")}
                   className="form-input"
                 />
-                <p className="helper-text">
-                  Usaremos este correo solo para responderte.
-                </p>
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <label className="form-label">
-                  WhatsApp <span className="text-red-500">*</span>
+                  WhatsApp <span className="text-red-500 font-bold">*</span>
                 </label>
                 <input
                   name="whatsapp"
@@ -220,54 +203,48 @@ export default function BuzonCiudadano() {
                   onChange={handleChange("whatsapp", "phone")}
                   className="form-input"
                 />
-                <p className="helper-text">
-                  Solo números, puedes empezar con 0 o +593.
-                </p>
               </div>
             </div>
 
-            {/* ASUNTO */}
-            <div className="mb-5">
+            <div className="space-y-2">
               <label className="form-label">
-                Asunto <span className="text-red-500">*</span>
+                Asunto del Mensaje <span className="text-red-500 font-bold">*</span>
               </label>
               <input
                 name="asunto"
                 type="text"
                 required
-                placeholder="Breve título del mensaje"
+                placeholder="¿Sobre qué nos quieres escribir?"
                 value={formState.asunto}
                 onChange={handleChange("asunto")}
                 className="form-input"
               />
             </div>
 
-            {/* MENSAJE */}
-            <div className="mb-5">
+            <div className="space-y-2">
               <label className="form-label">
-                Mensaje <span className="text-red-500">*</span>
+                Detalla tu mensaje <span className="text-red-500 font-bold">*</span>
               </label>
               <textarea
                 name="mensaje"
-                rows={5}
+                rows={6}
                 required
-                placeholder="Escribe aquí los detalles..."
+                placeholder="Escribe aquí los detalles de tu propuesta o historia..."
                 value={formState.mensaje}
                 onChange={handleChange("mensaje")}
-                className="form-input resize-none"
+                className="form-input resize-none min-h-[150px]"
               />
             </div>
 
-            {/* ARCHIVO */}
-            <div className="mb-6">
-              <label className="form-label mb-2 block">
-                Adjuntar archivo{" "}
-                <span className="text-gray-400">(PDF o imagen, máx 1MB)</span>
+            {/* ZONA DE ARCHIVO REDISEÑADA */}
+            <div className="space-y-3">
+              <label className="form-label text-[#86868B] flex items-center gap-2">
+                Adjuntar documentos de respaldo <span className="text-xs font-normal">(PDF o imagen, máx 1MB)</span>
               </label>
 
-              <div className="flex items-center gap-3">
-                <label className="inline-flex items-center gap-2 px-4 py-2 bg-[#6F2C91] text-white rounded-lg cursor-pointer hover:bg-[#4F1570] transition-all text-sm font-[var(--font-boruino)]">
-                  📎 Subir archivo
+              <div className="flex flex-col sm:flex-row items-stretch gap-4">
+                <label className="flex-none flex items-center justify-center gap-2 px-6 py-4 bg-[#6F2C91] text-white rounded-2xl cursor-pointer hover:bg-[#5a2376] transition-all font-bold shadow-lg shadow-purple-200 active:scale-95">
+                  <FaPaperclip /> Subir Archivo
                   <input
                     ref={fileInputRef}
                     name="archivo"
@@ -278,90 +255,97 @@ export default function BuzonCiudadano() {
                   />
                 </label>
 
-                <div className="flex-1 flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg border border-dashed border-gray-300 text-xs sm:text-sm font-[var(--font-body)] text-gray-600">
-                  <span className="truncate">{fileName}</span>
+                <div className="flex-1 flex items-center justify-between px-5 py-4 bg-[#F5F5F7] rounded-2xl border-2 border-dashed border-gray-200 text-gray-500 text-sm italic">
+                  <span className="truncate max-w-[250px]">{fileName}</span>
                   {fileName !== "Ningún archivo seleccionado" && (
                     <button
                       type="button"
                       onClick={clearFile}
-                      className="ml-3 text-gray-400 hover:text-red-500 text-lg leading-none"
-                      aria-label="Quitar archivo"
+                      className="w-8 h-8 flex items-center justify-center rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm"
                     >
-                      ✕
+                      <FaTrash size={12} />
                     </button>
                   )}
                 </div>
               </div>
             </div>
 
-            {/* BOTÓN */}
-            <button
-              type="submit"
-              disabled={loading}
-              className={`w-full bg-[#6F2C91] text-white py-4 rounded-lg text-[1.4rem] font-[var(--font-bebas)] tracking-wider transition-all ${
-                loading
-                  ? "opacity-60 cursor-not-allowed"
-                  : "hover:bg-[#4F1570]"
-              }`}
-            >
-              {loading ? "ENVIANDO..." : "ENVIAR MI MENSAJE"}
-            </button>
+            {/* BOTÓN REFORZADO */}
+            <div className="pt-4">
+                <button
+                type="submit"
+                disabled={loading}
+                className={`group relative w-full py-5 rounded-[1.5rem] text-xl font-black uppercase tracking-widest transition-all duration-300 shadow-2xl overflow-hidden ${
+                    loading
+                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    : "bg-[#6F2C91] text-white hover:bg-[#5a2376] hover:scale-[1.01] active:scale-[0.99] shadow-purple-200"
+                }`}
+                >
+                <div className="relative z-10 flex items-center justify-center gap-3">
+                    {loading ? (
+                        <>
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            ENVIANDO...
+                        </>
+                    ) : (
+                        <>
+                            ENVIAR MI MENSAJE
+                            <FaCheckCircle className="opacity-50 group-hover:opacity-100 transition-opacity" />
+                        </>
+                    )}
+                </div>
+                </button>
+            </div>
 
-            {/* Mensaje UX mientras se envía */}
             {loading && (
-              <p className="mt-4 text-center text-sm text-[#6F2C91] font-[var(--font-body)]">
-                Enviando tu mensaje, por favor no cierres esta ventana.
+              <p className="text-center text-sm text-[#6F2C91] font-bold animate-pulse">
+                Procesando envío, por favor no recargues la página...
               </p>
             )}
 
-            <div className="text-center text-gray-400 text-sm mt-6 font-[var(--font-body)]">
-              🔒 Tus datos son confidenciales.
+            <div className="flex items-center justify-center gap-2 text-gray-400 text-xs font-bold pt-4 border-t border-gray-50">
+              <FaLock size={10} /> TUS DATOS ESTÁN PROTEGIDOS POR LEY DE PRIVACIDAD
             </div>
           </form>
         </div>
       </div>
 
-      {/* Styles */}
-      <style>{`
+      <style jsx>{`
         .form-label {
           font-family: var(--font-boruino);
-          color: #6F2C91;
-          font-weight: 600;
-          display: block;
-          margin-bottom: 4px;
+          color: #1D1D1F;
+          font-size: 0.95rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
         }
 
         .form-input {
           width: 100%;
-          padding: 14px 16px;
-          border: 1px solid #ddd;
-          border-radius: 10px;
-          font-size: 1rem;
-          font-family: var(--font-body);
-          background: white;
+          padding: 1.1rem 1.25rem;
+          border: 2px solid #F5F5F7;
+          border-radius: 1.25rem;
+          font-size: 1.05rem;
+          background: #F5F5F7;
           outline: none;
-          transition: 0.2s;
-          color: #333 !important;
+          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+          color: #1D1D1F;
         }
 
         .form-input::placeholder {
-          color: #999 !important;
+          color: #86868B;
+          opacity: 0.6;
         }
 
         .form-input:focus {
+          background: white;
           border-color: #6F2C91;
-          box-shadow: 0 0 0 2px rgba(111,44,145,0.15);
+          box-shadow: 0 10px 20px rgba(111,44,145,0.08);
+          transform: translateY(-2px);
         }
 
-        textarea.form-input {
-          color: #333 !important;
-        }
-
-        .helper-text {
-          margin-top: 4px;
-          font-size: 0.8rem;
-          color: #9CA3AF;
-          font-family: var(--font-body);
+        .form-input:hover {
+          border-color: #EAE84B;
         }
       `}</style>
     </section>

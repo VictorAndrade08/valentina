@@ -1,10 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Oswald } from "next/font/google"; // Para mantener consistencia tipográfica
 
-// =========================================
-// TIPOS
-// =========================================
+const oswald = Oswald({
+  subsets: ["latin"],
+  weight: ["700"],
+});
+
 type AgendaData = {
   id: string;
   title: string;
@@ -16,9 +19,6 @@ type AgendaData = {
   image: string;
 };
 
-// =========================================
-// FALLBACK (Muy importante)
-// =========================================
 const fallback: AgendaData = {
   id: "1",
   title: "AGENDA INTERNACIONAL",
@@ -39,74 +39,37 @@ const fallback: AgendaData = {
     "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2025/12/ONU-UIP-1.webp",
 };
 
-// =========================================
-// URL DEL CSV  (ya con el gid correcto)
-// =========================================
 const CSV_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vTYKQwKNfKrrKl6J91u7X26Yr8cQxsalFeHIjnZfxjDaHcgS5JYPn_KzHt5naz_-yFXfLidX96gr_yg/pub?gid=2020873782&single=true&output=csv";
 
-// =========================================
-// PARSER CSV ROBUSTO (acepta comas y comillas)
-// =========================================
 function parseCsv(text: string): string[][] {
   const rows: string[][] = [];
   let cur = "";
   let row: string[] = [];
   let inQuotes = false;
   let i = 0;
-
   while (i < text.length) {
     const char = text[i];
-
     if (inQuotes) {
       if (char === '"') {
-        if (i + 1 < text.length && text[i + 1] === '"') {
-          // comilla escapada ""
-          cur += '"';
-          i += 2;
-        } else {
-          inQuotes = false;
-          i++;
-        }
-      } else {
-        cur += char;
-        i++;
-      }
+        if (i + 1 < text.length && text[i + 1] === '"') { cur += '"'; i += 2; }
+        else { inQuotes = false; i++; }
+      } else { cur += char; i++; }
     } else {
-      if (char === '"') {
-        inQuotes = true;
-        i++;
-      } else if (char === ",") {
-        row.push(cur);
-        cur = "";
-        i++;
-      } else if (char === "\r" || char === "\n") {
-        if (cur !== "" || row.length > 0) {
-          row.push(cur);
-          rows.push(row);
-        }
-        row = [];
-        cur = "";
+      if (char === '"') { inQuotes = true; i++; }
+      else if (char === ",") { row.push(cur); cur = ""; i++; }
+      else if (char === "\r" || char === "\n") {
+        if (cur !== "" || row.length > 0) { row.push(cur); rows.push(row); }
+        row = []; cur = "";
         if (char === "\r" && i + 1 < text.length && text[i + 1] === "\n") i += 2;
         else i++;
-      } else {
-        cur += char;
-        i++;
-      }
+      } else { cur += char; i++; }
     }
   }
-
-  if (cur !== "" || row.length > 0) {
-    row.push(cur);
-    rows.push(row);
-  }
-
+  if (cur !== "" || row.length > 0) { row.push(cur); rows.push(row); }
   return rows;
 }
 
-// =========================================
-// COMPONENTE PRINCIPAL
-// =========================================
 export default function AgendaInternacional() {
   const [data, setData] = useState<AgendaData>(fallback);
 
@@ -115,24 +78,9 @@ export default function AgendaInternacional() {
       .then((res) => res.text())
       .then((csv) => {
         const rows = parseCsv(csv);
-
         if (rows.length < 2) return;
-
-        const [
-          id,
-          title,
-          tag,
-          subtitle,
-          description,
-          bulletsString,
-          quote,
-          image,
-        ] = rows[1];
-
-        const bullets = bulletsString
-          ? bulletsString.split(";").map((b) => b.trim())
-          : fallback.bullets;
-
+        const [id, title, tag, subtitle, description, bulletsString, quote, image] = rows[1];
+        const bullets = bulletsString ? bulletsString.split(";").map((b) => b.trim()) : fallback.bullets;
         setData({
           id: id || fallback.id,
           title: title || fallback.title,
@@ -148,61 +96,72 @@ export default function AgendaInternacional() {
   }, []);
 
   return (
-    <section id="agenda-internacional" className="py-20 bg-white">
+    <section id="agenda-internacional" className="py-24 bg-[#FBFBFD] overflow-hidden">
       <div className="max-w-[1400px] mx-auto px-6">
-        {/* ===== TÍTULO ===== */}
-        <div className="text-center mb-12">
-          <h2 className="font-boruino text-[clamp(2rem,4vw,3rem)]
-                         font-extrabold text-[#6F2C91] uppercase">
-            {data.title}
+        
+        {/* TÍTULO MEJORADO */}
+        <div className="mb-16 md:mb-20">
+          <h2 className={`${oswald.className} text-[clamp(2.5rem,5vw,4.5rem)] font-black text-[#1D1D1F] uppercase leading-[0.85]`}>
+            {data.title.split(" ").slice(0, 1)} <br />
+            <span className="text-[#6F2C91]">{data.title.split(" ").slice(1).join(" ")}</span>
           </h2>
-          <div className="w-[80px] h-[6px] bg-[#EAE84B] mx-auto mt-2 rounded-md" />
+          <div className="w-20 h-2 bg-[#EAE84B] rounded-full mt-6" />
         </div>
 
-        {/* ===== GRID ===== */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* ===== COLUMNA IZQUIERDA ===== */}
-          <div>
-            <span className="inline-block bg-[#EAE84B] text-[#6F2C91] font-boruino
-                             text-sm font-bold px-4 py-1 rounded-sm uppercase mb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+          
+          {/* COLUMNA IZQUIERDA: INFORMACIÓN */}
+          <div className="lg:col-span-7 space-y-8">
+            <div className="inline-block bg-[#EAE84B] text-[#6F2C91] font-bold text-xs tracking-widest px-5 py-2 rounded-full uppercase shadow-sm">
               {data.tag}
-            </span>
+            </div>
 
-            <h3 className="text-[#6F2C91] font-boruino text-[1.8rem] font-extrabold
-                           leading-tight uppercase mb-5">
+            <h3 className={`${oswald.className} text-[#6F2C91] text-3xl md:text-4xl font-black uppercase leading-tight`}>
               {data.subtitle}
             </h3>
 
-            <p className="font-body text-gray-800 text-[17px] leading-relaxed mb-6 whitespace-pre-line">
+            <p className="text-[#424245] text-lg md:text-xl leading-relaxed font-medium whitespace-pre-line border-l-4 border-[#6F2C91]/20 pl-6">
               {data.description}
             </p>
 
-            <h4 className="font-boruino text-[#6F2C91] text-lg font-bold uppercase mb-3">
-              ¿Qué hago desde esta comisión?
-            </h4>
+            <div className="bg-white p-8 rounded-[2.5rem] shadow-xl border border-gray-50">
+              <h4 className={`${oswald.className} text-[#6F2C91] text-lg font-bold uppercase mb-6 flex items-center gap-2`}>
+                <span className="w-8 h-px bg-[#6F2C91]/30"></span>
+                ACCIONES ESTRATÉGICAS
+              </h4>
 
-            <ul className="space-y-3">
-              {data.bullets.map((texto, i) => (
-                <li key={i} className="flex gap-3">
-                  <span className="text-[#2BB673] text-xl font-bold">✔</span>
-                  <p className="font-body text-gray-700 text-[17px] leading-snug">
-                    {texto}
-                  </p>
-                </li>
-              ))}
-            </ul>
+              <ul className="grid grid-cols-1 md:grid-cols-1 gap-4">
+                {data.bullets.map((texto, i) => (
+                  <li key={i} className="flex gap-4 items-start group">
+                    <span className="flex-none w-6 h-6 rounded-full bg-[#6F2C91]/10 text-[#6F2C91] flex items-center justify-center text-xs font-bold transition-colors group-hover:bg-[#EAE84B]">
+                      ✓
+                    </span>
+                    <p className="text-gray-700 text-base md:text-lg leading-snug font-medium">
+                      {texto}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-            <p className="font-body text-[#6F2C91] text-[16px] font-semibold mt-6 whitespace-pre-line">
-              {data.quote}
-            </p>
+            <div className="bg-[#6F2C91] p-8 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
+                <p className="text-white text-xl md:text-2xl italic font-medium relative z-10 leading-relaxed">
+                  {data.quote}
+                </p>
+                {/* Comilla gigante decorativa */}
+                <span className="absolute -bottom-10 -right-4 text-[12rem] text-white/10 font-serif z-0 leading-none">”</span>
+            </div>
           </div>
 
-          {/* ===== COLUMNA DERECHA ===== */}
-          <div className="flex justify-center">
-            <div className="w-full max-w-[450px] h-[500px] rounded-2xl shadow-2xl overflow-hidden">
+          {/* COLUMNA DERECHA: IMAGEN IMPACTO */}
+          <div className="lg:col-span-5 relative">
+            {/* Elemento decorativo detrás de la imagen */}
+            <div className="absolute -top-6 -right-6 w-full h-full bg-[#EAE84B] rounded-[3rem] -z-10 opacity-20 rotate-3" />
+            
+            <div className="w-full aspect-[4/5] md:h-[650px] rounded-[3rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden border-[12px] border-white transition-transform duration-700 hover:scale-[1.02]">
               <img
                 src={data.image}
-                alt="Agenda Internacional"
+                alt="Valentina Centeno en Agenda Internacional"
                 className="w-full h-full object-cover"
               />
             </div>
