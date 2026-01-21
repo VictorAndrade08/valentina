@@ -18,9 +18,9 @@ interface MenuItem {
 const navItems: MenuItem[] = [
   { name: "INICIO", href: "#inicio" },
   { name: "ACERCA DE MÍ", href: "#acerca-de-mi" },
-  { name: "LEYES", href: "#leyes" },
-  { name: "LOGROS MANABÍ", href: "#logros-manabi" },
-  { name: "INICIATIVAS", href: "#iniciativas" },
+  { name: "LEYES", href: "#ley" },
+  { name: "MANABÍ", href: "#logros-manabi" },
+  // Se eliminó "INICIATIVAS"
   { name: "AGENDA INTERNACIONAL", href: "#agenda-internacional" },
 ];
 

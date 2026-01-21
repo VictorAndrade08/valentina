@@ -7,13 +7,14 @@ import { useState, useEffect } from "react";
 type HeroSlide = {
   id: string;
   img: string;
+  link?: string; // Nuevo campo opcional para el enlace
 };
 
 const fallbackSlides: HeroSlide[] = [
-  { id: "1", img: "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2025/12/1.webp" },
-  { id: "2", img: "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2025/12/8.webp" },
-  { id: "3", img: "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2025/12/3.webp" },
-  { id: "4", img: "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2025/12/7.webp" },
+  { id: "1", img: "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2025/12/1.webp", link: "" },
+  { id: "2", img: "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2025/12/8.webp", link: "" },
+  { id: "3", img: "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2025/12/3.webp", link: "" },
+  { id: "4", img: "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2025/12/7.webp", link: "" },
 ];
 
 // ===============================
@@ -42,10 +43,17 @@ export default function Hero() {
       .then((csv) => {
         const rows = parseCsv(csv);
         if (rows.length < 2) return;
+        
+        // Ahora leemos 3 columnas: ID, IMG, LINK
         const parsed = rows
           .slice(1)
           .filter((cols) => cols[0] && cols[1])
-          .map((cols) => ({ id: cols[0].trim(), img: cols[1].trim() }));
+          .map((cols) => ({ 
+            id: cols[0].trim(), 
+            img: cols[1].trim(),
+            link: cols[2] ? cols[2].trim() : "" // Leemos la 3ra columna como link
+          }));
+          
         if (parsed.length > 0) setSlides(parsed);
       })
       .catch(() => setSlides(fallbackSlides));
@@ -84,16 +92,37 @@ export default function Hero() {
               }`}
             >
               <div className="w-full h-full flex items-center justify-center bg-[#6F2C91]">
-                <img
-                  src={slide.img}
-                  alt={`Slide ${i + 1}`}
-                  className="
-                    object-contain
-                    w-auto h-auto max-w-full max-h-full
-                    md:w-full md:h-full md:scale-[1.15] md:max-w-none md:max-h-none
-                    transition-transform duration-[1500ms] ease-out
-                  "
-                />
+                {/* Lógica condicional: Si hay link, usamos <a>, si no, solo <img> */}
+                {slide.link ? (
+                  <a 
+                    href={slide.link} 
+                    target={slide.link.startsWith("http") ? "_blank" : "_self"}
+                    rel={slide.link.startsWith("http") ? "noopener noreferrer" : ""}
+                    className="w-full h-full flex items-center justify-center cursor-pointer"
+                  >
+                    <img
+                      src={slide.img}
+                      alt={`Slide ${i + 1}`}
+                      className="
+                        object-contain
+                        w-auto h-auto max-w-full max-h-full
+                        md:w-full md:h-full md:scale-[1.15] md:max-w-none md:max-h-none
+                        transition-transform duration-[1500ms] ease-out
+                      "
+                    />
+                  </a>
+                ) : (
+                  <img
+                    src={slide.img}
+                    alt={`Slide ${i + 1}`}
+                    className="
+                      object-contain
+                      w-auto h-auto max-w-full max-h-full
+                      md:w-full md:h-full md:scale-[1.15] md:max-w-none md:max-h-none
+                      transition-transform duration-[1500ms] ease-out
+                    "
+                  />
+                )}
               </div>
             </div>
           ))}

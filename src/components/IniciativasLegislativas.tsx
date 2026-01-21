@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Oswald } from "next/font/google";
-import { FaGraduationCap, FaPlayCircle, FaCheckCircle, FaImage } from "react-icons/fa";
+import { FaGraduationCap, FaPlayCircle, FaCheckCircle, FaImage, FaTimes } from "react-icons/fa";
 
 const oswald = Oswald({
   subsets: ["latin"],
@@ -68,6 +68,8 @@ function parseCSV(text: string) {
 
 export default function PresentacionFormacionDual() {
   const [cms, setCms] = useState<Record<string, string> | null>(null);
+  const [isVideoOpen, setIsVideoOpen] = useState(false); // Estado para controlar el Pop-up de Video
+  const [selectedImage, setSelectedImage] = useState<string | null>(null); // Nuevo Estado para el Pop-up de Imagen
 
   useEffect(() => {
     // Cache 'no-store' para que los cambios en el Excel se vean rápido
@@ -96,9 +98,10 @@ export default function PresentacionFormacionDual() {
   };
 
   const galleryImages = getGallery();
+  const videoUrl = get("fd_video", ""); // Guardamos la URL del video
 
   return (
-    <section id="formacion-dual" className="w-full py-24 bg-white selection:bg-[#6F2C91]/20">
+    <section id="ley" className="w-full py-24 bg-white selection:bg-[#6F2C91]/20 scroll-mt-20">
       <div className="max-w-[1300px] mx-auto px-6">
         
         {/* ENCABEZADO DINÁMICO */}
@@ -122,7 +125,11 @@ export default function PresentacionFormacionDual() {
             <div className="relative aspect-[9/16] rounded-[2.5rem] overflow-hidden shadow-2xl group border border-gray-100 bg-gray-50">
               <div className="flex h-full w-full overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth">
                 {galleryImages.map((img, index) => (
-                  <div key={index} className="flex-none w-full h-full snap-center">
+                  <div 
+                    key={index} 
+                    className="flex-none w-full h-full snap-center cursor-pointer"
+                    onClick={() => setSelectedImage(img)} // Al hacer clic, abre el pop-up de imagen
+                  >
                     <img 
                       src={img} 
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
@@ -133,33 +140,42 @@ export default function PresentacionFormacionDual() {
               </div>
               
               {/* Indicadores de Galería */}
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 pointer-events-none">
                 {galleryImages.length > 1 && galleryImages.map((_, i) => (
                   <div key={i} className="w-2 h-2 rounded-full bg-white/60 shadow-md" />
                 ))}
               </div>
 
-              <div className="absolute top-6 right-6 bg-black/30 backdrop-blur-md p-3 rounded-full text-white">
+              <div className="absolute top-6 right-6 bg-black/30 backdrop-blur-md p-3 rounded-full text-white pointer-events-none">
                 <FaImage size={18} />
               </div>
             </div>
 
-            {/* COMPONENTE VIDEO (DINÁMICO) */}
-            <div className="relative aspect-[9/16] rounded-[2.5rem] overflow-hidden shadow-2xl group border-2 border-[#EAE84B] bg-black">
+            {/* COMPONENTE VIDEO (PREVIEW CON POP-UP) */}
+            {/* Al hacer clic en este contenedor, se abre el modal */}
+            <div 
+              className="relative aspect-[9/16] rounded-[2.5rem] overflow-hidden shadow-2xl group border-2 border-[#EAE84B] bg-black cursor-pointer transform hover:scale-[1.02] transition-all duration-300"
+              onClick={() => setIsVideoOpen(true)}
+            >
+              {/* Video de fondo en silencio para preview */}
               <video 
-                key={get("fd_video", "video-key")} // Refresca el video si el link cambia
-                src={get("fd_video", "")} 
+                key={videoUrl}
+                src={videoUrl} 
                 autoPlay
                 muted
                 loop 
                 playsInline 
-                className="w-full h-full object-cover opacity-80 transition-opacity group-hover:opacity-100" 
+                className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity" 
               />
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/20 group-hover:bg-transparent transition-all pointer-events-none">
-                <div className="w-16 h-16 rounded-full bg-[#EAE84B] flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
-                  <FaPlayCircle className="text-[#6F2C91] text-4xl" />
+              
+              {/* Botón de Play Gigante */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 z-10">
+                <div className="w-20 h-20 rounded-full bg-[#EAE84B] flex items-center justify-center shadow-[0_0_30px_rgba(234,232,75,0.6)] group-hover:scale-110 transition-transform duration-300">
+                  <FaPlayCircle className="text-[#6F2C91] text-5xl ml-1" />
                 </div>
-                <span className="text-white font-black text-sm uppercase tracking-widest drop-shadow-md">Video Tour</span>
+                <span className="text-white font-black text-sm uppercase tracking-widest drop-shadow-md bg-black/20 px-4 py-1 rounded-full backdrop-blur-sm group-hover:bg-[#EAE84B] group-hover:text-[#6F2C91] transition-colors">
+                  Ver Video Completo
+                </span>
               </div>
             </div>
           </div>
@@ -190,9 +206,14 @@ export default function PresentacionFormacionDual() {
 
                 {/* BOTONES */}
                 <div className="flex flex-col gap-6">
-                  <button className="bg-[#EAE84B] text-[#6F2C91] py-5 rounded-full font-black uppercase tracking-widest hover:bg-white hover:scale-[1.02] transition-all shadow-xl active:scale-95">
+                  <a 
+                    href="https://appcmi.ces.gob.ec/formaciondual/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="bg-[#EAE84B] text-[#6F2C91] py-5 rounded-full font-black uppercase tracking-widest hover:bg-white hover:scale-[1.02] transition-all shadow-xl active:scale-95 text-center flex items-center justify-center"
+                  >
                     {get("fd_btn_principal", "CONOCE LOS INSTITUTOS")}
-                  </button>
+                  </a>
                   <button disabled className="bg-white/10 text-white/40 border border-white/5 py-5 rounded-full font-black uppercase tracking-widest text-sm cursor-not-allowed">
                     {get("fd_btn_secundario", "PRÓXIMAMENTE")}
                   </button>
@@ -207,6 +228,59 @@ export default function PresentacionFormacionDual() {
         </div>
       </div>
 
+      {/* --- MODAL POP-UP VIDEO (A PANTALLA COMPLETA CON SONIDO) --- */}
+      {isVideoOpen && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 md:p-8 animate-fadeIn">
+          <div className="relative w-full max-w-5xl aspect-video bg-black rounded-3xl shadow-2xl overflow-hidden border border-white/10">
+            
+            {/* Botón Cerrar */}
+            <button 
+              onClick={() => setIsVideoOpen(false)}
+              className="absolute top-4 right-4 z-20 w-12 h-12 bg-black/50 hover:bg-[#EAE84B] text-white hover:text-[#6F2C91] rounded-full flex items-center justify-center transition-all duration-300 backdrop-blur-md group"
+            >
+              <FaTimes className="text-xl group-hover:rotate-90 transition-transform" />
+            </button>
+
+            {/* Video con Sonido */}
+            <video 
+              src={videoUrl} 
+              autoPlay 
+              controls // Habilitamos controles para que el usuario pueda manejar el volumen
+              className="w-full h-full object-contain"
+            />
+          </div>
+          
+          {/* Fondo clicable para cerrar */}
+          <div className="absolute inset-0 -z-10" onClick={() => setIsVideoOpen(false)} />
+        </div>
+      )}
+
+      {/* --- MODAL POP-UP IMAGEN (GALERÍA) --- */}
+      {selectedImage && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 backdrop-blur-lg p-4 animate-fadeIn">
+          <div className="relative w-full h-full flex items-center justify-center">
+            
+            {/* Botón Cerrar */}
+            <button 
+              onClick={() => setSelectedImage(null)}
+              className="absolute top-4 right-4 z-20 w-12 h-12 bg-white/10 hover:bg-[#EAE84B] text-white hover:text-[#6F2C91] rounded-full flex items-center justify-center transition-all duration-300 backdrop-blur-md group shadow-lg"
+            >
+              <FaTimes className="text-xl group-hover:rotate-90 transition-transform" />
+            </button>
+
+            {/* Imagen Fullscreen */}
+            <img 
+              src={selectedImage} 
+              alt="Galería Fullscreen" 
+              className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+            />
+          </div>
+          
+          {/* Fondo clicable para cerrar */}
+          <div className="absolute inset-0 -z-10" onClick={() => setSelectedImage(null)} />
+        </div>
+      )}
+
       <style jsx>{`
         .no-scrollbar::-webkit-scrollbar {
           display: none;
@@ -214,6 +288,13 @@ export default function PresentacionFormacionDual() {
         .no-scrollbar {
           -ms-overflow-style: none;
           scrollbar-width: none;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.2s ease-out forwards;
         }
       `}</style>
     </section>
