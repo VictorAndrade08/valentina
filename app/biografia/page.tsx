@@ -6,11 +6,10 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { 
   ArrowRight, Star, Target, Users, Quote, Calendar, MapPin, Award, ChevronRight, 
-  CheckCircle2, Heart, Zap, Shield, BookOpen, AlertCircle, LucideIcon
+  CheckCircle2, Heart, Zap, Shield, BookOpen, AlertCircle, LucideIcon, Loader2
 } from "lucide-react";
 
 // --- CONFIGURACIÓN ---
-// CAMBIO CLAVE: Usamos /export?format=csv en lugar de /pub para mayor compatibilidad
 const BIO_CSV_URL = "https://docs.google.com/spreadsheets/d/1eYERExfcLuzh_VYgByaDNgCj_6Pzm4WHlrLm5oL-pxQ/export?format=csv&gid=1612750821";
 
 // --- TIPOS DE DATOS ---
@@ -57,55 +56,29 @@ interface BioData {
 
 // MAPA DE ICONOS
 const ICON_MAP: Record<string, LucideIcon> = {
-  star: Star,
-  target: Target,
-  users: Users,
-  quote: Quote,
-  calendar: Calendar,
-  mappin: MapPin,
-  award: Award,
-  check: CheckCircle2,
-  heart: Heart,
-  zap: Zap,
-  shield: Shield,
-  book: BookOpen,
+  star: Star, target: Target, users: Users, quote: Quote, calendar: Calendar,
+  mappin: MapPin, award: Award, check: CheckCircle2, heart: Heart,
+  zap: Zap, shield: Shield, book: BookOpen,
 };
 
-// DATOS POR DEFECTO
-const INITIAL_DATA: BioData = {
+// DATOS DE RESPALDO (SOLO SE USAN SI FALLA EL CSV, NO AL INICIO)
+const FALLBACK_DATA: BioData = {
   hero: {
     tag: "Biografía",
-    title: "Pasión por Servir a Ecuador",
-    quote: "No llegué a la política para ser una espectadora, sino para jugar el partido más importante: el futuro de nuestras familias.",
-    description: "Desde las canchas deportivas hasta el pleno de la Asamblea, mi vida ha estado marcada por la disciplina. Soy una manabita orgullosa que cree firmemente que la juventud no es el futuro, sino el presente activo que Ecuador necesita.",
-    cta: "Escríbeme al Buzón",
-    imageMain: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=800&auto=format&fit=crop",
-    imageSec: "https://images.unsplash.com/photo-1529070538774-1843cb3265df?q=80&w=600&auto=format&fit=crop"
+    title: "Cargando perfil...",
+    quote: "",
+    description: "Espere un momento mientras cargamos la información actualizada.",
+    cta: "Contactar",
+    imageMain: "", // Dejamos vacío para no cargar imágenes incorrectas
+    imageSec: ""
   },
-  timeline: [
-    { year: "Orígenes", title: "Raíces Manabitas", desc: "Nací y crecí en Manabí, donde aprendí el valor del trabajo duro de mi familia.", icon: "mappin" },
-    { year: "Deporte", title: "Selección Nacional", desc: "Representé a Ecuador en voleibol, aprendiendo que ningún logro es individual.", icon: "award" },
-    { year: "Formación", title: "Abogada de la República", desc: "Me especialicé en Derecho Deportivo y Gestión Pública para defender causas justas.", icon: "book" },
-    { year: "Actualidad", title: "Asambleísta Nacional", desc: "Legislando con honestidad y transparencia por un nuevo Ecuador.", icon: "target" },
-  ],
-  gallery: [
-    { title: "Escuchando a nuestros emprendedores", image: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?q=80&w=800&auto=format&fit=crop" },
-    { title: "Sesión en la Asamblea Nacional", image: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=800&auto=format&fit=crop" },
-    { title: "Trabajo de campo", image: "https://images.unsplash.com/photo-1531206715517-5c0ba140b2b8?q=80&w=800&auto=format&fit=crop" },
-    { title: "Manabí", image: "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=800&auto=format&fit=crop" },
-  ],
-  pillars: [
-    { title: "Liderazgo Joven", desc: "Renovando la política con energía y nuevas ideas.", icon: "star" },
-    { title: "Territorio 24/7", desc: "No soy asambleísta de escritorio, recorro cada cantón.", icon: "users" },
-    { title: "Resultados Reales", desc: "Leyes aprobadas y fiscalización efectiva para Manabí.", icon: "target" },
-  ],
-  finalCta: {
-    title: "Pilares de mi Gestión",
-    btnText: "Únete al Cambio"
-  }
+  timeline: [],
+  gallery: [],
+  pillars: [],
+  finalCta: { title: "", btnText: "" }
 };
 
-// --- PARSER CSV IDENTICO AL QUE FUNCIONA ---
+// --- PARSER CSV ---
 function parseCsv(text: string): string[][] {
   const rows: string[][] = [];
   let cur = ""; let row: string[] = []; let inQuotes = false; let i = 0;
@@ -128,7 +101,6 @@ function parseCsv(text: string): string[][] {
   row.push(cur); rows.push(row); return rows;
 }
 
-// Renderizador de Iconos
 const RenderIcon = ({ iconName, className }: { iconName: string, className: string }) => {
   const safeKey = (iconName || "").toLowerCase().trim();
   const IconComponent = ICON_MAP[safeKey] || Star; 
@@ -136,37 +108,37 @@ const RenderIcon = ({ iconName, className }: { iconName: string, className: stri
 };
 
 export default function AboutBio() {
-  const [data, setData] = useState<BioData>(INITIAL_DATA);
+  // CAMBIO IMPORTANTE: Iniciamos en null o loading para no mostrar datos viejos
+  const [data, setData] = useState<BioData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    setIsLoading(true);
     fetch(BIO_CSV_URL, { cache: "no-store" })
       .then((res) => {
-        if (!res.ok) throw new Error("Error de red al cargar CSV");
+        if (!res.ok) throw new Error("Error de red");
         return res.text();
       })
       .then((csv) => {
         const rawRows = parseCsv(csv);
-        // Filtramos filas vacías igual que en tu ejemplo funcional
         const rows = rawRows.filter(r => r && r.some(cell => cell.trim() !== ""));
         
-        if (rows.length < 2) return; // Si no hay datos (solo header o nada), salimos
+        if (rows.length < 2) throw new Error("Datos insuficientes");
 
-        // Clonamos estructura inicial
-        const newHero: HeroData = { ...INITIAL_DATA.hero };
-        const newTimeline: TimelineItem[] = [];
-        const newGallery: GalleryItem[] = [];
-        const newPillars: PillarItem[] = [];
-        const newFinalCta: FinalCtaData = { ...INITIAL_DATA.finalCta };
+        // Estructura temporal basada en el Fallback pero vacía para llenar con CSV
+        const newData: BioData = {
+            hero: { ...FALLBACK_DATA.hero },
+            timeline: [],
+            gallery: [],
+            pillars: [],
+            finalCta: { ...FALLBACK_DATA.finalCta }
+        };
 
-        // Procesamos fila por fila
         rows.forEach((col) => {
           if (col.length < 2) return;
-
-          // Normalizamos la sección y la clave para lógica
           const section = (col[0] || "").toString().trim().toUpperCase();
           const rawKey = (col[1] || "").toString().trim();
           const logicKey = rawKey.toUpperCase();
-          
           const title = (col[2] || "").toString().trim();
           const desc = (col[3] || "").toString().trim();
           const image = (col[4] || "").toString().trim();
@@ -174,63 +146,51 @@ export default function AboutBio() {
 
           if (section === "HERO") {
             if (logicKey === "MAIN") {
-              if (title) newHero.title = title;
-              if (desc) newHero.description = desc;
-              if (image) newHero.imageMain = image;
+              if (title) newData.hero.title = title;
+              if (desc) newData.hero.description = desc;
+              if (image) newData.hero.imageMain = image;
             } else if (logicKey === "QUOTE") {
-              if (title) newHero.quote = title;
-              if (desc) newHero.quote = desc;
-            } else if (logicKey === "SECONDARY") {
-              if (image) newHero.imageSec = image;
-            } else if (logicKey === "TAG") {
-              if (title) newHero.tag = title;
-            } else if (logicKey === "CTA") {
-              if (title) newHero.cta = title;
-            }
+              if (title) newData.hero.quote = title;
+              if (desc) newData.hero.quote = desc; // Fallback si está en la col desc
+            } else if (logicKey === "SECONDARY" && image) newData.hero.imageSec = image;
+            else if (logicKey === "TAG" && title) newData.hero.tag = title;
+            else if (logicKey === "CTA" && title) newData.hero.cta = title;
           } 
-          else if (section === "TIMELINE") {
-            if (title || desc) {
-              newTimeline.push({
-                year: rawKey || extra || "", 
-                title: title || "Sin título",
-                desc: desc || "",
-                icon: (extra || "").toLowerCase().trim() 
-              });
-            }
+          else if (section === "TIMELINE" && (title || desc)) {
+            newData.timeline.push({ year: rawKey || extra, title, desc, icon: extra });
           }
-          else if (section === "GALLERY") {
-            if (image) {
-              newGallery.push({ title, image });
-            }
+          else if (section === "GALLERY" && image) {
+            newData.gallery.push({ title, image });
           }
-          else if (section === "PILLARS") {
-            if (title || desc) {
-              newPillars.push({
-                title: title || "Pilar",
-                desc: desc || "",
-                icon: extra.toLowerCase().trim()
-              });
-            }
+          else if (section === "PILLARS" && (title || desc)) {
+            newData.pillars.push({ title, desc, icon: extra });
           }
           else if (section === "FINAL") {
-             if (logicKey === "TITLE" && title) newFinalCta.title = title;
-             if (logicKey === "BTN" && title) newFinalCta.btnText = title;
+             if (logicKey === "TITLE" && title) newData.finalCta.title = title;
+             if (logicKey === "BTN" && title) newData.finalCta.btnText = title;
           }
         });
 
-        // Solo actualizamos si hay datos nuevos reales, si no mantenemos defaults
-        setData({
-          hero: newHero,
-          timeline: newTimeline.length > 0 ? newTimeline : INITIAL_DATA.timeline,
-          gallery: newGallery.length > 0 ? newGallery : INITIAL_DATA.gallery,
-          pillars: newPillars.length > 0 ? newPillars : INITIAL_DATA.pillars,
-          finalCta: newFinalCta
-        });
+        setData(newData);
       })
       .catch((err) => {
-        console.error("Error cargando biografía desde CSV:", err);
-      });
+        console.error("Error CSV:", err);
+        // Solo usamos fallback si falla la red, no antes
+        setData(FALLBACK_DATA); 
+      })
+      .finally(() => setIsLoading(false));
   }, []);
+
+  // --- RENDERIZADO DE CARGA (SKELETON) ---
+  // Esto evita que se vea la imagen anterior. Se muestra esto mientras carga el Excel.
+  if (isLoading || !data) {
+    return (
+      <div className="w-full min-h-[80vh] flex flex-col items-center justify-center bg-white">
+        <Loader2 className="w-10 h-10 text-[#6F2C91] animate-spin mb-4" />
+        <p className="text-slate-500 animate-pulse">Cargando biografía...</p>
+      </div>
+    );
+  }
 
   // --- ANIMACIONES ---
   const fadeIn = {
@@ -238,117 +198,94 @@ export default function AboutBio() {
     visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
   };
 
-  const staggerContainer = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.2 }
-    }
-  };
-
   return (
-    <div className="w-full bg-white text-slate-800">
+    <div className="w-full bg-white text-slate-800 overflow-x-hidden">
       
-      {/* =========================================
-          SECCIÓN 1: HERO BIO
-         ========================================= */}
-      <section className="relative w-full py-20 lg:py-28 overflow-hidden">
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-b from-[#6F2C91]/5 to-transparent rounded-full blur-3xl translate-x-1/3 -translate-y-1/4 pointer-events-none" />
+      {/* SECCIÓN 1: HERO BIO */}
+      <section className="relative w-full py-16 lg:py-28 overflow-hidden">
+        {/* Decoración de fondo */}
+        <div className="absolute top-0 right-0 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-gradient-to-b from-[#6F2C91]/5 to-transparent rounded-full blur-3xl translate-x-1/3 -translate-y-1/4 pointer-events-none" />
         
         <div className="container mx-auto px-4 md:px-6 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+          <div className="flex flex-col lg:grid lg:grid-cols-12 gap-10 lg:gap-16 items-center">
             
-            {/* IMÁGENES */}
+            {/* IMAGEN PRINCIPAL (Arriba en móvil, Izquierda en PC) */}
             <motion.div 
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
-              className="lg:col-span-5 relative"
+              className="w-full lg:col-span-5 relative max-w-[500px] lg:max-w-none mx-auto"
             >
               <div className="relative z-10 w-full aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl border-4 border-white bg-slate-100">
                 {data.hero.imageMain ? (
                   <Image
                     src={data.hero.imageMain}
-                    alt={data.hero.title || "Imagen Principal"}
+                    alt={data.hero.title}
                     fill
-                    className="object-cover hover:scale-105 transition-transform duration-700"
+                    className="object-cover"
                     priority
                     sizes="(max-width: 768px) 100vw, 50vw"
                   />
                 ) : (
-                   <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                     <span className="text-gray-400">Imagen no disponible</span>
-                   </div>
+                   <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">Sin imagen</div>
                 )}
               </div>
               
+              {/* Imagen secundaria (Oculta en móvil para limpiar la vista) */}
               {data.hero.imageSec && (
-                <div className="absolute -bottom-10 -right-10 w-2/3 aspect-square rounded-2xl overflow-hidden shadow-xl border-4 border-white z-20 hidden md:block bg-[#6F2C91]">
-                   <div className="relative w-full h-full bg-[#6F2C91]">
-                      <Image
-                        src={data.hero.imageSec}
-                        alt="Detalle secundario"
-                        fill
-                        className="object-cover opacity-90 hover:opacity-100 transition-opacity duration-500"
-                        sizes="(max-width: 768px) 0vw, 33vw"
-                      />
-                      <div className="absolute inset-0 bg-[#6F2C91]/20 mix-blend-multiply" />
-                   </div>
+                <div className="absolute -bottom-10 -right-10 w-2/3 aspect-square rounded-2xl overflow-hidden shadow-xl border-4 border-white z-20 hidden lg:block bg-[#6F2C91]">
+                   <Image
+                     src={data.hero.imageSec}
+                     alt="Detalle"
+                     fill
+                     className="object-cover opacity-90"
+                   />
                 </div>
               )}
             </motion.div>
 
             {/* TEXTO HERO */}
             <motion.div 
-              variants={staggerContainer}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              className="lg:col-span-7 flex flex-col space-y-6"
+              className="w-full lg:col-span-7 flex flex-col space-y-6 text-center lg:text-left"
             >
               {data.hero.tag && (
-                <motion.div variants={fadeIn} className="inline-flex items-center space-x-2 bg-[#6F2C91]/5 border border-[#6F2C91]/20 px-4 py-1.5 rounded-full w-fit">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#6F2C91] opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#6F2C91]"></span>
-                  </span>
-                  <span className="text-[#6F2C91] font-bold text-xs uppercase tracking-widest">
-                    {data.hero.tag}
-                  </span>
-                </motion.div>
+                <div className="flex justify-center lg:justify-start">
+                    <motion.div variants={fadeIn} className="inline-flex items-center space-x-2 bg-[#6F2C91]/5 border border-[#6F2C91]/20 px-4 py-1.5 rounded-full w-fit">
+                    <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#6F2C91] opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-[#6F2C91]"></span>
+                    </span>
+                    <span className="text-[#6F2C91] font-bold text-xs uppercase tracking-widest">
+                        {data.hero.tag}
+                    </span>
+                    </motion.div>
+                </div>
               )}
               
-              <motion.h2 variants={fadeIn} className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight leading-tight">
-                {data.hero.title.includes(" ") ? (
-                  <>
-                    {data.hero.title.split(" ").slice(0, Math.ceil(data.hero.title.split(" ").length / 2)).join(" ")} <br />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#6F2C91] to-[#9c4ac1]">
-                      {data.hero.title.split(" ").slice(Math.ceil(data.hero.title.split(" ").length / 2)).join(" ")}
-                    </span>
-                  </>
-                ) : (
-                  <span className="text-[#6F2C91]">{data.hero.title}</span>
-                )}
+              <motion.h2 variants={fadeIn} className="text-3xl md:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight leading-tight">
+                {data.hero.title}
               </motion.h2>
 
               {data.hero.quote && (
-                <motion.div variants={fadeIn} className="relative pl-6 border-l-4 border-[#6F2C91]/30 py-2 my-4">
-                  <Quote className="absolute top-0 left-6 text-[#6F2C91]/10 w-12 h-12 -translate-x-full -translate-y-2" />
-                  <p className="text-xl md:text-2xl font-serif italic text-slate-700 leading-relaxed">
+                <motion.div variants={fadeIn} className="relative lg:pl-6 lg:border-l-4 border-[#6F2C91]/30 py-2 my-4">
+                  <p className="text-lg md:text-2xl font-serif italic text-slate-700 leading-relaxed px-4 lg:px-0">
                     "{data.hero.quote}"
                   </p>
                 </motion.div>
               )}
 
-              <motion.p variants={fadeIn} className="text-slate-600 text-lg leading-relaxed whitespace-pre-line">
+              <motion.p variants={fadeIn} className="text-slate-600 text-base md:text-lg leading-relaxed whitespace-pre-line px-2 lg:px-0">
                 {data.hero.description}
               </motion.p>
               
-              <motion.div variants={fadeIn} className="pt-4">
+              <motion.div variants={fadeIn} className="pt-4 flex justify-center lg:justify-start">
                 <Link 
                   href="/#buzon" 
-                  className="group inline-flex items-center justify-center px-8 py-3.5 text-base font-bold text-white transition-all duration-200 bg-[#6F2C91] rounded-full hover:bg-[#5a2275] hover:shadow-lg hover:shadow-[#6F2C91]/30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#6F2C91]"
+                  className="group inline-flex items-center justify-center px-8 py-3.5 text-base font-bold text-white transition-all duration-200 bg-[#6F2C91] rounded-full hover:bg-[#5a2275] shadow-lg shadow-[#6F2C91]/30"
                 >
                   {data.hero.cta}
                   <ArrowRight className="w-5 h-5 ml-2 transition-transform duration-200 group-hover:translate-x-1" />
@@ -359,21 +296,20 @@ export default function AboutBio() {
         </div>
       </section>
 
-      {/* =========================================
-          SECCIÓN 2: TRAYECTORIA (Timeline)
-         ========================================= */}
+      {/* SECCIÓN 2: TRAYECTORIA (RESPONSIVE MEJORADO) */}
       {data.timeline && data.timeline.length > 0 && (
-        <section className="py-20 bg-slate-50 relative">
+        <section className="py-16 bg-slate-50 relative">
           <div className="container mx-auto px-4 md:px-6">
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              <h3 className="text-3xl font-bold text-slate-900 mb-4">Mi Camino al Servicio</h3>
-              <p className="text-slate-600">De la disciplina deportiva a la gestión legislativa.</p>
+            <div className="text-center max-w-3xl mx-auto mb-12">
+              <h3 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">Mi Trayectoria</h3>
+              <p className="text-slate-600 text-sm md:text-base">De la disciplina deportiva a la gestión legislativa.</p>
             </div>
 
             <div className="relative max-w-4xl mx-auto">
-              <div className="absolute left-0 md:left-1/2 top-0 bottom-0 w-px bg-[#6F2C91]/20 transform md:-translate-x-1/2 ml-4 md:ml-0" />
+              {/* Línea vertical: Izquierda en móvil, Centro en PC */}
+              <div className="absolute left-6 md:left-1/2 top-0 bottom-0 w-px bg-[#6F2C91]/20 transform md:-translate-x-1/2" />
 
-              <div className="space-y-12">
+              <div className="space-y-8 md:space-y-12">
                 {data.timeline.map((item, index) => (
                   <motion.div 
                     key={index}
@@ -381,20 +317,24 @@ export default function AboutBio() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.1 }}
-                    className={`relative flex items-center md:justify-between ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} flex-row`}
+                    // EN MÓVIL: Siempre flex-row normal. EN PC: Alternado
+                    className={`relative flex items-start md:items-center md:justify-between ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} flex-row`}
                   >
-                    <div className={`w-full md:w-[45%] pl-12 md:pl-0 ${index % 2 === 0 ? 'md:pr-8 md:text-right' : 'md:pl-8 md:text-left'}`}>
-                      <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
-                        {item.year && <span className="inline-block text-[#6F2C91] font-bold text-sm mb-2">{item.year}</span>}
-                        <h4 className="text-xl font-bold text-slate-900 mb-2">{item.title}</h4>
-                        <p className="text-slate-600 text-sm">{item.desc}</p>
+                    {/* Contenido: En móvil siempre a la derecha de la línea */}
+                    <div className={`w-full md:w-[45%] pl-16 md:pl-0 ${index % 2 === 0 ? 'md:pr-8 md:text-right' : 'md:pl-8 md:text-left'}`}>
+                      <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+                        {item.year && <span className="inline-block text-[#6F2C91] font-bold text-xs uppercase mb-1">{item.year}</span>}
+                        <h4 className="text-lg font-bold text-slate-900 mb-1">{item.title}</h4>
+                        <p className="text-slate-600 text-sm leading-relaxed">{item.desc}</p>
                       </div>
                     </div>
 
-                    <div className="absolute left-4 md:left-1/2 w-8 h-8 bg-white border-4 border-[#6F2C91] rounded-full transform -translate-x-1/2 flex items-center justify-center z-10 shadow-sm">
+                    {/* Icono: Posicionado sobre la línea */}
+                    <div className="absolute left-6 md:left-1/2 w-8 h-8 bg-white border-4 border-[#6F2C91] rounded-full transform -translate-x-1/2 flex items-center justify-center z-10 shadow-sm mt-6 md:mt-0">
                       <RenderIcon iconName={item.icon} className="w-3 h-3 text-[#6F2C91]" />
                     </div>
 
+                    {/* Espaciador para PC */}
                     <div className="hidden md:block w-[45%]" />
                   </motion.div>
                 ))}
@@ -404,33 +344,29 @@ export default function AboutBio() {
         </section>
       )}
 
-      {/* =========================================
-          SECCIÓN 3: GALERÍA VISUAL (Collage)
-         ========================================= */}
+      {/* SECCIÓN 3: GALERÍA VISUAL */}
       {data.gallery && data.gallery.length > 0 && (
-        <section className="py-20 bg-white">
+        <section className="py-16 bg-white">
           <div className="container mx-auto px-4 md:px-6">
-            <div className="flex flex-col md:flex-row justify-between items-end mb-12">
-              <div>
-                <span className="text-[#6F2C91] font-semibold tracking-wider text-sm uppercase">En Territorio</span>
-                <h3 className="text-3xl font-bold text-slate-900 mt-2">Cerca de la Gente</h3>
+            <div className="flex flex-col md:flex-row justify-between items-end mb-8 md:mb-12">
+              <div className="text-center md:text-left w-full">
+                <span className="text-[#6F2C91] font-semibold tracking-wider text-xs uppercase">En Territorio</span>
+                <h3 className="text-2xl md:text-3xl font-bold text-slate-900 mt-1">Cerca de la Gente</h3>
               </div>
-              <Link href="/galeria" className="hidden md:flex items-center text-[#6F2C91] font-medium hover:underline mt-4 md:mt-0">
-                Ver todas las fotos <ChevronRight className="w-4 h-4 ml-1" />
-              </Link>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-4 h-[600px] md:h-[500px]">
+            {/* Grid Galería: 1 col en móvil, 4 en PC */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 md:grid-rows-2 gap-4 h-auto md:h-[500px]">
               {data.gallery.slice(0, 4).map((item, i) => {
-                let gridClasses = "md:col-span-1 md:row-span-1"; 
-                if (i === 0) gridClasses = "md:col-span-2 md:row-span-2";
-                else if (i === 1) gridClasses = "md:col-span-2 md:row-span-1";
+                // Lógica de grid responsive
+                let desktopClasses = "md:col-span-1 md:row-span-1"; 
+                if (i === 0) desktopClasses = "md:col-span-2 md:row-span-2";
+                else if (i === 1) desktopClasses = "md:col-span-2 md:row-span-1";
 
                 return (
-                  <motion.div 
+                  <div 
                     key={i}
-                    whileHover={{ scale: 1.02 }}
-                    className={`${gridClasses} relative rounded-2xl overflow-hidden group bg-slate-100`}
+                    className={`${desktopClasses} relative rounded-2xl overflow-hidden group bg-slate-100 h-[250px] md:h-auto`}
                   >
                     {item.image ? (
                       <Image 
@@ -441,67 +377,49 @@ export default function AboutBio() {
                         sizes="(max-width: 768px) 100vw, 33vw"
                       />
                     ) : (
-                      <div className="flex items-center justify-center w-full h-full text-slate-300">
-                        <AlertCircle />
-                      </div>
+                      <div className="flex items-center justify-center w-full h-full bg-slate-200"><AlertCircle className="text-slate-400" /></div>
                     )}
                     {item.title && (
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                        <p className="text-white font-medium">{item.title}</p>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4 md:p-6">
+                        <p className="text-white font-medium text-sm md:text-base">{item.title}</p>
                       </div>
                     )}
-                  </motion.div>
+                  </div>
                 );
               })}
-            </div>
-            
-            <div className="mt-6 md:hidden text-center">
-              <Link href="/galeria" className="inline-flex items-center text-[#6F2C91] font-medium">
-                Ver todas las fotos <ChevronRight className="w-4 h-4 ml-1" />
-              </Link>
             </div>
           </div>
         </section>
       )}
 
-      {/* =========================================
-          SECCIÓN 4: VALORES Y CTA FINAL
-         ========================================= */}
+      {/* SECCIÓN 4: PILARES Y CTA FINAL */}
       {data.pillars && data.pillars.length > 0 && (
-        <section className="py-20 bg-[#6F2C91]/5">
+        <section className="py-16 bg-[#6F2C91]/5">
           <div className="container mx-auto px-4 text-center">
-            <h3 className="text-3xl font-bold text-slate-900 mb-10">{data.finalCta.title}</h3>
+            <h3 className="text-2xl md:text-3xl font-bold text-slate-900 mb-8">{data.finalCta.title}</h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-10">
               {data.pillars.map((item, index) => (
-                <motion.div 
+                <div 
                   key={index}
-                  whileHover={{ y: -5 }}
-                  className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:border-[#6F2C91]/30 transition-all"
+                  className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100"
                 >
-                  <div className="w-12 h-12 bg-[#6F2C91]/10 rounded-full flex items-center justify-center text-[#6F2C91] mx-auto mb-4">
-                    <RenderIcon iconName={item.icon} className="w-6 h-6" />
+                  <div className="w-10 h-10 bg-[#6F2C91]/10 rounded-full flex items-center justify-center text-[#6F2C91] mx-auto mb-3">
+                    <RenderIcon iconName={item.icon} className="w-5 h-5" />
                   </div>
-                  <h4 className="text-lg font-bold text-slate-900 mb-2">{item.title}</h4>
-                  <p className="text-slate-600">{item.desc}</p>
-                </motion.div>
+                  <h4 className="text-lg font-bold text-slate-900 mb-1">{item.title}</h4>
+                  <p className="text-slate-600 text-sm">{item.desc}</p>
+                </div>
               ))}
             </div>
 
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              className="inline-block"
-            >
-              <Link 
+            <Link 
                 href="/#buzon" 
-                className="group inline-flex items-center space-x-3 bg-[#6F2C91] text-white px-10 py-5 rounded-full font-bold shadow-lg shadow-[#6F2C91]/30 hover:shadow-[#6F2C91]/50 hover:-translate-y-1 transition-all duration-300"
-              >
+                className="inline-flex items-center space-x-2 bg-[#6F2C91] text-white px-8 py-4 rounded-full font-bold shadow-lg shadow-[#6F2C91]/30 hover:scale-105 transition-transform"
+            >
                 <span>{data.finalCta.btnText}</span>
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </motion.div>
+                <ArrowRight className="w-5 h-5" />
+            </Link>
           </div>
         </section>
       )}

@@ -114,17 +114,16 @@ export default function BuzonCiudadano() {
   };
 
   return (
-    <section id="buzon" className="bg-[#FBFBFD] py-24 border-t border-gray-100">
+    <section id="buzon" className="bg-[#FBFBFD] py-24 border-t border-gray-100 overflow-hidden relative">
       <div className="max-w-[1400px] mx-auto px-6">
         
-        {/* HEADER MEJORADO - ACTUALIZADO */}
-        <div className="text-center mb-16">
-          {/* TÍTULO CAMBIADO: BUZÓN ENVIAR MENSAJE */}
-          <h2 className={`${oswald.className} text-[clamp(2.5rem,5vw,4.5rem)] text-[#1D1D1F] font-black uppercase leading-[0.85] mb-6`}>
+        {/* HEADER */}
+        <div className="text-center mb-16 relative z-10">
+          <h2 className={`${oswald.className} text-[clamp(2.5rem,5vw,4.5rem)] text-[#1D1D1F] font-black uppercase leading-[0.9] mb-6`}>
             BUZÓN <span className="text-[#6F2C91]">ENVIAR MENSAJE</span>
           </h2>
 
-          <div className="inline-block px-8 py-3 bg-[#EAE84B] text-[#6F2C91] font-black text-2xl md:text-3xl rounded-2xl shadow-sm rotate-[-1deg]">
+          <div className="inline-block px-8 py-3 bg-[#EAE84B] text-[#6F2C91] font-black text-xl md:text-3xl rounded-2xl shadow-sm -rotate-1 transform">
             TU VOZ CUENTA
           </div>
 
@@ -134,14 +133,15 @@ export default function BuzonCiudadano() {
           </p>
         </div>
 
-        {/* FORMULARIO MEJORADO */}
-        <div className="max-w-[900px] mx-auto bg-white p-8 md:p-14 rounded-[3rem] shadow-2xl relative overflow-hidden">
-          {/* Acento lateral */}
-          <div className="absolute top-0 left-0 w-full h-3 bg-[#EAE84B]" />
+        {/* FORMULARIO */}
+        <div className="max-w-[900px] mx-auto bg-white p-6 md:p-14 rounded-[2.5rem] md:rounded-[3rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] relative overflow-hidden z-10">
+          {/* Barra decorativa superior */}
+          <div className="absolute top-0 left-0 w-full h-2 md:h-3 bg-[#EAE84B]" />
           
-          <form onSubmit={handleSubmit} encType="multipart/form-data" noValidate className="space-y-8">
+          <form onSubmit={handleSubmit} encType="multipart/form-data" noValidate className="space-y-6 md:space-y-8 mt-4">
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Grid 2 Columnas */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
               <div className="space-y-2">
                 <label className="form-label flex items-center gap-2">
                    Nombre completo <span className="text-red-500 font-bold">*</span>
@@ -150,10 +150,11 @@ export default function BuzonCiudadano() {
                   name="nombre"
                   type="text"
                   required
-                  placeholder="Tu nombre"
+                  placeholder="Tu nombre completo"
                   value={formState.nombre}
                   onChange={handleChange("nombre", "letters")}
                   className="form-input"
+                  autoComplete="name"
                 />
               </div>
 
@@ -173,7 +174,8 @@ export default function BuzonCiudadano() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Grid 2 Columnas */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
               <div className="space-y-2">
                 <label className="form-label">
                   Correo electrónico <span className="text-red-500 font-bold">*</span>
@@ -182,10 +184,11 @@ export default function BuzonCiudadano() {
                   name="correo"
                   type="email"
                   required
-                  placeholder="tu@correo.com"
+                  placeholder="ejemplo@correo.com"
                   value={formState.correo}
                   onChange={handleChange("correo")}
                   className="form-input"
+                  autoComplete="email"
                 />
               </div>
 
@@ -203,6 +206,7 @@ export default function BuzonCiudadano() {
                   value={formState.whatsapp}
                   onChange={handleChange("whatsapp", "phone")}
                   className="form-input"
+                  autoComplete="tel"
                 />
               </div>
             </div>
@@ -238,14 +242,15 @@ export default function BuzonCiudadano() {
             </div>
 
             {/* ZONA DE ARCHIVO REDISEÑADA */}
-            <div className="space-y-3">
+            <div className="space-y-3 pt-2">
               <label className="form-label text-[#86868B] flex items-center gap-2">
-                Adjuntar documentos de respaldo <span className="text-xs font-normal">(PDF o imagen, máx 1MB)</span>
+                Adjuntar documentos de respaldo <span className="text-xs font-normal opacity-70">(PDF o imagen, máx 1MB)</span>
               </label>
 
               <div className="flex flex-col sm:flex-row items-stretch gap-4">
-                <label className="flex-none flex items-center justify-center gap-2 px-6 py-4 bg-[#6F2C91] text-white rounded-2xl cursor-pointer hover:bg-[#5a2376] transition-all font-bold shadow-lg shadow-purple-200 active:scale-95">
-                  <FaPaperclip /> Subir Archivo
+                <label className="flex-none flex items-center justify-center gap-2 px-6 py-4 bg-[#6F2C91] text-white rounded-2xl cursor-pointer hover:bg-[#5a2376] transition-all font-bold shadow-lg shadow-purple-200/50 active:scale-95 group">
+                  <FaPaperclip className="group-hover:rotate-45 transition-transform" /> 
+                  Subir Archivo
                   <input
                     ref={fileInputRef}
                     name="archivo"
@@ -256,13 +261,14 @@ export default function BuzonCiudadano() {
                   />
                 </label>
 
-                <div className="flex-1 flex items-center justify-between px-5 py-4 bg-[#F5F5F7] rounded-2xl border-2 border-dashed border-gray-200 text-gray-500 text-sm italic">
-                  <span className="truncate max-w-[250px]">{fileName}</span>
+                <div className="flex-1 flex items-center justify-between px-5 py-4 bg-[#F5F5F7] rounded-2xl border-2 border-dashed border-gray-300 text-gray-500 text-sm font-medium">
+                  <span className="truncate max-w-[200px] md:max-w-xs">{fileName}</span>
                   {fileName !== "Ningún archivo seleccionado" && (
                     <button
                       type="button"
                       onClick={clearFile}
-                      className="w-8 h-8 flex items-center justify-center rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                      className="w-9 h-9 flex-none flex items-center justify-center rounded-full bg-white text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm border border-gray-100"
+                      title="Eliminar archivo"
                     >
                       <FaTrash size={12} />
                     </button>
@@ -272,26 +278,26 @@ export default function BuzonCiudadano() {
             </div>
 
             {/* BOTÓN REFORZADO */}
-            <div className="pt-4">
+            <div className="pt-6">
                 <button
                 type="submit"
                 disabled={loading}
-                className={`group relative w-full py-5 rounded-[1.5rem] text-xl font-black uppercase tracking-widest transition-all duration-300 shadow-2xl overflow-hidden ${
+                className={`group relative w-full py-5 rounded-[1.5rem] text-xl font-black uppercase tracking-widest transition-all duration-300 shadow-xl overflow-hidden ${
                     loading
                     ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                    : "bg-[#6F2C91] text-white hover:bg-[#5a2376] hover:scale-[1.01] active:scale-[0.99] shadow-purple-200"
+                    : "bg-[#1D1D1F] text-[#EAE84B] hover:bg-[#6F2C91] hover:text-white hover:scale-[1.01] active:scale-[0.99] shadow-lg"
                 }`}
                 >
                 <div className="relative z-10 flex items-center justify-center gap-3">
                     {loading ? (
                         <>
-                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
                             ENVIANDO...
                         </>
                     ) : (
                         <>
-                            ENVIAR MI MENSAJE
-                            <FaCheckCircle className="opacity-50 group-hover:opacity-100 transition-opacity" />
+                            ENVIAR MENSAJE
+                            <FaCheckCircle className="opacity-0 group-hover:opacity-100 transition-opacity -ml-6 group-hover:ml-0" />
                         </>
                     )}
                 </div>
@@ -304,8 +310,8 @@ export default function BuzonCiudadano() {
               </p>
             )}
 
-            <div className="flex items-center justify-center gap-2 text-gray-400 text-xs font-bold pt-4 border-t border-gray-50">
-              <FaLock size={10} /> TUS DATOS ESTÁN PROTEGIDOS POR LEY DE PRIVACIDAD
+            <div className="flex items-center justify-center gap-2 text-gray-400 text-[10px] md:text-xs font-bold pt-6 border-t border-gray-100 mt-8">
+              <FaLock size={10} /> TUS DATOS ESTÁN PROTEGIDOS Y SON CONFIDENCIALES
             </div>
           </form>
         </div>
@@ -313,9 +319,9 @@ export default function BuzonCiudadano() {
 
       <style jsx>{`
         .form-label {
-          font-family: var(--font-boruino);
+          font-family: var(--font-boruino), sans-serif;
           color: #1D1D1F;
-          font-size: 0.95rem;
+          font-size: 0.9rem;
           font-weight: 700;
           text-transform: uppercase;
           letter-spacing: 0.05em;
@@ -323,14 +329,14 @@ export default function BuzonCiudadano() {
 
         .form-input {
           width: 100%;
-          padding: 1.1rem 1.25rem;
+          padding: 1rem 1.25rem;
           border: 2px solid #F5F5F7;
-          border-radius: 1.25rem;
-          font-size: 1.05rem;
+          border-radius: 1rem;
+          font-size: 1rem;
           background: #F5F5F7;
+          color: #1D1D1F;
           outline: none;
           transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-          color: #1D1D1F;
         }
 
         .form-input::placeholder {
@@ -341,12 +347,11 @@ export default function BuzonCiudadano() {
         .form-input:focus {
           background: white;
           border-color: #6F2C91;
-          box-shadow: 0 10px 20px rgba(111,44,145,0.08);
-          transform: translateY(-2px);
+          box-shadow: 0 4px 20px rgba(111,44,145,0.05);
         }
 
-        .form-input:hover {
-          border-color: #EAE84B;
+        .form-input:hover:not(:focus) {
+          border-color: #e5e7eb;
         }
       `}</style>
     </section>
