@@ -117,14 +117,15 @@ export default function BuzonCiudadano() {
     <section id="buzon" className="bg-[#FBFBFD] py-24 border-t border-gray-100">
       <div className="max-w-[1400px] mx-auto px-6">
         
-        {/* HEADER MEJORADO */}
+        {/* HEADER MEJORADO - ACTUALIZADO */}
         <div className="text-center mb-16">
+          {/* TÍTULO CAMBIADO: BUZÓN ENVIAR MENSAJE */}
           <h2 className={`${oswald.className} text-[clamp(2.5rem,5vw,4.5rem)] text-[#1D1D1F] font-black uppercase leading-[0.85] mb-6`}>
-            BUZÓN <span className="text-[#6F2C91]">CIUDADANO</span>
+            BUZÓN <span className="text-[#6F2C91]">ENVIAR MENSAJE</span>
           </h2>
 
           <div className="inline-block px-8 py-3 bg-[#EAE84B] text-[#6F2C91] font-black text-2xl md:text-3xl rounded-2xl shadow-sm rotate-[-1deg]">
-            TU VOZ SÍ IMPORTA
+            TU VOZ CUENTA
           </div>
 
           <p className="max-w-[750px] mx-auto mt-8 text-[#86868B] text-lg md:text-xl leading-relaxed font-medium">
