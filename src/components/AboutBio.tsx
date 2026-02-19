@@ -86,7 +86,6 @@ export default function AboutBio() {
       <div className="max-w-[1300px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
         
         {/* LADO IZQUIERDO: VIDEO (VISUAL HOOK) */}
-        {/* En móvil aparece primero para captar atención */}
         <div 
           className="lg:col-span-5 relative group cursor-pointer mx-auto w-full max-w-[500px] lg:max-w-none"
           onClick={() => setIsVideoOpen(true)}
@@ -94,27 +93,26 @@ export default function AboutBio() {
           {/* Card Container */}
           <div className="relative z-10 w-full aspect-[4/5] overflow-hidden rounded-[2rem] md:rounded-[2.5rem] shadow-[0_15px_40px_rgba(111,44,145,0.15)] bg-gray-100 border-2 border-transparent group-hover:border-[#6F2C91] transition-all duration-300">
              
-             {/* Video Preview (Muted loop) */}
-             <video
-                src={videoUrl}
-                className="w-full h-full object-cover opacity-95 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
-                autoPlay
-                loop
-                muted
-                playsInline
-             />
+             {/* BLINDAJE: Solo renderiza si hay URL */}
+             {videoUrl && (
+               <video
+                  src={videoUrl}
+                  className="w-full h-full object-cover opacity-95 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+               />
+             )}
              
-             {/* Dark Gradient Overlay for text readability */}
              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
 
-             {/* Play Button Center */}
              <div className="absolute inset-0 flex items-center justify-center">
                 <div className="w-16 h-16 md:w-20 md:h-20 bg-[#6F2C91]/90 backdrop-blur-md rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300 animate-pulse-soft">
                    <FaPlay className="text-white text-2xl md:text-3xl ml-1" />
                 </div>
              </div>
 
-             {/* Label Bottom */}
              <div className="absolute bottom-6 left-0 right-0 text-center">
                 <span className="bg-white/90 backdrop-blur-md text-[#6F2C91] px-5 py-2.5 rounded-full text-xs md:text-sm font-bold uppercase tracking-widest shadow-md transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
                   Ver Video Historia
@@ -122,7 +120,6 @@ export default function AboutBio() {
              </div>
           </div>
           
-          {/* Elemento decorativo detrás (Blobs) */}
           <div className="absolute -bottom-6 -left-6 w-32 h-32 md:w-48 md:h-48 bg-[#EAE84B] rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob pointer-events-none" />
           <div className="absolute -top-6 -right-6 w-32 h-32 md:w-48 md:h-48 bg-[#6F2C91] rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000 pointer-events-none" />
         </div>
@@ -139,14 +136,12 @@ export default function AboutBio() {
           </header>
 
           <div className="space-y-6 md:space-y-8 text-left">
-            {/* Párrafo destacado con borde */}
             <div className="relative pl-6 md:pl-8 border-l-4 border-[#6F2C91]">
               <p className="text-[#1A1A1A] font-medium text-lg md:text-2xl leading-snug">
                 {get("p1", "Soy asambleísta del Ecuador y, ante todo, una mujer que sueña con un país más justo.")}
               </p>
             </div>
 
-            {/* Párrafos secundarios */}
             <div className="space-y-4">
               <p className="text-gray-600 text-base md:text-xl leading-relaxed">
                 {get("p2", "Nací en Portoviejo, Manabí, donde aprendí a trabajar con humildad y propósito.")}
@@ -172,7 +167,6 @@ export default function AboutBio() {
       {/* --- MODAL POP-UP VIDEO (UX MEJORADO) --- */}
       {isVideoOpen && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-8 animate-fadeIn">
-          {/* Overlay oscuro con blur */}
           <div 
             className="absolute inset-0 bg-black/90 backdrop-blur-sm transition-opacity"
             onClick={() => setIsVideoOpen(false)}
@@ -180,7 +174,6 @@ export default function AboutBio() {
 
           <div className="relative w-full max-w-6xl h-auto max-h-[85vh] bg-black rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden flex items-center justify-center ring-1 ring-white/10">
             
-            {/* Botón Cerrar */}
             <button 
               onClick={() => setIsVideoOpen(false)}
               className="absolute top-4 right-4 z-50 w-10 h-10 md:w-12 md:h-12 bg-black/60 hover:bg-[#6F2C91] text-white rounded-full flex items-center justify-center transition-all duration-300 backdrop-blur-md group shadow-lg"
@@ -189,13 +182,15 @@ export default function AboutBio() {
               <FaTimes className="text-lg md:text-xl group-hover:scale-110 transition-transform" />
             </button>
 
-            {/* Video con Sonido */}
-            <video 
-              src={videoUrl} 
-              autoPlay 
-              controls
-              className="w-full h-full max-h-[85vh] object-contain"
-            />
+            {/* BLINDAJE: Solo renderiza si hay URL */}
+            {videoUrl && (
+              <video 
+                src={videoUrl} 
+                autoPlay 
+                controls
+                className="w-full h-full max-h-[85vh] object-contain"
+              />
+            )}
           </div>
         </div>
       )}
