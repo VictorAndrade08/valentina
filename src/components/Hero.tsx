@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from "react";
 // ===============================
 type HeroSlide = {
   id: string;
-  img: string;
+  img: string | null; // CORRECCIÓN 1: Permitimos que sea null
   link?: string;
 };
 
@@ -44,10 +44,11 @@ export default function Hero() {
         
         const parsed = rows
           .slice(1)
-          .filter((cols) => cols[0] && cols[1])
+          .filter((cols) => cols[0]) // Solo requerimos el ID
           .map((cols) => ({ 
             id: cols[0].trim(), 
-            img: cols[1].trim(),
+            // CORRECCIÓN 2: Si viene vacío, lo volvemos null
+            img: cols[1] && cols[1].trim() !== "" ? cols[1].trim() : null,
             link: cols[2] ? cols[2].trim() : "" 
           }));
           
@@ -120,6 +121,7 @@ export default function Hero() {
               }`}
             >
               <div className="w-full h-full relative flex items-center justify-center">
+                {/* CORRECCIÓN 3: Validamos que img no sea null antes de renderizar <img> */}
                 {slide.link ? (
                   <a 
                     href={slide.link} 
@@ -127,7 +129,21 @@ export default function Hero() {
                     rel={slide.link.startsWith("http") ? "noopener noreferrer" : ""}
                     className="w-full h-full flex items-center justify-center cursor-pointer"
                   >
-                     {/* CORRECCIÓN AQUÍ: object-contain */}
+                    {slide.img && (
+                      <img
+                        src={slide.img}
+                        alt={`Slide ${i + 1}`}
+                        className="
+                          w-full h-full
+                          /* GARANTIZA QUE SE VEA TODA LA IMAGEN SIN CORTES */
+                          object-contain object-center
+                          transition-transform duration-[2000ms] ease-out
+                        "
+                      />
+                    )}
+                  </a>
+                ) : (
+                  slide.img && (
                     <img
                       src={slide.img}
                       alt={`Slide ${i + 1}`}
@@ -138,18 +154,7 @@ export default function Hero() {
                         transition-transform duration-[2000ms] ease-out
                       "
                     />
-                  </a>
-                ) : (
-                  <img
-                    src={slide.img}
-                    alt={`Slide ${i + 1}`}
-                    className="
-                      w-full h-full
-                      /* GARANTIZA QUE SE VEA TODA LA IMAGEN SIN CORTES */
-                      object-contain object-center
-                      transition-transform duration-[2000ms] ease-out
-                    "
-                  />
+                  )
                 )}
               </div>
             </div>
