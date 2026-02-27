@@ -1,13 +1,6 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Oswald } from "next/font/google";
-import { FaPaperclip, FaTrash, FaCheckCircle, FaLock } from "react-icons/fa";
-
-const oswald = Oswald({
-  subsets: ["latin"],
-  weight: ["700"],
-});
 
 type FormState = {
   nombre: string;
@@ -20,6 +13,8 @@ type FormState = {
 
 export default function BuzonCiudadano() {
   const [loading, setLoading] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [showTermsError, setShowTermsError] = useState(false);
   const [formState, setFormState] = useState<FormState>({
     nombre: "",
     canton: "",
@@ -85,6 +80,10 @@ export default function BuzonCiudadano() {
       alert("Por favor completa todos los campos antes de enviar.");
       return;
     }
+    if (!acceptedTerms) {
+      setShowTermsError(true);
+      return;
+    }
     setLoading(true);
     const formElement = e.currentTarget;
     const formData = new FormData(formElement);
@@ -104,6 +103,8 @@ export default function BuzonCiudadano() {
           nombre: "", canton: "", correo: "", whatsapp: "", asunto: "", mensaje: "",
         });
         clearFile();
+        setAcceptedTerms(false);
+        setShowTermsError(false);
       } else {
         alert("Error: " + data.message);
       }
@@ -119,7 +120,7 @@ export default function BuzonCiudadano() {
         
         {/* HEADER */}
         <div className="text-center mb-16 relative z-10">
-          <h2 className={`${oswald.className} text-[clamp(2.5rem,5vw,4.5rem)] text-[#1D1D1F] font-black uppercase leading-[0.9] mb-6`}>
+          <h2 style={{ fontFamily: "'Oswald', sans-serif" }} className="text-[clamp(2.5rem,5vw,4.5rem)] text-[#1D1D1F] font-black uppercase leading-[0.9] mb-6">
             BUZÓN <span className="text-[#6F2C91]">ENVIAR MENSAJE</span>
           </h2>
 
@@ -128,8 +129,7 @@ export default function BuzonCiudadano() {
           </div>
 
           <p className="max-w-[750px] mx-auto mt-8 text-[#86868B] text-lg md:text-xl leading-relaxed font-medium">
-            Este es un espacio para escucharte. Comparte tus propuestas, denuncias o historias.
-            Tu participación es la base de nuestra gestión.
+            Este es un espacio para escucharte. Comparte tus propuestas, quejas e historias. Tu participación es la base de nuestra gestión.
           </p>
         </div>
 
@@ -249,7 +249,7 @@ export default function BuzonCiudadano() {
 
               <div className="flex flex-col sm:flex-row items-stretch gap-4">
                 <label className="flex-none flex items-center justify-center gap-2 px-6 py-4 bg-[#6F2C91] text-white rounded-2xl cursor-pointer hover:bg-[#5a2376] transition-all font-bold shadow-lg shadow-purple-200/50 active:scale-95 group">
-                  <FaPaperclip className="group-hover:rotate-45 transition-transform" /> 
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 group-hover:rotate-45 transition-transform"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg> 
                   Subir Archivo
                   <input
                     ref={fileInputRef}
@@ -270,15 +270,40 @@ export default function BuzonCiudadano() {
                       className="w-9 h-9 flex-none flex items-center justify-center rounded-full bg-white text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm border border-gray-100"
                       title="Eliminar archivo"
                     >
-                      <FaTrash size={12} />
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
                     </button>
                   )}
                 </div>
               </div>
             </div>
 
+            {/* CHECKBOX TÉRMINOS Y CONDICIONES */}
+            <div className="pt-4 flex flex-col gap-1">
+              <label className="flex items-start gap-3 cursor-pointer group p-1 -ml-1 rounded-lg hover:bg-gray-50 transition-colors">
+                <input
+                  type="checkbox"
+                  id="terms"
+                  required
+                  checked={acceptedTerms}
+                  onChange={(e) => {
+                    setAcceptedTerms(e.target.checked);
+                    if (e.target.checked) setShowTermsError(false);
+                  }}
+                  className={`flex-none w-8 h-8 rounded text-[#6F2C91] focus:ring-[#6F2C91] cursor-pointer transition-all ${showTermsError ? "border-red-500 ring-2 ring-red-200" : "border-gray-300"}`}
+                />
+                <span className={`text-sm leading-tight transition-colors mt-1.5 ${showTermsError ? "text-red-600 font-medium" : "text-[#86868B]"}`}>
+                  He leído y acepto los <a href="/politicasdeprivacidad" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-[#6F2C91] underline font-bold hover:text-[#5a2376]">Términos y Condiciones</a> y las <a href="/politicasdeprivacidad" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-[#6F2C91] underline font-bold hover:text-[#5a2376]">Políticas de Privacidad</a>. <span className="text-red-500 font-bold">*</span>
+                </span>
+              </label>
+              {showTermsError && (
+                <span className="text-red-500 text-xs font-bold ml-11 animate-pulse">
+                  Por favor, acepta los términos para continuar.
+                </span>
+              )}
+            </div>
+
             {/* BOTÓN REFORZADO */}
-            <div className="pt-6">
+            <div className="pt-2">
                 <button
                 type="submit"
                 disabled={loading}
@@ -297,7 +322,7 @@ export default function BuzonCiudadano() {
                     ) : (
                         <>
                             ENVIAR MENSAJE
-                            <FaCheckCircle className="opacity-0 group-hover:opacity-100 transition-opacity -ml-6 group-hover:ml-0" />
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 opacity-0 group-hover:opacity-100 transition-opacity -ml-6 group-hover:ml-0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                         </>
                     )}
                 </div>
@@ -311,13 +336,15 @@ export default function BuzonCiudadano() {
             )}
 
             <div className="flex items-center justify-center gap-2 text-gray-400 text-[10px] md:text-xs font-bold pt-6 border-t border-gray-100 mt-8">
-              <FaLock size={10} /> TUS DATOS ESTÁN PROTEGIDOS Y SON CONFIDENCIALES
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> TUS DATOS ESTÁN PROTEGIDOS Y SON CONFIDENCIALES
             </div>
           </form>
         </div>
       </div>
 
       <style jsx>{`
+        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap');
+
         .form-label {
           font-family: var(--font-boruino), sans-serif;
           color: #1D1D1F;
