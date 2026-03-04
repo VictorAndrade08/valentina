@@ -1,13 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
 
 // Credenciales de Supabase
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://jcuromipofksetcixkyu.supabase.co";
 const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY || "sb_publishable_wAiUv2aZWqYQDLcYqDf-Q_CPJnB2As";
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 type ConcursoState = {
   nombres: string;
@@ -154,13 +151,21 @@ export default function ConcursoForm() {
     setLoading(true);
     
     try {
-      // Inserción directa en Supabase (Más rápido)
-      const { error } = await supabase
-        .from('proyectos')
-        .insert([formState]);
+      // Inserción directa en Supabase usando Fetch API (Compatible con el entorno)
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/proyectos`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify(formState)
+      });
 
-      if (error) {
-        throw new Error(`Fallo en la base de datos: ${error.message}`);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`Fallo en la base de datos: ${errorData.message || response.statusText}`);
       } else {
         alert("¡Excelente! Tu proyecto ha sido registrado con éxito.");
         setFormState({
@@ -471,7 +476,7 @@ export default function ConcursoForm() {
                   className={`flex-none w-8 h-8 rounded text-[#6F2C91] focus:ring-[#6F2C91] cursor-pointer transition-all ${showTermsError ? "border-red-500 ring-2 ring-red-200" : "border-gray-300"}`}
                 />
                 <span className={`text-sm leading-tight mt-1.5 ${showTermsError ? "text-red-600 font-medium" : "text-[#86868B]"}`}>
-                  Declaro que la información es verídica y acepto las <a href="/politicasdeprivacidad" target="_blank" rel="noopener noreferrer" className="text-[#6F2C91] underline font-bold hover:text-[#5a2376]">Bases del Concurso</a> y las <a href="/politicasdeprivacidad" target="_blank" rel="noopener noreferrer" className="text-[#6F2C91] underline font-bold hover:text-[#5a2376]">Políticas de Privacidad</a>. <span className="text-red-500 font-bold">*</span>
+                  Declaro que la información es verídica y acepto las <a href="/basesconcurso" target="_blank" rel="noopener noreferrer" className="text-[#6F2C91] underline font-bold hover:text-[#5a2376]">Bases del Concurso</a> y las <a href="/politicasdeprivacidad" target="_blank" rel="noopener noreferrer" className="text-[#6F2C91] underline font-bold hover:text-[#5a2376]">Políticas de Privacidad</a>. <span className="text-red-500 font-bold">*</span>
                 </span>
               </label>
               {showTermsError && (
