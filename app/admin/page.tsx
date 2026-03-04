@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 
-// ⚠️ SOLO LEYENDO DESDE .ENV.LOCAL
+// ⚠️ Se mantienen las variables apuntando a process.env
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY || "";
 
@@ -53,8 +53,9 @@ export default function App() {
   const fetchProyectos = async () => {
     if (!isAuthenticated) return;
     
+    // Verificación de variables en consola para debug (solo tú las verás)
     if (!SUPABASE_URL || !SUPABASE_KEY) {
-      console.error("Faltan las variables de entorno en .env.local");
+      console.error("Error: Variables de entorno no detectadas en el servidor.");
       return;
     }
 
@@ -65,7 +66,8 @@ export default function App() {
         headers: {
           'apikey': SUPABASE_KEY,
           'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation'
         },
         cache: 'no-store'
       });
@@ -131,7 +133,6 @@ export default function App() {
     document.body.removeChild(link);
   };
 
-  // Función para limpiar links y sacar el localhost
   const getExternalLink = (url: string) => {
     if (!url) return "#";
     const cleanUrl = url.trim();
