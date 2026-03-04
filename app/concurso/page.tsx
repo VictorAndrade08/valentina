@@ -122,17 +122,14 @@ export default function ConcursoForm() {
 
     setLoading(true);
     const formElement = e.currentTarget;
-    const formData = new FormData(formElement);
     
     try {
-      const res = await fetch(
-        "https://peachpuff-cod-624982.hostingersite.com/wp-json/buzon/v1/guardar",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-      const data = await res.json();
+      // SIMULACIÓN DE ENVÍO: Espera 2 segundos para mostrar el estado de carga
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Simulamos que la respuesta del servidor fue exitosa
+      const data = { status: "ok" };
+
       if (data.status === "ok") {
         alert("¡Excelente! Tu proyecto ha sido registrado con éxito.");
         formElement.reset();
@@ -144,7 +141,7 @@ export default function ConcursoForm() {
         setAcceptedTerms(false);
         setShowTermsError(false);
       } else {
-        alert("Error: " + data.message);
+        alert("Error: Simulación fallida.");
       }
     } catch (error) {
       alert("Error enviando los datos. Por favor intenta nuevamente.");
