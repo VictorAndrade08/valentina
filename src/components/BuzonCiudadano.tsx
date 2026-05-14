@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { FaWhatsapp } from "react-icons/fa";
+
+const WHATSAPP_DEST_NUMBER = "593963730513";
 
 type FormState = {
   nombre: string;
@@ -70,6 +73,20 @@ export default function BuzonCiudadano() {
       fileInputRef.current.value = "";
     }
     setFileName("Ningún archivo seleccionado");
+  };
+
+  const handleWhatsapp = () => {
+    const { nombre, canton, correo, asunto, mensaje } = formState;
+    const lines: string[] = [];
+    lines.push("Hola Valentina, te escribo desde tu página web.");
+    if (nombre) lines.push(`\n*Nombre:* ${nombre}`);
+    if (canton) lines.push(`*Cantón / Provincia:* ${canton}`);
+    if (correo) lines.push(`*Correo:* ${correo}`);
+    if (asunto) lines.push(`\n*Asunto:* ${asunto}`);
+    if (mensaje) lines.push(`\n${mensaje}`);
+    const text = lines.join("\n");
+    const url = `https://wa.me/${WHATSAPP_DEST_NUMBER}?text=${encodeURIComponent(text)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -327,6 +344,31 @@ export default function BuzonCiudadano() {
                     )}
                 </div>
                 </button>
+            </div>
+
+            {/* DIVISOR + BOTÓN WHATSAPP */}
+            <div className="relative flex items-center justify-center py-2">
+              <span className="absolute inset-x-0 h-px bg-gray-200" />
+              <span className="relative bg-white px-4 text-xs font-bold uppercase tracking-widest text-gray-400">
+                o
+              </span>
+            </div>
+
+            <div>
+              <button
+                type="button"
+                onClick={handleWhatsapp}
+                disabled={loading}
+                className="group relative w-full py-5 rounded-[1.5rem] text-xl font-black uppercase tracking-widest transition-all duration-300 shadow-xl overflow-hidden bg-[#25D366] text-white hover:bg-[#1ebe57] hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                <div className="relative z-10 flex items-center justify-center gap-3">
+                  <FaWhatsapp className="w-6 h-6" />
+                  Enviar por WhatsApp
+                </div>
+              </button>
+              <p className="text-center text-xs text-[#86868B] mt-3">
+                Abre WhatsApp con tu mensaje listo para enviar.
+              </p>
             </div>
 
             {loading && (
