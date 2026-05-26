@@ -206,6 +206,8 @@ export default function AdminPage() {
   const [loadingMensajes, setLoadingMensajes] = useState(false);
   const [searchTermMensajes, setSearchTermMensajes] = useState("");
   const [mesFiltro, setMesFiltro] = useState<string>("todos");
+  const [desdeFiltro, setDesdeFiltro] = useState<string>("");
+  const [hastaFiltro, setHastaFiltro] = useState<string>("");
   const [mensajeAbierto, setMensajeAbierto] = useState<string | null>(null);
 
   const [showReportModal, setShowReportModal] = useState(false);
@@ -287,9 +289,18 @@ export default function AdminPage() {
 
   const mensajesFiltrados = useMemo(() => {
     const term = searchTermMensajes.toLowerCase();
+    const desdeMs = desdeFiltro
+      ? new Date(desdeFiltro + "T00:00:00").getTime()
+      : null;
+    const hastaMs = hastaFiltro
+      ? new Date(hastaFiltro + "T23:59:59.999").getTime()
+      : null;
     return mensajes.filter((m) => {
       if (mesFiltro !== "todos" && monthKey(m.created_at) !== mesFiltro)
         return false;
+      const t = new Date(m.created_at).getTime();
+      if (desdeMs !== null && t < desdeMs) return false;
+      if (hastaMs !== null && t > hastaMs) return false;
       if (!term) return true;
       return (
         (m.nombre || "").toLowerCase().includes(term) ||
@@ -299,7 +310,7 @@ export default function AdminPage() {
         (m.correo || "").toLowerCase().includes(term)
       );
     });
-  }, [mensajes, searchTermMensajes, mesFiltro]);
+  }, [mensajes, searchTermMensajes, mesFiltro, desdeFiltro, hastaFiltro]);
 
   const stats = useMemo(() => computeMensajeStats(mensajes), [mensajes]);
   const proyectoStats = useMemo(
@@ -1531,31 +1542,85 @@ export default function AdminPage() {
             </div>
 
             {/* FILTERS */}
-            <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 mb-6 flex flex-wrap gap-4 items-center">
-              <div className="flex-1 min-w-[260px]">
-                <input
-                  type="text"
-                  placeholder="Buscar nombre, cantón, asunto o mensaje..."
-                  value={searchTermMensajes}
-                  onChange={(e) => setSearchTermMensajes(e.target.value)}
-                  className="w-full py-3 px-5 rounded-xl border-2 border-transparent bg-[#F5F5F7] focus:bg-white focus:border-[#6F2C91] outline-none transition-all font-medium text-black"
-                />
+            <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 mb-6 space-y-4">
+              <div className="flex flex-wrap gap-4 items-center">
+                <div className="flex-1 min-w-[260px]">
+                  <input
+                    type="text"
+                    placeholder="Buscar nombre, cantón, asunto o mensaje..."
+                    value={searchTermMensajes}
+                    onChange={(e) => setSearchTermMensajes(e.target.value)}
+                    className="w-full py-3 px-5 rounded-xl border-2 border-transparent bg-[#F5F5F7] focus:bg-white focus:border-[#6F2C91] outline-none transition-all font-medium text-black"
+                  />
+                </div>
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                  {mensajesFiltrados.length} resultado{mensajesFiltrados.length === 1 ? "" : "s"}
+                </span>
               </div>
-              <select
-                value={mesFiltro}
-                onChange={(e) => setMesFiltro(e.target.value)}
-                className="py-3 px-5 rounded-xl border-2 border-transparent bg-[#F5F5F7] focus:bg-white focus:border-[#6F2C91] outline-none transition-all font-bold text-[#1D1D1F]"
-              >
-                <option value="todos">Todos los meses</option>
-                {mesesDisponibles.map((k) => (
-                  <option key={k} value={k}>
-                    {monthLabel(k)}
-                  </option>
-                ))}
-              </select>
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                {mensajesFiltrados.length} resultados
-              </span>
+
+              <div className="flex flex-wrap gap-3 items-end pt-4 border-t border-gray-100">
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">
+                    Mes rápido
+                  </label>
+                  <select
+                    value={mesFiltro}
+                    onChange={(e) => setMesFiltro(e.target.value)}
+                    className="py-3 px-4 rounded-xl border-2 border-transparent bg-[#F5F5F7] focus:bg-white focus:border-[#6F2C91] outline-none transition-all font-bold text-[#1D1D1F]"
+                  >
+                    <option value="todos">Todos los meses</option>
+                    {mesesDisponibles.map((k) => (
+                      <option key={k} value={k}>
+                        {monthLabel(k)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">
+                    Desde
+                  </label>
+                  <input
+                    type="date"
+                    value={desdeFiltro}
+                    onChange={(e) => setDesdeFiltro(e.target.value)}
+                    className="py-3 px-4 rounded-xl border-2 border-transparent bg-[#F5F5F7] focus:bg-white focus:border-[#6F2C91] outline-none transition-all font-bold text-[#1D1D1F]"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">
+                    Hasta
+                  </label>
+                  <input
+                    type="date"
+                    value={hastaFiltro}
+                    onChange={(e) => setHastaFiltro(e.target.value)}
+                    className="py-3 px-4 rounded-xl border-2 border-transparent bg-[#F5F5F7] focus:bg-white focus:border-[#6F2C91] outline-none transition-all font-bold text-[#1D1D1F]"
+                  />
+                </div>
+
+                {(mesFiltro !== "todos" || desdeFiltro || hastaFiltro || searchTermMensajes) && (
+                  <button
+                    onClick={() => {
+                      setMesFiltro("todos");
+                      setDesdeFiltro("");
+                      setHastaFiltro("");
+                      setSearchTermMensajes("");
+                    }}
+                    className="py-3 px-5 rounded-xl bg-gray-100 text-gray-600 font-black text-xs uppercase tracking-widest hover:bg-red-50 hover:text-red-600 transition-all"
+                  >
+                    Limpiar filtros
+                  </button>
+                )}
+              </div>
+
+              {desdeFiltro && hastaFiltro && desdeFiltro > hastaFiltro && (
+                <p className="text-xs text-red-600 font-bold">
+                  La fecha "Desde" debe ser anterior a "Hasta".
+                </p>
+              )}
             </div>
 
             {/* MESSAGE LIST */}
