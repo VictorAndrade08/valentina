@@ -1,77 +1,36 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { FaPlay, FaTimes } from "react-icons/fa"; 
+import { FaPlay, FaTimes } from "react-icons/fa";
 import { Oswald } from "next/font/google";
+import { getSupabase } from "@/lib/supabaseClient";
 
 const oswald = Oswald({ subsets: ["latin"], weight: ["700"] });
-
-// URL de tu Google Sheets publicada como CSV
-const CMS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTYKQwKNfKrrKl6J91u7X26Yr8cQxsalFeHIjnZfxjDaHcgS5JYPn_KzHt5naz_-yFXfLidX96gr_yg/pub?output=csv";
-
-// FUNCIÓN DE PROCESAMIENTO ROBUSTO
-function parseCSV(text: string) {
-  const result: Record<string, string> = {};
-  const rows: string[][] = [];
-  let currentRow: string[] = [];
-  let currentColumn = "";
-  let inQuotes = false;
-
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i];
-    const nextChar = text[i + 1];
-
-    if (inQuotes) {
-      if (char === '"' && nextChar === '"') {
-        currentColumn += '"'; i++;
-      } else if (char === '"') {
-        inQuotes = false;
-      } else {
-        currentColumn += char;
-      }
-    } else {
-      if (char === '"') {
-        inQuotes = true;
-      } else if (char === ",") {
-        currentRow.push(currentColumn.trim());
-        currentColumn = "";
-      } else if (char === "\n" || char === "\r") {
-        if (currentColumn || currentRow.length > 0) {
-          currentRow.push(currentColumn.trim());
-          rows.push(currentRow);
-          currentRow = [];
-          currentColumn = "";
-        }
-      } else {
-        currentColumn += char;
-      }
-    }
-  }
-  if (currentColumn || currentRow.length > 0) {
-    currentRow.push(currentColumn.trim());
-    rows.push(currentRow);
-  }
-
-  rows.slice(1).forEach(row => {
-    if (row[0]) result[row[0].toLowerCase()] = row[1] || "";
-  });
-
-  return result;
-}
 
 export default function AboutBio() {
   const [cms, setCms] = useState<Record<string, string> | null>(null);
   const [isVideoOpen, setIsVideoOpen] = useState(false);
 
   useEffect(() => {
-    fetch(CMS_URL, { cache: "no-store" })
-      .then(res => res.text())
-      .then(csv => {
-        const data = parseCSV(csv);
-        setCms(data);
-      })
-      .catch(err => console.error("ERROR CMS:", err));
+    const cargar = async () => {
+      try {
+        const supabase = getSupabase();
+        const { data, error } = await supabase
+          .from("cms_textos")
+          .select("clave, valor")
+          .eq("seccion", "about");
+        if (error || !data || data.length === 0) return;
+        const map: Record<string, string> = {};
+        data.forEach((r) => {
+          if (r.clave) map[String(r.clave).toLowerCase()] = r.valor || "";
+        });
+        setCms(map);
+      } catch {
+        // Silencio intencional → mantiene fallback hardcoded
+      }
+    };
+    cargar();
   }, []);
 
   const get = (key: string, fallback: string) => {

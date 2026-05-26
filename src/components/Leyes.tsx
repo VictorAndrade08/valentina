@@ -2,10 +2,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Oswald } from "next/font/google";
-// Asegúrate de tener instalado: npm install react-icons
 import { FaChevronLeft, FaChevronRight, FaPlus, FaTimes } from "react-icons/fa";
+import { getSupabase } from "@/lib/supabaseClient";
 
-// Configuramos la fuente para evitar errores si no tienes 'boruino'
 const oswald = Oswald({
   subsets: ["latin"],
   weight: ["700"],
@@ -20,62 +19,37 @@ type LeyData = {
   full: string;
 };
 
-// --- TU FUNCIÓN ORIGINAL (INTACTA) ---
-function parseCsv(text: string): string[][] {
-  const rows: string[][] = [];
-  let cur = ""; let row: string[] = []; let inQuotes = false; let i = 0;
-  while (i < text.length) {
-    const char = text[i];
-    if (inQuotes) {
-      if (char === '"') {
-        if (i + 1 < text.length && text[i + 1] === '"') { cur += '"'; i += 2; }
-        else { inQuotes = false; i++; }
-      } else { cur += char; i++; }
-    } else {
-      if (char === '"') { inQuotes = true; i++; }
-      else if (char === ",") { row.push(cur); cur = ""; i++; }
-      else if (char === "\r" || char === "\n") {
-        row.push(cur); rows.push(row); row = []; cur = "";
-        if (char === "\r" && i + 1 < text.length && text[i + 1] === "\n") i += 2; else i++;
-      } else { cur += char; i++; }
-    }
-  }
-  row.push(cur); rows.push(row); return rows;
-}
-// -------------------------------------
-
 export default function Leyes() {
   const [leyes, setLeyes] = useState<LeyData[]>([]);
   const [modalData, setModalData] = useState<LeyData | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTYKQwKNfKrrKl6J91u7X26Yr8cQxsalFeHIjnZfxjDaHcgS5JYPn_KzHt5naz_-yFXfLidX96gr_yg/pub?gid=809219241&single=true&output=csv";
-    
-    fetch(url, { cache: "no-store" })
-      .then((res) => res.text())
-      .then((csv) => {
-        // Validación extra para evitar pantalla blanca si el CSV falla
-        if (!csv) return;
-        
-        const rawRows = parseCsv(csv);
-        const rows = rawRows.filter(r => r && r.some(cell => cell.trim() !== ""));
-        
-        if (rows.length < 2) return;
-        
-        const dataRows = rows.slice(1);
-        const parsed = dataRows.map((cols, index) => ({
-          id: (cols[0] ?? index).toString().trim(),
-          titleTop: (cols[1] ?? "").toString().trim(),
-          title: (cols[2] ?? "").toString().trim(),
-          img: (cols[3] ?? "").toString().trim(),
-          desc: (cols[4] ?? "").toString().trim(),
-          full: (cols[5] ?? "").toString().trim(),
-        })).filter(item => item.title); // Filtro básico
-        
-        setLeyes(parsed);
-      })
-      .catch(err => console.error("Error cargando leyes:", err));
+    const cargar = async () => {
+      try {
+        const supabase = getSupabase();
+        const { data, error } = await supabase
+          .from("cms_leyes")
+          .select("id, orden, title_top, title, img, descripcion, full_text, activo")
+          .eq("activo", true)
+          .order("orden", { ascending: true });
+        if (error || !data || data.length === 0) return;
+        const parsed: LeyData[] = data
+          .filter((r) => r.title)
+          .map((r) => ({
+            id: String(r.id),
+            titleTop: r.title_top || "",
+            title: r.title || "",
+            img: r.img || "",
+            desc: r.descripcion || "",
+            full: r.full_text || "",
+          }));
+        if (parsed.length > 0) setLeyes(parsed);
+      } catch {
+        // Silencio: si Supabase falla, leyes queda vacío y la sección no renderiza nada
+      }
+    };
+    cargar();
   }, []);
 
   const scroll = (direction: "left" | "right") => {

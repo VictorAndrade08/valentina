@@ -5,6 +5,11 @@ import { getSupabase } from "@/lib/supabaseClient";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import CmsHeroEditor from "@/components/admin/CmsHeroEditor";
+import CmsTextosEditor from "@/components/admin/CmsTextosEditor";
+import CmsAgendaEditor from "@/components/admin/CmsAgendaEditor";
+import CmsLeyesEditor from "@/components/admin/CmsLeyesEditor";
+import CmsLogrosEditor from "@/components/admin/CmsLogrosEditor";
+import CmsBiografiaEditor from "@/components/admin/CmsBiografiaEditor";
 
 const PASSWORD_ACCESO = "admin123";
 
@@ -1648,7 +1653,7 @@ export default function AdminPage() {
           </>
         )}
 
-        {tab === "contenido" && <CmsHeroEditor />}
+        {tab === "contenido" && <ContenidoTab />}
 
         <div className="mt-8 flex justify-between items-center px-4">
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">
@@ -1876,5 +1881,89 @@ export default function AdminPage() {
         </div>
       )}
     </section>
+  );
+}
+
+type ContenidoSeccion =
+  | "banners"
+  | "sobre-mi"
+  | "formacion"
+  | "agenda"
+  | "leyes"
+  | "logros"
+  | "biografia";
+
+function ContenidoTab() {
+  const [seccion, setSeccion] = useState<ContenidoSeccion>("banners");
+
+  const subTabs: { key: ContenidoSeccion; label: string }[] = [
+    { key: "banners", label: "Banners (carrusel)" },
+    { key: "sobre-mi", label: "Sobre mí" },
+    { key: "formacion", label: "Formación Dual" },
+    { key: "agenda", label: "Agenda Internacional" },
+    { key: "leyes", label: "Leyes / Logros legislativos" },
+    { key: "logros", label: "Logros Manabí" },
+    { key: "biografia", label: "Página Biografía" },
+  ];
+
+  return (
+    <div>
+      <div className="bg-white rounded-[1.5rem] p-3 shadow-sm border border-gray-100 mb-8 flex gap-2 overflow-x-auto">
+        {subTabs.map((s) => (
+          <button
+            key={s.key}
+            onClick={() => setSeccion(s.key)}
+            className={`px-4 py-2 rounded-xl font-bold text-xs uppercase tracking-wider whitespace-nowrap transition-all ${
+              seccion === s.key
+                ? "bg-[#6F2C91] text-white shadow-md"
+                : "text-gray-500 hover:text-[#6F2C91] hover:bg-gray-50"
+            }`}
+          >
+            {s.label}
+          </button>
+        ))}
+      </div>
+
+      {seccion === "banners" && <CmsHeroEditor />}
+      {seccion === "sobre-mi" && (
+        <CmsTextosEditor
+          seccion="about"
+          titulo="Sobre Mí"
+          descripcion="Textos de la sección 'Hola, soy Valentina' en el home."
+          campos={[
+            { clave: "title", label: "Título principal", multilinea: false },
+            { clave: "subtitle", label: "Subtítulo (opcional)", multilinea: false },
+            { clave: "p1", label: "Párrafo 1 (destacado)", multilinea: true },
+            { clave: "p2", label: "Párrafo 2", multilinea: true },
+            { clave: "p3", label: "Párrafo 3 (opcional)", multilinea: true },
+            { clave: "video", label: "URL del video de fondo", multilinea: false, esArchivo: true, acepta: "video/*" },
+          ]}
+        />
+      )}
+      {seccion === "formacion" && (
+        <CmsTextosEditor
+          seccion="formacion"
+          titulo="Formación Dual"
+          descripcion="Sección 'Ley de Formación Dual y Técnica' del home."
+          campos={[
+            { clave: "fd_titulo_1", label: "Antetítulo (línea 1)", multilinea: false },
+            { clave: "fd_titulo_2", label: "Título principal (línea 2)", multilinea: false },
+            { clave: "fd_descripcion", label: "Descripción larga", multilinea: true },
+            { clave: "fd_galeria", label: "URLs de galería (separadas por coma)", multilinea: true },
+            { clave: "fd_video", label: "URL del video", multilinea: false, esArchivo: true, acepta: "video/*" },
+            { clave: "fd_ficha_titulo_1", label: "Ficha — Título línea 1", multilinea: false },
+            { clave: "fd_ficha_titulo_2", label: "Ficha — Título línea 2", multilinea: false },
+            { clave: "fd_beneficio_1", label: "Beneficio 1", multilinea: true },
+            { clave: "fd_beneficio_2", label: "Beneficio 2", multilinea: true },
+            { clave: "fd_btn_principal", label: "Texto del botón principal", multilinea: false },
+            { clave: "fd_btn_secundario", label: "Texto del botón secundario", multilinea: false },
+          ]}
+        />
+      )}
+      {seccion === "agenda" && <CmsAgendaEditor />}
+      {seccion === "leyes" && <CmsLeyesEditor />}
+      {seccion === "logros" && <CmsLogrosEditor />}
+      {seccion === "biografia" && <CmsBiografiaEditor />}
+    </div>
   );
 }

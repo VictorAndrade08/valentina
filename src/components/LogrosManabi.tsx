@@ -8,6 +8,7 @@ import {
   FaFireFlameSimple,
   FaHeartPulse,
 } from "react-icons/fa6";
+import { getSupabase } from "@/lib/supabaseClient";
 
 type BlogroData = {
   id: string;
@@ -16,31 +17,6 @@ type BlogroData = {
   body: string;
   image?: string;
 };
-
-const BLOGROS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTYKQwKNfKrrKl6J91u7X26Yr8cQxsalFeHIjnZfxjDaHcgS5JYPn_KzHt5naz_-yFXfLidX96gr_yg/pub?gid=57984147&single=true&output=csv";
-
-// PARSER CSV (Tu código original intacto)
-function parseCsv(text: string): string[][] {
-  const rows: string[][] = [];
-  let cur = ""; let row: string[] = []; let inQuotes = false; let i = 0;
-  while (i < text.length) {
-    const char = text[i];
-    if (inQuotes) {
-      if (char === '"') {
-        if (i + 1 < text.length && text[i + 1] === '"') { cur += '"'; i += 2; }
-        else { inQuotes = false; i++; }
-      } else { cur += char; i++; }
-    } else {
-      if (char === '"') { inQuotes = true; i++; }
-      else if (char === ",") { row.push(cur); cur = ""; i++; }
-      else if (char === "\r" || char === "\n") {
-        row.push(cur); rows.push(row); row = []; cur = "";
-        if (char === "\r" && i + 1 < text.length && text[i + 1] === "\n") i += 2; else i++;
-      } else { cur += char; i++; }
-    }
-  }
-  row.push(cur); rows.push(row); return rows;
-}
 
 const iconMap: Record<string, ReactNode> = {
   helmet: <FaHelmetSafety />,
@@ -54,49 +30,43 @@ export default function LogrosManabi() {
   const [items, setItems] = useState<BlogroData[]>([]);
   const [modalData, setModalData] = useState<BlogroData | null>(null);
   const [sectionTitle, setSectionTitle] = useState("POR AMOR Y JUSTICIA CON MANABÍ");
-  
-  // NUEVO: Estado de carga para evitar pantalla blanca
   const [isLoading, setIsLoading] = useState(true);
   const [scrollProgress, setScrollProgress] = useState(0);
-  
+
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setIsLoading(true); // Empezar carga
-    fetch(BLOGROS_URL, { cache: "no-store" })
-      .then((res) => res.text())
-      .then((csv) => {
-        // Validación simple para evitar errores si Google falla
-        if (csv.includes("<!DOCTYPE") || csv.includes("<html")) return; 
-
-        const allRows = parseCsv(csv);
-        const rows = allRows.filter(r => r && r.some(cell => cell.trim() !== ""));
-        if (rows.length < 2) return;
-        
-        const dataRows = rows.slice(1);
+    const cargar = async () => {
+      try {
+        const supabase = getSupabase();
+        const { data, error } = await supabase
+          .from("cms_logros")
+          .select("id, orden, icon_key, title, body, image, section_title, activo")
+          .eq("activo", true)
+          .order("orden", { ascending: true });
+        if (error || !data || data.length === 0) return;
         const parsed: BlogroData[] = [];
         let foundSectionTitle = "";
-        
-        for (const cols of dataRows) {
-          if (cols.length < 2) continue;
-          const rawId = (cols[0] ?? "").toString().trim();
-          const iconKey = (cols[1] ?? "").toString().trim().toLowerCase();
-          const title = (cols[2] ?? "").toString().trim();
-          const body = (cols[3] ?? "").toString().trim();
-          const image = (cols[4] ?? "").toString().trim();
-          const sectionTitleCol = (cols[5] ?? "").toString().trim();
-          
-          if (!foundSectionTitle && sectionTitleCol) foundSectionTitle = sectionTitleCol;
-          if (!rawId || !title) continue;
-          
-          parsed.push({ id: rawId.padStart(2, "0"), iconKey, title, body, image });
+        for (const r of data) {
+          if (!foundSectionTitle && r.section_title) foundSectionTitle = r.section_title;
+          if (!r.title) continue;
+          parsed.push({
+            id: String(r.id),
+            iconKey: (r.icon_key || "helmet").toLowerCase(),
+            title: r.title,
+            body: r.body || "",
+            image: r.image || undefined,
+          });
         }
-        
         if (parsed.length > 0) setItems(parsed);
         if (foundSectionTitle) setSectionTitle(foundSectionTitle);
-      })
-      .catch((err) => console.error("Error:", err))
-      .finally(() => setIsLoading(false)); // Finalizar carga siempre
+      } catch {
+        // Silencio: items queda vacío
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    cargar();
   }, []);
 
   // Calcular progreso del scroll

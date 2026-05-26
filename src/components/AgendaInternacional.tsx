@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Oswald } from "next/font/google";
+import { getSupabase } from "@/lib/supabaseClient";
 
 const oswald = Oswald({
   subsets: ["latin"],
@@ -19,7 +20,7 @@ type AgendaData = {
   image: string;
 };
 
-// DATOS POR DEFECTO
+// FALLBACK: si Supabase no responde, se ve el contenido actual
 const fallback: AgendaData = {
   id: "1",
   title: "AGENDA INTERNACIONAL",
@@ -40,58 +41,38 @@ const fallback: AgendaData = {
     "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2025/12/ONU-UIP-1.webp",
 };
 
-const CSV_URL =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vTYKQwKNfKrrKl6J91u7X26Yr8cQxsalFeHIjnZfxjDaHcgS5JYPn_KzHt5naz_-yFXfLidX96gr_yg/pub?gid=2020873782&single=true&output=csv";
-
-// PARSER CSV
-function parseCsv(text: string): string[][] {
-  const rows: string[][] = [];
-  let cur = ""; let row: string[] = []; let inQuotes = false; let i = 0;
-  while (i < text.length) {
-    const char = text[i];
-    if (inQuotes) {
-      if (char === '"') {
-        if (i + 1 < text.length && text[i + 1] === '"') { cur += '"'; i += 2; }
-        else { inQuotes = false; i++; }
-      } else { cur += char; i++; }
-    } else {
-      if (char === '"') { inQuotes = true; i++; }
-      else if (char === ",") { row.push(cur); cur = ""; i++; }
-      else if (char === "\r" || char === "\n") {
-        if (cur !== "" || row.length > 0) { row.push(cur); rows.push(row); }
-        row = []; cur = "";
-        if (char === "\r" && i + 1 < text.length && text[i + 1] === "\n") i += 2;
-        else i++;
-      } else { cur += char; i++; }
-    }
-  }
-  if (cur !== "" || row.length > 0) { row.push(cur); rows.push(row); }
-  return rows;
-}
-
 export default function AgendaInternacional() {
   const [data, setData] = useState<AgendaData>(fallback);
 
   useEffect(() => {
-    fetch(CSV_URL, { cache: "no-store" })
-      .then((res) => res.text())
-      .then((csv) => {
-        const rows = parseCsv(csv);
-        if (rows.length < 2) return;
-        const [id, title, tag, subtitle, description, bulletsString, quote, image] = rows[1];
-        const bullets = bulletsString ? bulletsString.split(";").map((b) => b.trim()) : fallback.bullets;
+    const cargar = async () => {
+      try {
+        const supabase = getSupabase();
+        const { data: rows, error } = await supabase
+          .from("cms_agenda_internacional")
+          .select("*")
+          .order("updated_at", { ascending: false })
+          .limit(1);
+        if (error || !rows || rows.length === 0) return;
+        const r = rows[0];
+        const bullets = r.bullets
+          ? String(r.bullets).split(";").map((b: string) => b.trim()).filter(Boolean)
+          : fallback.bullets;
         setData({
-          id: id || fallback.id,
-          title: title || fallback.title,
-          tag: tag || fallback.tag,
-          subtitle: subtitle || fallback.subtitle,
-          description: description || fallback.description,
+          id: String(r.id || fallback.id),
+          title: r.title || fallback.title,
+          tag: r.tag || fallback.tag,
+          subtitle: r.subtitle || fallback.subtitle,
+          description: r.description || fallback.description,
           bullets,
-          quote: quote || fallback.quote,
-          image: image || fallback.image,
+          quote: r.quote || fallback.quote,
+          image: r.image || fallback.image,
         });
-      })
-      .catch((err) => console.error("AGENDA CSV ERROR:", err));
+      } catch {
+        // Silencio: mantiene fallback
+      }
+    };
+    cargar();
   }, []);
 
   return (
