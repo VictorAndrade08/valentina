@@ -2,8 +2,10 @@
 
 import { useState, useRef } from "react";
 import { FaWhatsapp } from "react-icons/fa";
+import { getSupabase } from "@/lib/supabaseClient";
 
 const WHATSAPP_DEST_NUMBER = "593963730513";
+const STORAGE_BUCKET = "buzon-archivos";
 
 type FormState = {
   nombre: string;
@@ -103,30 +105,67 @@ export default function BuzonCiudadano() {
     }
     setLoading(true);
     const formElement = e.currentTarget;
-    const formData = new FormData(formElement);
     try {
-      const res = await fetch(
-        "https://peachpuff-cod-624982.hostingersite.com/wp-json/buzon/v1/guardar",
-        {
-          method: "POST",
-          body: formData,
+      const supabase = getSupabase();
+
+      let archivoUrl: string | null = null;
+      let archivoNombre: string | null = null;
+
+      const file = fileInputRef.current?.files?.[0] || null;
+      if (file) {
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const path = `${Date.now()}_${safeName}`;
+        const { error: uploadError } = await supabase.storage
+          .from(STORAGE_BUCKET)
+          .upload(path, file, {
+            cacheControl: "3600",
+            upsert: false,
+            contentType: file.type,
+          });
+        if (uploadError) {
+          throw new Error("No se pudo subir el archivo: " + uploadError.message);
         }
-      );
-      const data = await res.json();
-      if (data.status === "ok") {
-        alert("¡Gracias! Tu mensaje ha sido enviado.");
-        formElement.reset();
-        setFormState({
-          nombre: "", canton: "", correo: "", whatsapp: "", asunto: "", mensaje: "",
-        });
-        clearFile();
-        setAcceptedTerms(false);
-        setShowTermsError(false);
-      } else {
-        alert("Error: " + data.message);
+        const { data: publicData } = supabase.storage
+          .from(STORAGE_BUCKET)
+          .getPublicUrl(path);
+        archivoUrl = publicData.publicUrl;
+        archivoNombre = file.name;
       }
-    } catch (error) {
-      alert("Error enviando los datos.");
+
+      const { error: insertError } = await supabase
+        .from("mensajes_buzon")
+        .insert({
+          nombre,
+          canton,
+          correo,
+          whatsapp,
+          asunto,
+          mensaje,
+          archivo_url: archivoUrl,
+          archivo_nombre: archivoNombre,
+        });
+
+      if (insertError) {
+        throw new Error(insertError.message);
+      }
+
+      alert("¡Gracias! Tu mensaje ha sido enviado.");
+      formElement.reset();
+      setFormState({
+        nombre: "",
+        canton: "",
+        correo: "",
+        whatsapp: "",
+        asunto: "",
+        mensaje: "",
+      });
+      clearFile();
+      setAcceptedTerms(false);
+      setShowTermsError(false);
+    } catch (err) {
+      const msg =
+        err instanceof Error ? err.message : "Error enviando los datos.";
+      alert("Error: " + msg);
     }
     setLoading(false);
   };
