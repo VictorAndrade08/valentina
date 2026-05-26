@@ -4,6 +4,7 @@ import { Fragment, useState, useEffect, useMemo } from "react";
 import { getSupabase } from "@/lib/supabaseClient";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import CmsHeroEditor from "@/components/admin/CmsHeroEditor";
 
 const PASSWORD_ACCESO = "admin123";
 
@@ -38,7 +39,7 @@ type Mensaje = {
   archivo_nombre: string | null;
 };
 
-type TabKey = "concurso" | "buzon";
+type TabKey = "concurso" | "buzon" | "contenido";
 
 const MES_LABELS = [
   "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
@@ -59,6 +60,117 @@ const csvCell = (val: unknown) => {
   if (val === null || val === undefined) return '""';
   return `"${String(val).replace(/"/g, '""')}"`;
 };
+
+type MensajeStats = {
+  totalGeneral: number;
+  totalEsteMes: number;
+  mesPico: [string, number] | null;
+  mesesOrdenados: [string, number][];
+  cantonesOrdenados: [string, number][];
+  asuntosOrdenados: [string, number][];
+  maxMes: number;
+};
+
+type ProyectoStats = {
+  totalGeneral: number;
+  totalEsteMes: number;
+  mesPico: [string, number] | null;
+  mesesOrdenados: [string, number][];
+  cantonesOrdenados: [string, number][];
+  areasOrdenadas: [string, number][];
+  ocupacionesOrdenadas: [string, number][];
+  institucionesOrdenadas: [string, number][];
+};
+
+function computeMensajeStats(msgs: Mensaje[]): MensajeStats {
+  const totalGeneral = msgs.length;
+  const nowKey = monthKey(new Date().toISOString());
+  const totalEsteMes = msgs.filter((m) => monthKey(m.created_at) === nowKey).length;
+  const porMes = new Map<string, number>();
+  const porCanton = new Map<string, number>();
+  const porAsunto = new Map<string, number>();
+  msgs.forEach((m) => {
+    const mk = monthKey(m.created_at);
+    porMes.set(mk, (porMes.get(mk) || 0) + 1);
+    const canton = (m.canton || "Sin especificar").trim();
+    porCanton.set(canton, (porCanton.get(canton) || 0) + 1);
+    const asunto = (m.asunto || "Sin asunto").trim();
+    porAsunto.set(asunto, (porAsunto.get(asunto) || 0) + 1);
+  });
+  const mesesOrdenados = Array.from(porMes.entries()).sort((a, b) =>
+    a[0] < b[0] ? 1 : -1
+  );
+  const cantonesOrdenados = Array.from(porCanton.entries()).sort(
+    (a, b) => b[1] - a[1]
+  );
+  const asuntosOrdenados = Array.from(porAsunto.entries()).sort(
+    (a, b) => b[1] - a[1]
+  );
+  const mesPico =
+    mesesOrdenados.length > 0
+      ? mesesOrdenados.reduce((a, b) => (b[1] > a[1] ? b : a))
+      : null;
+  const maxMes = mesesOrdenados.reduce((acc, [, n]) => Math.max(acc, n), 0);
+  return {
+    totalGeneral,
+    totalEsteMes,
+    mesPico,
+    mesesOrdenados,
+    cantonesOrdenados,
+    asuntosOrdenados,
+    maxMes,
+  };
+}
+
+function computeProyectoStats(prys: Proyecto[]): ProyectoStats {
+  const totalGeneral = prys.length;
+  const nowKey = monthKey(new Date().toISOString());
+  const totalEsteMes = prys.filter((p) => monthKey(p.created_at) === nowKey).length;
+  const porMes = new Map<string, number>();
+  const porCanton = new Map<string, number>();
+  const porArea = new Map<string, number>();
+  const porOcupacion = new Map<string, number>();
+  const porInstitucion = new Map<string, number>();
+  prys.forEach((p) => {
+    const mk = monthKey(p.created_at);
+    porMes.set(mk, (porMes.get(mk) || 0) + 1);
+    porCanton.set(
+      (p.cantonParroquia || "Sin especificar").trim(),
+      (porCanton.get((p.cantonParroquia || "Sin especificar").trim()) || 0) + 1
+    );
+    porArea.set(
+      (p.areaInteres || "Sin especificar").trim(),
+      (porArea.get((p.areaInteres || "Sin especificar").trim()) || 0) + 1
+    );
+    porOcupacion.set(
+      (p.ocupacion || "Sin especificar").trim(),
+      (porOcupacion.get((p.ocupacion || "Sin especificar").trim()) || 0) + 1
+    );
+    porInstitucion.set(
+      (p.institucion || "Sin especificar").trim(),
+      (porInstitucion.get((p.institucion || "Sin especificar").trim()) || 0) + 1
+    );
+  });
+  const mesesOrdenados = Array.from(porMes.entries()).sort((a, b) =>
+    a[0] < b[0] ? 1 : -1
+  );
+  const sortByCount = (m: Map<string, number>) =>
+    Array.from(m.entries()).sort((a, b) => b[1] - a[1]);
+  const mesPico =
+    mesesOrdenados.length > 0
+      ? mesesOrdenados.reduce((a, b) => (b[1] > a[1] ? b : a))
+      : null;
+  return {
+    totalGeneral,
+    totalEsteMes,
+    mesPico,
+    mesesOrdenados,
+    cantonesOrdenados: sortByCount(porCanton),
+    areasOrdenadas: sortByCount(porArea),
+    ocupacionesOrdenadas: sortByCount(porOcupacion),
+    institucionesOrdenadas: sortByCount(porInstitucion),
+  };
+}
 
 const downloadCsv = (filename: string, headers: string[], rows: string[][]) => {
   const csv =
@@ -90,6 +202,14 @@ export default function AdminPage() {
   const [searchTermMensajes, setSearchTermMensajes] = useState("");
   const [mesFiltro, setMesFiltro] = useState<string>("todos");
   const [mensajeAbierto, setMensajeAbierto] = useState<string | null>(null);
+
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportTipo, setReportTipo] = useState<"historico" | "mes" | "rango">(
+    "historico"
+  );
+  const [reportMes, setReportMes] = useState<string>("");
+  const [reportDesde, setReportDesde] = useState<string>("");
+  const [reportHasta, setReportHasta] = useState<string>("");
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -176,113 +296,11 @@ export default function AdminPage() {
     });
   }, [mensajes, searchTermMensajes, mesFiltro]);
 
-  const stats = useMemo(() => {
-    const totalGeneral = mensajes.length;
-    const nowKey = monthKey(new Date().toISOString());
-    const totalEsteMes = mensajes.filter(
-      (m) => monthKey(m.created_at) === nowKey
-    ).length;
-
-    const porMes = new Map<string, number>();
-    const porCanton = new Map<string, number>();
-    const porAsunto = new Map<string, number>();
-    mensajes.forEach((m) => {
-      const mk = monthKey(m.created_at);
-      porMes.set(mk, (porMes.get(mk) || 0) + 1);
-      const canton = (m.canton || "Sin especificar").trim();
-      porCanton.set(canton, (porCanton.get(canton) || 0) + 1);
-      const asunto = (m.asunto || "Sin asunto").trim();
-      porAsunto.set(asunto, (porAsunto.get(asunto) || 0) + 1);
-    });
-
-    const mesesOrdenados = Array.from(porMes.entries()).sort((a, b) =>
-      a[0] < b[0] ? 1 : -1
-    );
-    const cantonesOrdenados = Array.from(porCanton.entries()).sort(
-      (a, b) => b[1] - a[1]
-    );
-    const asuntosOrdenados = Array.from(porAsunto.entries()).sort(
-      (a, b) => b[1] - a[1]
-    );
-
-    const mesPico =
-      mesesOrdenados.length > 0
-        ? mesesOrdenados.reduce((a, b) => (b[1] > a[1] ? b : a))
-        : null;
-
-    const maxMes = mesesOrdenados.reduce((acc, [, n]) => Math.max(acc, n), 0);
-
-    return {
-      totalGeneral,
-      totalEsteMes,
-      mesPico,
-      mesesOrdenados,
-      cantonesOrdenados,
-      asuntosOrdenados,
-      maxMes,
-    };
-  }, [mensajes]);
-
-  const proyectoStats = useMemo(() => {
-    const totalGeneral = proyectos.length;
-    const nowKey = monthKey(new Date().toISOString());
-    const totalEsteMes = proyectos.filter(
-      (p) => monthKey(p.created_at) === nowKey
-    ).length;
-
-    const porMes = new Map<string, number>();
-    const porCanton = new Map<string, number>();
-    const porArea = new Map<string, number>();
-    const porOcupacion = new Map<string, number>();
-    const porInstitucion = new Map<string, number>();
-    proyectos.forEach((p) => {
-      const mk = monthKey(p.created_at);
-      porMes.set(mk, (porMes.get(mk) || 0) + 1);
-      const canton = (p.cantonParroquia || "Sin especificar").trim();
-      porCanton.set(canton, (porCanton.get(canton) || 0) + 1);
-      const area = (p.areaInteres || "Sin especificar").trim();
-      porArea.set(area, (porArea.get(area) || 0) + 1);
-      const ocupacion = (p.ocupacion || "Sin especificar").trim();
-      porOcupacion.set(ocupacion, (porOcupacion.get(ocupacion) || 0) + 1);
-      const institucion = (p.institucion || "Sin especificar").trim();
-      porInstitucion.set(
-        institucion,
-        (porInstitucion.get(institucion) || 0) + 1
-      );
-    });
-
-    const mesesOrdenados = Array.from(porMes.entries()).sort((a, b) =>
-      a[0] < b[0] ? 1 : -1
-    );
-    const cantonesOrdenados = Array.from(porCanton.entries()).sort(
-      (a, b) => b[1] - a[1]
-    );
-    const areasOrdenadas = Array.from(porArea.entries()).sort(
-      (a, b) => b[1] - a[1]
-    );
-    const ocupacionesOrdenadas = Array.from(porOcupacion.entries()).sort(
-      (a, b) => b[1] - a[1]
-    );
-    const institucionesOrdenadas = Array.from(porInstitucion.entries()).sort(
-      (a, b) => b[1] - a[1]
-    );
-
-    const mesPico =
-      mesesOrdenados.length > 0
-        ? mesesOrdenados.reduce((a, b) => (b[1] > a[1] ? b : a))
-        : null;
-
-    return {
-      totalGeneral,
-      totalEsteMes,
-      mesPico,
-      mesesOrdenados,
-      cantonesOrdenados,
-      areasOrdenadas,
-      ocupacionesOrdenadas,
-      institucionesOrdenadas,
-    };
-  }, [proyectos]);
+  const stats = useMemo(() => computeMensajeStats(mensajes), [mensajes]);
+  const proyectoStats = useMemo(
+    () => computeProyectoStats(proyectos),
+    [proyectos]
+  );
 
   const exportProyectosExcel = () => {
     if (proyectosFiltrados.length === 0) return;
@@ -540,7 +558,75 @@ export default function AdminPage() {
     doc.save(`Reporte_Buzon_Valentina_${suffix}.pdf`);
   };
 
+  const getReportFilter = (): {
+    desde: Date;
+    hasta: Date;
+    label: string;
+    fileSuffix: string;
+  } | null => {
+    if (reportTipo === "mes" && reportMes) {
+      const [y, m] = reportMes.split("-").map(Number);
+      const desde = new Date(y, m - 1, 1, 0, 0, 0, 0);
+      const hasta = new Date(y, m, 0, 23, 59, 59, 999);
+      return {
+        desde,
+        hasta,
+        label: monthLabel(reportMes),
+        fileSuffix: reportMes,
+      };
+    }
+    if (reportTipo === "rango" && reportDesde && reportHasta) {
+      const desde = new Date(reportDesde + "T00:00:00");
+      const hasta = new Date(reportHasta + "T23:59:59.999");
+      const fmt = (s: string) =>
+        new Date(s + "T00:00:00").toLocaleDateString("es-EC");
+      return {
+        desde,
+        hasta,
+        label: `${fmt(reportDesde)} — ${fmt(reportHasta)}`,
+        fileSuffix: `${reportDesde}_a_${reportHasta}`,
+      };
+    }
+    return null;
+  };
+
+  const previewCounts = useMemo(() => {
+    const f = getReportFilter();
+    if (!f) return { mensajes: mensajes.length, proyectos: proyectos.length };
+    const inRange = (iso: string) => {
+      const d = new Date(iso);
+      return d >= f.desde && d <= f.hasta;
+    };
+    return {
+      mensajes: mensajes.filter((m) => inRange(m.created_at)).length,
+      proyectos: proyectos.filter((p) => inRange(p.created_at)).length,
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reportTipo, reportMes, reportDesde, reportHasta, mensajes, proyectos]);
+
   const exportReporteCompletoPdf = () => {
+    const filter = getReportFilter();
+    const msgsUsed = filter
+      ? mensajes.filter((m) => {
+          const d = new Date(m.created_at);
+          return d >= filter.desde && d <= filter.hasta;
+        })
+      : mensajes;
+    const prysUsed = filter
+      ? proyectos.filter((p) => {
+          const d = new Date(p.created_at);
+          return d >= filter.desde && d <= filter.hasta;
+        })
+      : proyectos;
+    const statsLocal = filter ? computeMensajeStats(msgsUsed) : stats;
+    const proyectoStatsLocal = filter
+      ? computeProyectoStats(prysUsed)
+      : proyectoStats;
+    const periodoLabel = filter ? filter.label : "Histórico completo";
+    const fileSuffix = filter
+      ? filter.fileSuffix
+      : new Date().toISOString().split("T")[0];
+
     const doc = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
@@ -640,7 +726,8 @@ export default function AdminPage() {
       timeStyle: "short",
     });
     doc.setFontSize(8);
-    doc.text(`Generado: ${fechaLarga}`, margin, 162);
+    doc.text(`Periodo: ${periodoLabel}`, margin, 158);
+    doc.text(`Generado: ${fechaLarga}`, margin, 170);
 
     // KPIs principales (6 tarjetas en grid 3x2)
     const kpiTop = 210;
@@ -654,15 +741,15 @@ export default function AdminPage() {
     doc.text("Resumen ejecutivo", margin, kpiTop - 12);
 
     // Fila 1 (buzón)
-    drawKpi(margin, kpiTop, kpiW, kpiH, "Mensajes (total)", String(stats.totalGeneral), "Buzón acumulado", LIGHT, DARK);
-    drawKpi(margin + kpiW + gap, kpiTop, kpiW, kpiH, "Mensajes este mes", String(stats.totalEsteMes), monthLabel(monthKey(new Date().toISOString())), PURPLE, WHITE);
-    drawKpi(margin + (kpiW + gap) * 2, kpiTop, kpiW, kpiH, "Mes pico buzón", stats.mesPico ? String(stats.mesPico[1]) : "0", stats.mesPico ? monthLabel(stats.mesPico[0]) : "sin datos", YELLOW, PURPLE);
+    drawKpi(margin, kpiTop, kpiW, kpiH, "Mensajes (total)", String(statsLocal.totalGeneral), "Buzón en el periodo", LIGHT, DARK);
+    drawKpi(margin + kpiW + gap, kpiTop, kpiW, kpiH, "Mensajes este mes", String(statsLocal.totalEsteMes), monthLabel(monthKey(new Date().toISOString())), PURPLE, WHITE);
+    drawKpi(margin + (kpiW + gap) * 2, kpiTop, kpiW, kpiH, "Mes pico buzón", statsLocal.mesPico ? String(statsLocal.mesPico[1]) : "0", statsLocal.mesPico ? monthLabel(statsLocal.mesPico[0]) : "sin datos", YELLOW, PURPLE);
 
     // Fila 2 (concurso)
     const kpiTop2 = kpiTop + kpiH + gap;
-    drawKpi(margin, kpiTop2, kpiW, kpiH, "Inscritos (total)", String(proyectoStats.totalGeneral), "Concurso acumulado", LIGHT, DARK);
-    drawKpi(margin + kpiW + gap, kpiTop2, kpiW, kpiH, "Inscritos este mes", String(proyectoStats.totalEsteMes), monthLabel(monthKey(new Date().toISOString())), PURPLE, WHITE);
-    drawKpi(margin + (kpiW + gap) * 2, kpiTop2, kpiW, kpiH, "Mes pico concurso", proyectoStats.mesPico ? String(proyectoStats.mesPico[1]) : "0", proyectoStats.mesPico ? monthLabel(proyectoStats.mesPico[0]) : "sin datos", YELLOW, PURPLE);
+    drawKpi(margin, kpiTop2, kpiW, kpiH, "Inscritos (total)", String(proyectoStatsLocal.totalGeneral), "Concurso en el periodo", LIGHT, DARK);
+    drawKpi(margin + kpiW + gap, kpiTop2, kpiW, kpiH, "Inscritos este mes", String(proyectoStatsLocal.totalEsteMes), monthLabel(monthKey(new Date().toISOString())), PURPLE, WHITE);
+    drawKpi(margin + (kpiW + gap) * 2, kpiTop2, kpiW, kpiH, "Mes pico concurso", proyectoStatsLocal.mesPico ? String(proyectoStatsLocal.mesPico[1]) : "0", proyectoStatsLocal.mesPico ? monthLabel(proyectoStatsLocal.mesPico[0]) : "sin datos", YELLOW, PURPLE);
 
     // Snapshots clave
     const snapY = kpiTop2 + kpiH + 25;
@@ -671,21 +758,22 @@ export default function AdminPage() {
     doc.setFontSize(11);
     doc.text("Snapshots clave", margin, snapY);
 
-    const topCantonMsg = stats.cantonesOrdenados[0];
-    const topAsunto = stats.asuntosOrdenados[0];
-    const topCantonProy = proyectoStats.cantonesOrdenados[0];
-    const topArea = proyectoStats.areasOrdenadas[0];
+    const topCantonMsg = statsLocal.cantonesOrdenados[0];
+    const topAsunto = statsLocal.asuntosOrdenados[0];
+    const topCantonProy = proyectoStatsLocal.cantonesOrdenados[0];
+    const topArea = proyectoStatsLocal.areasOrdenadas[0];
 
     autoTable(doc, {
       startY: snapY + 10,
       head: [["Indicador", "Valor"]],
       body: [
-        ["Total mensajes recibidos", String(stats.totalGeneral)],
-        ["Mensajes este mes", String(stats.totalEsteMes)],
+        ["Periodo cubierto", periodoLabel],
+        ["Total mensajes en el periodo", String(statsLocal.totalGeneral)],
+        ["Mensajes este mes", String(statsLocal.totalEsteMes)],
         ["Ubicación con más mensajes", topCantonMsg ? `${topCantonMsg[0]} (${topCantonMsg[1]})` : "—"],
         ["Tema más recurrente", topAsunto ? `${topAsunto[0]} (${topAsunto[1]})` : "—"],
-        ["Total inscritos al concurso", String(proyectoStats.totalGeneral)],
-        ["Inscritos este mes", String(proyectoStats.totalEsteMes)],
+        ["Total inscritos en el periodo", String(proyectoStatsLocal.totalGeneral)],
+        ["Inscritos este mes", String(proyectoStatsLocal.totalEsteMes)],
         ["Cantón con más inscritos", topCantonProy ? `${topCantonProy[0]} (${topCantonProy[1]})` : "—"],
         ["Área de interés más solicitada", topArea ? `${topArea[0]} (${topArea[1]})` : "—"],
       ],
@@ -700,7 +788,7 @@ export default function AdminPage() {
     // SECCIÓN 1 — BUZÓN CIUDADANO
     // ============================================
     doc.addPage();
-    let y = drawSectionTitle("SECCIÓN 1 — BUZÓN CIUDADANO", `${stats.totalGeneral} mensajes`, margin);
+    let y = drawSectionTitle("SECCIÓN 1 — BUZÓN CIUDADANO", `${statsLocal.totalGeneral} mensajes`, margin);
 
     doc.setTextColor(...DARK);
     doc.setFont("helvetica", "bold");
@@ -708,7 +796,7 @@ export default function AdminPage() {
     doc.text("1.1 Mensajes por mes (con variación vs mes anterior)", margin, y);
     y += 10;
 
-    const buzonMesAsc = [...stats.mesesOrdenados].reverse();
+    const buzonMesAsc = [...statsLocal.mesesOrdenados].reverse();
     const buzonMesRows = buzonMesAsc.map(([k, n], i) => {
       const prev = i > 0 ? buzonMesAsc[i - 1][1] : null;
       const variacion =
@@ -733,11 +821,11 @@ export default function AdminPage() {
     doc.setFontSize(11);
     doc.text("1.2 Top 15 ubicaciones (cantón / provincia)", margin, y);
 
-    const totalMsg = Math.max(stats.totalGeneral, 1);
+    const totalMsg = Math.max(statsLocal.totalGeneral, 1);
     autoTable(doc, {
       startY: y + 10,
       head: [["#", "Ubicación", "Mensajes", "% del total"]],
-      body: stats.cantonesOrdenados.slice(0, 15).map(([k, n], i) => [
+      body: statsLocal.cantonesOrdenados.slice(0, 15).map(([k, n], i) => [
         String(i + 1), k, String(n), `${((n / totalMsg) * 100).toFixed(1)}%`,
       ]),
       headStyles: { fillColor: PURPLE, textColor: WHITE, fontStyle: "bold", fontSize: 9 },
@@ -756,7 +844,7 @@ export default function AdminPage() {
     autoTable(doc, {
       startY: y + 10,
       head: [["#", "Tema", "Mensajes", "% del total"]],
-      body: stats.asuntosOrdenados.slice(0, 15).map(([k, n], i) => [
+      body: statsLocal.asuntosOrdenados.slice(0, 15).map(([k, n], i) => [
         String(i + 1), k, String(n), `${((n / totalMsg) * 100).toFixed(1)}%`,
       ]),
       headStyles: { fillColor: PURPLE, textColor: WHITE, fontStyle: "bold", fontSize: 9 },
@@ -768,18 +856,18 @@ export default function AdminPage() {
 
     // 1.4 Listado COMPLETO de mensajes
     doc.addPage();
-    y = drawSectionTitle("1.4 LISTADO COMPLETO DE MENSAJES", `${mensajes.length} mensajes`, margin);
+    y = drawSectionTitle("1.4 LISTADO COMPLETO DE MENSAJES", `${msgsUsed.length} mensajes`, margin);
 
-    if (mensajes.length === 0) {
+    if (msgsUsed.length === 0) {
       doc.setFont("helvetica", "italic");
       doc.setFontSize(10);
       doc.setTextColor(...GRAY);
-      doc.text("Aún no se han recibido mensajes en el buzón.", margin, y);
+      doc.text("No hay mensajes en el periodo seleccionado.", margin, y);
     } else {
       autoTable(doc, {
         startY: y,
         head: [["Fecha", "Nombre", "Cantón", "Contacto", "Asunto", "Mensaje"]],
-        body: mensajes.map((m) => [
+        body: msgsUsed.map((m) => [
           new Date(m.created_at).toLocaleDateString("es-EC"),
           m.nombre,
           m.canton,
@@ -806,14 +894,14 @@ export default function AdminPage() {
     // SECCIÓN 2 — CONCURSO
     // ============================================
     doc.addPage();
-    y = drawSectionTitle("SECCIÓN 2 — CONCURSO (PROYECTOS)", `${proyectoStats.totalGeneral} inscritos`, margin);
+    y = drawSectionTitle("SECCIÓN 2 — CONCURSO (PROYECTOS)", `${proyectoStatsLocal.totalGeneral} inscritos`, margin);
 
     doc.setTextColor(...DARK);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
     doc.text("2.1 Inscripciones por mes (con variación)", margin, y);
 
-    const proyMesAsc = [...proyectoStats.mesesOrdenados].reverse();
+    const proyMesAsc = [...proyectoStatsLocal.mesesOrdenados].reverse();
     const proyMesRows = proyMesAsc.map(([k, n], i) => {
       const prev = i > 0 ? proyMesAsc[i - 1][1] : null;
       const variacion =
@@ -837,11 +925,11 @@ export default function AdminPage() {
     doc.setFontSize(11);
     doc.text("2.2 Top 15 cantones / parroquias", margin, y);
 
-    const totalProy = Math.max(proyectoStats.totalGeneral, 1);
+    const totalProy = Math.max(proyectoStatsLocal.totalGeneral, 1);
     autoTable(doc, {
       startY: y + 10,
       head: [["#", "Cantón / Parroquia", "Inscritos", "% del total"]],
-      body: proyectoStats.cantonesOrdenados.slice(0, 15).map(([k, n], i) => [
+      body: proyectoStatsLocal.cantonesOrdenados.slice(0, 15).map(([k, n], i) => [
         String(i + 1), k, String(n), `${((n / totalProy) * 100).toFixed(1)}%`,
       ]),
       headStyles: { fillColor: PURPLE, textColor: WHITE, fontStyle: "bold", fontSize: 9 },
@@ -860,7 +948,7 @@ export default function AdminPage() {
     autoTable(doc, {
       startY: y + 10,
       head: [["#", "Área", "Inscritos", "% del total"]],
-      body: proyectoStats.areasOrdenadas.map(([k, n], i) => [
+      body: proyectoStatsLocal.areasOrdenadas.map(([k, n], i) => [
         String(i + 1), k, String(n), `${((n / totalProy) * 100).toFixed(1)}%`,
       ]),
       headStyles: { fillColor: PURPLE, textColor: WHITE, fontStyle: "bold", fontSize: 9 },
@@ -879,7 +967,7 @@ export default function AdminPage() {
     autoTable(doc, {
       startY: y + 10,
       head: [["#", "Ocupación", "Inscritos", "% del total"]],
-      body: proyectoStats.ocupacionesOrdenadas.slice(0, 10).map(([k, n], i) => [
+      body: proyectoStatsLocal.ocupacionesOrdenadas.slice(0, 10).map(([k, n], i) => [
         String(i + 1), k, String(n), `${((n / totalProy) * 100).toFixed(1)}%`,
       ]),
       headStyles: { fillColor: PURPLE, textColor: WHITE, fontStyle: "bold", fontSize: 9 },
@@ -898,7 +986,7 @@ export default function AdminPage() {
     autoTable(doc, {
       startY: y + 10,
       head: [["#", "Institución", "Inscritos", "% del total"]],
-      body: proyectoStats.institucionesOrdenadas.slice(0, 10).map(([k, n], i) => [
+      body: proyectoStatsLocal.institucionesOrdenadas.slice(0, 10).map(([k, n], i) => [
         String(i + 1), k, String(n), `${((n / totalProy) * 100).toFixed(1)}%`,
       ]),
       headStyles: { fillColor: PURPLE, textColor: WHITE, fontStyle: "bold", fontSize: 9 },
@@ -910,18 +998,18 @@ export default function AdminPage() {
 
     // 2.6 Listado COMPLETO de inscritos
     doc.addPage();
-    y = drawSectionTitle("2.6 LISTADO COMPLETO DE INSCRITOS", `${proyectos.length} inscritos`, margin);
+    y = drawSectionTitle("2.6 LISTADO COMPLETO DE INSCRITOS", `${prysUsed.length} inscritos`, margin);
 
-    if (proyectos.length === 0) {
+    if (prysUsed.length === 0) {
       doc.setFont("helvetica", "italic");
       doc.setFontSize(10);
       doc.setTextColor(...GRAY);
-      doc.text("Aún no hay inscritos al concurso.", margin, y);
+      doc.text("No hay inscritos en el periodo seleccionado.", margin, y);
     } else {
       autoTable(doc, {
         startY: y,
         head: [["Fecha", "Nombre", "Cédula", "Cantón", "Edad", "Área", "Ocupación", "Título proyecto"]],
-        body: proyectos.map((p) => [
+        body: prysUsed.map((p) => [
           new Date(p.created_at).toLocaleDateString("es-EC"),
           p.nombres,
           p.cedula,
@@ -949,7 +1037,7 @@ export default function AdminPage() {
     }
 
     addFooter();
-    doc.save(`Reporte_Mensual_Completo_${new Date().toISOString().split("T")[0]}.pdf`);
+    doc.save(`Reporte_Mensual_Completo_${fileSuffix}.pdf`);
   };
 
   const exportResumenMensualExcel = () => {
@@ -1053,10 +1141,25 @@ export default function AdminPage() {
             >
               Buzón Ciudadano
             </button>
+            <button
+              onClick={() => setTab("contenido")}
+              className={`px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-sm ${
+                tab === "contenido"
+                  ? "bg-[#1D1D1F] text-[#EAE84B]"
+                  : "bg-white text-gray-500 hover:text-[#6F2C91]"
+              }`}
+            >
+              Contenido
+            </button>
           </div>
 
           <button
-            onClick={exportReporteCompletoPdf}
+            onClick={() => {
+              setReportTipo("historico");
+              const m = monthKey(new Date().toISOString());
+              setReportMes((prev) => prev || m);
+              setShowReportModal(true);
+            }}
             className="flex items-center gap-3 px-8 py-3 rounded-2xl bg-[#6F2C91] text-white font-black text-xs uppercase tracking-widest hover:bg-[#1D1D1F] hover:text-[#EAE84B] transition-all shadow-lg active:scale-95"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -1545,6 +1648,8 @@ export default function AdminPage() {
           </>
         )}
 
+        {tab === "contenido" && <CmsHeroEditor />}
+
         <div className="mt-8 flex justify-between items-center px-4">
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">
             © 2026 PANEL ADMINISTRATIVO
@@ -1562,6 +1667,214 @@ export default function AdminPage() {
           __html: `@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap');`,
         }}
       />
+
+      {/* MODAL: Configuración del Reporte PDF */}
+      {showReportModal && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          onClick={() => setShowReportModal(false)}
+        >
+          <div
+            className="bg-white rounded-[2rem] w-full max-w-[640px] max-h-[90vh] overflow-y-auto shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="bg-[#6F2C91] text-white p-6 rounded-t-[2rem]">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#EAE84B] mb-1">
+                    Generar reporte
+                  </p>
+                  <h3 className="text-2xl font-black uppercase">¿Qué período incluir?</h3>
+                </div>
+                <button
+                  onClick={() => setShowReportModal(false)}
+                  className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+                  aria-label="Cerrar"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {/* Opción: Histórico */}
+              <label
+                className={`block p-5 rounded-2xl border-2 cursor-pointer transition-all ${
+                  reportTipo === "historico"
+                    ? "border-[#6F2C91] bg-purple-50"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <input
+                    type="radio"
+                    name="reportTipo"
+                    checked={reportTipo === "historico"}
+                    onChange={() => setReportTipo("historico")}
+                    className="mt-1 w-5 h-5 accent-[#6F2C91]"
+                  />
+                  <div className="flex-1">
+                    <p className="font-black text-[#1D1D1F] uppercase text-sm tracking-wide">
+                      Histórico completo
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Incluye todos los datos desde el inicio. Útil para reportes acumulados.
+                    </p>
+                  </div>
+                </div>
+              </label>
+
+              {/* Opción: Por mes */}
+              <label
+                className={`block p-5 rounded-2xl border-2 cursor-pointer transition-all ${
+                  reportTipo === "mes"
+                    ? "border-[#6F2C91] bg-purple-50"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <input
+                    type="radio"
+                    name="reportTipo"
+                    checked={reportTipo === "mes"}
+                    onChange={() => setReportTipo("mes")}
+                    className="mt-1 w-5 h-5 accent-[#6F2C91]"
+                  />
+                  <div className="flex-1">
+                    <p className="font-black text-[#1D1D1F] uppercase text-sm tracking-wide">
+                      Por mes específico
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1 mb-3">
+                      Solo datos del mes que selecciones.
+                    </p>
+                    <input
+                      type="month"
+                      value={reportMes}
+                      onChange={(e) => {
+                        setReportMes(e.target.value);
+                        setReportTipo("mes");
+                      }}
+                      className="w-full py-3 px-4 rounded-xl bg-white border-2 border-gray-200 focus:border-[#6F2C91] outline-none transition-all font-bold text-[#1D1D1F]"
+                    />
+                  </div>
+                </div>
+              </label>
+
+              {/* Opción: Rango personalizado */}
+              <label
+                className={`block p-5 rounded-2xl border-2 cursor-pointer transition-all ${
+                  reportTipo === "rango"
+                    ? "border-[#6F2C91] bg-purple-50"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <input
+                    type="radio"
+                    name="reportTipo"
+                    checked={reportTipo === "rango"}
+                    onChange={() => setReportTipo("rango")}
+                    className="mt-1 w-5 h-5 accent-[#6F2C91]"
+                  />
+                  <div className="flex-1">
+                    <p className="font-black text-[#1D1D1F] uppercase text-sm tracking-wide">
+                      Rango personalizado de fechas
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1 mb-3">
+                      Define un rango exacto desde / hasta.
+                    </p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">
+                          Desde
+                        </label>
+                        <input
+                          type="date"
+                          value={reportDesde}
+                          onChange={(e) => {
+                            setReportDesde(e.target.value);
+                            setReportTipo("rango");
+                          }}
+                          className="w-full py-3 px-4 rounded-xl bg-white border-2 border-gray-200 focus:border-[#6F2C91] outline-none transition-all font-bold text-[#1D1D1F]"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">
+                          Hasta
+                        </label>
+                        <input
+                          type="date"
+                          value={reportHasta}
+                          onChange={(e) => {
+                            setReportHasta(e.target.value);
+                            setReportTipo("rango");
+                          }}
+                          className="w-full py-3 px-4 rounded-xl bg-white border-2 border-gray-200 focus:border-[#6F2C91] outline-none transition-all font-bold text-[#1D1D1F]"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </label>
+
+              {/* Preview */}
+              <div className="bg-[#FBFBFD] rounded-2xl p-5 border border-gray-100">
+                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">
+                  Vista previa del reporte
+                </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-3xl font-black text-[#6F2C91]">{previewCounts.mensajes}</p>
+                    <p className="text-xs text-gray-500">mensajes del buzón</p>
+                  </div>
+                  <div>
+                    <p className="text-3xl font-black text-[#1D1D1F]">{previewCounts.proyectos}</p>
+                    <p className="text-xs text-gray-500">inscritos al concurso</p>
+                  </div>
+                </div>
+                {reportTipo === "rango" && (!reportDesde || !reportHasta) && (
+                  <p className="text-xs text-orange-600 font-bold mt-3">
+                    Selecciona desde y hasta para activar el rango.
+                  </p>
+                )}
+                {reportTipo === "rango" && reportDesde && reportHasta && reportDesde > reportHasta && (
+                  <p className="text-xs text-red-600 font-bold mt-3">
+                    La fecha "desde" debe ser anterior a la fecha "hasta".
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="p-6 pt-0 flex flex-wrap gap-3 justify-end">
+              <button
+                onClick={() => setShowReportModal(false)}
+                className="px-6 py-3 rounded-2xl bg-gray-100 text-gray-600 font-black text-xs uppercase tracking-widest hover:bg-gray-200 transition-all"
+              >
+                Cancelar
+              </button>
+              <button
+                disabled={
+                  (reportTipo === "mes" && !reportMes) ||
+                  (reportTipo === "rango" &&
+                    (!reportDesde || !reportHasta || reportDesde > reportHasta))
+                }
+                onClick={() => {
+                  exportReporteCompletoPdf();
+                  setShowReportModal(false);
+                }}
+                className="flex items-center gap-2 px-8 py-3 rounded-2xl bg-[#6F2C91] text-white font-black text-xs uppercase tracking-widest hover:bg-[#1D1D1F] hover:text-[#EAE84B] disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg active:scale-95"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Generar PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

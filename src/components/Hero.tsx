@@ -1,60 +1,79 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
+import { getSupabase } from "@/lib/supabaseClient";
 
-// ===============================
-// TIPO Y DATOS DE FALLBACK
-// ===============================
 type HeroSlide = {
   id: string;
-  img: string | null; // CORRECCIÓN 1: Permitimos que sea null
+  img: string | null;
   link?: string;
 };
 
+// Banners actuales (fallback de seguridad si Supabase está vacío o falla).
+// Coinciden con el contenido que estaba en producción vía Google Sheet.
 const fallbackSlides: HeroSlide[] = [
-  { id: "1", img: "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2025/12/1.webp", link: "" },
-  { id: "2", img: "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2025/12/8.webp", link: "" },
-  { id: "3", img: "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2025/12/3.webp", link: "" },
-  { id: "4", img: "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2025/12/7.webp", link: "" },
+  {
+    id: "fb-1",
+    img: "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2025/12/Banners-Pagina-WEB_Mesa-de-trabajo-1-7.webp",
+    link: "#buzon",
+  },
+  {
+    id: "fb-2",
+    img: "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2025/12/Banners-Pagina-WEB-03.webp",
+    link: "#buzon",
+  },
+  {
+    id: "fb-3",
+    img: "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2026/01/Valentina-Banner_Mesa-de-trabajo-1-copia-2.jpg.webp",
+    link: "#buzon",
+  },
+  {
+    id: "fb-4",
+    img: "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2026/01/Valentina-Banner1_Mesa-de-trabajo-1-copia-3.webp",
+    link: "#ley",
+  },
+  {
+    id: "fb-5",
+    img: "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2026/03/BannerAI.webp",
+    link: "concurso",
+  },
 ];
-
-function parseCsv(text: string): string[][] {
-  return text
-    .trim()
-    .split("\n")
-    .map((row) => row.replace(/^\uFEFF/, "").split(",").map((c) => c.trim()));
-}
 
 export default function Hero() {
   const [slides, setSlides] = useState<HeroSlide[]>(fallbackSlides);
   const [index, setIndex] = useState(0);
-  
+
   // Variables para lógica de Swipe
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
-  const CSV_URL =
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vTYKQwKNfKrrKl6J91u7X26Yr8cQxsalFeHIjnZfxjDaHcgS5JYPn_KzHt5naz_-yFXfLidX96gr_yg/pub?gid=1530434330&single=true&output=csv";
-
   useEffect(() => {
-    fetch(CSV_URL, { cache: "no-store" })
-      .then((res) => res.text())
-      .then((csv) => {
-        const rows = parseCsv(csv);
-        if (rows.length < 2) return;
-        
-        const parsed = rows
-          .slice(1)
-          .filter((cols) => cols[0]) // Solo requerimos el ID
-          .map((cols) => ({ 
-            id: cols[0].trim(), 
-            // CORRECCIÓN 2: Si viene vacío, lo volvemos null
-            img: cols[1] && cols[1].trim() !== "" ? cols[1].trim() : null,
-            link: cols[2] ? cols[2].trim() : "" 
+    // Lee banners desde Supabase. Si falla o está vacío,
+    // se conserva el fallback definido arriba — la web no se rompe nunca.
+    const cargarDesdeSupabase = async () => {
+      try {
+        const supabase = getSupabase();
+        const { data, error } = await supabase
+          .from("cms_hero")
+          .select("id, img, link, orden, activo")
+          .eq("activo", true)
+          .order("orden", { ascending: true });
+
+        if (error || !data || data.length === 0) return;
+
+        const parsed: HeroSlide[] = data
+          .filter((row) => row.img && String(row.img).trim() !== "")
+          .map((row) => ({
+            id: String(row.id),
+            img: String(row.img).trim(),
+            link: row.link ? String(row.link).trim() : "",
           }));
-          
+
         if (parsed.length > 0) setSlides(parsed);
-      })
-      .catch(() => setSlides(fallbackSlides));
+      } catch {
+        // Silencio intencional: mantiene fallbackSlides
+      }
+    };
+    cargarDesdeSupabase();
   }, []);
 
   // Auto-play
@@ -98,7 +117,6 @@ export default function Hero() {
       id="inicio"
       className="
         relative w-full
-        /* Altura ajustada: un poco más pequeña en móvil para que se vea bien el banner cuadrado/horizontal */
         h-[50vh] min-h-[350px]
         md:h-[80vh] md:min-h-[600px]
         flex items-center justify-center
@@ -121,12 +139,13 @@ export default function Hero() {
               }`}
             >
               <div className="w-full h-full relative flex items-center justify-center">
-                {/* CORRECCIÓN 3: Validamos que img no sea null antes de renderizar <img> */}
                 {slide.link ? (
-                  <a 
-                    href={slide.link} 
+                  <a
+                    href={slide.link}
                     target={slide.link.startsWith("http") ? "_blank" : "_self"}
-                    rel={slide.link.startsWith("http") ? "noopener noreferrer" : ""}
+                    rel={
+                      slide.link.startsWith("http") ? "noopener noreferrer" : ""
+                    }
                     className="w-full h-full flex items-center justify-center cursor-pointer"
                   >
                     {slide.img && (
@@ -135,7 +154,6 @@ export default function Hero() {
                         alt={`Slide ${i + 1}`}
                         className="
                           w-full h-full
-                          /* GARANTIZA QUE SE VEA TODA LA IMAGEN SIN CORTES */
                           object-contain object-center
                           transition-transform duration-[2000ms] ease-out
                         "
@@ -149,7 +167,6 @@ export default function Hero() {
                       alt={`Slide ${i + 1}`}
                       className="
                         w-full h-full
-                        /* GARANTIZA QUE SE VEA TODA LA IMAGEN SIN CORTES */
                         object-contain object-center
                         transition-transform duration-[2000ms] ease-out
                       "
@@ -171,9 +188,10 @@ export default function Hero() {
             aria-label={`Ir a slide ${i + 1}`}
             className={`
               rounded-full transition-all duration-300 shadow-sm border border-white/20
-              ${i === index
-                ? "bg-[#EAE84B] w-3 h-3 scale-110 shadow-[0_0_10px_rgba(234,232,75,0.6)]" 
-                : "bg-white/40 w-2 h-2 hover:bg-white/90" 
+              ${
+                i === index
+                  ? "bg-[#EAE84B] w-3 h-3 scale-110 shadow-[0_0_10px_rgba(234,232,75,0.6)]"
+                  : "bg-white/40 w-2 h-2 hover:bg-white/90"
               }
             `}
           />
