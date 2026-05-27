@@ -193,7 +193,7 @@ export default function CmsBiografiaEditor() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                 <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-1.5">
                     Identificador
                   </label>
                   <input
@@ -206,7 +206,7 @@ export default function CmsBiografiaEditor() {
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-1.5">
                     Título
                   </label>
                   <input
@@ -219,7 +219,7 @@ export default function CmsBiografiaEditor() {
               </div>
 
               <div className="mb-3">
-                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-1.5">
                   Descripción
                 </label>
                 <textarea
@@ -234,7 +234,7 @@ export default function CmsBiografiaEditor() {
 
               <div className="grid grid-cols-1 md:grid-cols-[1fr,180px] gap-3 mb-3">
                 <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-1.5">
                     Imagen (URL)
                   </label>
                   <input
@@ -273,7 +273,7 @@ export default function CmsBiografiaEditor() {
               )}
 
               <div className="mb-3">
-                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-1.5">
                   Extra (icono / nota)
                 </label>
                 <input

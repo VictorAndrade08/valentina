@@ -175,12 +175,13 @@ export default function CmsTextosEditor({ seccion, titulo, descripcion, campos }
         </div>
       )}
 
-      <div className="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-gray-100 space-y-6">
+      <div className="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
         {campos.map((c) => {
           const val = valores[c.clave] || "";
+          const anchoCompleto = c.multilinea || c.esArchivo;
           return (
-            <div key={c.clave}>
-              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">
+            <div key={c.clave} className={anchoCompleto ? "md:col-span-2" : ""}>
+              <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-1.5">
                 {c.label}
               </label>
 

@@ -85,6 +85,7 @@ type ProyectoStats = {
   areasOrdenadas: [string, number][];
   ocupacionesOrdenadas: [string, number][];
   institucionesOrdenadas: [string, number][];
+  maxMes: number;
 };
 
 function computeMensajeStats(msgs: Mensaje[]): MensajeStats {
@@ -165,6 +166,7 @@ function computeProyectoStats(prys: Proyecto[]): ProyectoStats {
     mesesOrdenados.length > 0
       ? mesesOrdenados.reduce((a, b) => (b[1] > a[1] ? b : a))
       : null;
+  const maxMes = mesesOrdenados.reduce((acc, [, n]) => Math.max(acc, n), 0);
   return {
     totalGeneral,
     totalEsteMes,
@@ -174,6 +176,7 @@ function computeProyectoStats(prys: Proyecto[]): ProyectoStats {
     areasOrdenadas: sortByCount(porArea),
     ocupacionesOrdenadas: sortByCount(porOcupacion),
     institucionesOrdenadas: sortByCount(porInstitucion),
+    maxMes,
   };
 }
 
@@ -1248,6 +1251,138 @@ export default function AdminPage() {
               </div>
             </div>
 
+            {/* STATS CARDS — CONCURSO */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+              <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2">
+                  Total inscritos
+                </p>
+                <p className="text-5xl font-black text-[#1D1D1F]">
+                  {proyectoStats.totalGeneral}
+                </p>
+                <p className="text-xs text-gray-400 mt-2">
+                  participantes registrados
+                </p>
+              </div>
+
+              <div className="bg-[#6F2C91] rounded-[2rem] p-8 shadow-sm">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#EAE84B] mb-2">
+                  Este mes
+                </p>
+                <p className="text-5xl font-black text-white">
+                  {proyectoStats.totalEsteMes}
+                </p>
+                <p className="text-xs text-[#EAE84B]/80 mt-2">
+                  {monthLabel(monthKey(new Date().toISOString()))}
+                </p>
+              </div>
+
+              <div className="bg-[#EAE84B] rounded-[2rem] p-8 shadow-sm">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#6F2C91] mb-2">
+                  Mes con más inscritos
+                </p>
+                <p className="text-3xl font-black text-[#1D1D1F] leading-tight">
+                  {proyectoStats.mesPico
+                    ? monthLabel(proyectoStats.mesPico[0])
+                    : "—"}
+                </p>
+                <p className="text-xs text-[#6F2C91] font-bold mt-2">
+                  {proyectoStats.mesPico
+                    ? `${proyectoStats.mesPico[1]} inscritos`
+                    : "sin datos aún"}
+                </p>
+              </div>
+            </div>
+
+            {/* MONTHLY BREAKDOWN — CONCURSO */}
+            <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100 mb-8">
+              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 mb-6">
+                Inscripciones por mes
+              </h3>
+              {proyectoStats.mesesOrdenados.length === 0 ? (
+                <p className="text-gray-400 text-sm">
+                  {loadingProyectos ? "Cargando..." : "Aún no hay inscritos."}
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {proyectoStats.mesesOrdenados.map(([k, n]) => {
+                    const pct = proyectoStats.maxMes
+                      ? (n / proyectoStats.maxMes) * 100
+                      : 0;
+                    return (
+                      <div key={k} className="flex items-center gap-4">
+                        <div className="w-40 text-xs font-bold text-[#1D1D1F]">
+                          {monthLabel(k)}
+                        </div>
+                        <div className="flex-1 h-6 bg-gray-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-[#6F2C91] rounded-full transition-all"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                        <div className="w-12 text-right text-sm font-black text-[#6F2C91]">
+                          {n}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* TOP CANTONES + TOP ÁREAS — CONCURSO */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+              <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100">
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 mb-6">
+                  Por cantón / parroquia
+                </h3>
+                {proyectoStats.cantonesOrdenados.length === 0 ? (
+                  <p className="text-gray-400 text-sm">Sin datos.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {proyectoStats.cantonesOrdenados.slice(0, 10).map(([k, n]) => (
+                      <div
+                        key={k}
+                        className="flex items-center justify-between py-2 border-b border-gray-50 last:border-b-0"
+                      >
+                        <span className="font-bold text-[#1D1D1F] capitalize">
+                          {k}
+                        </span>
+                        <span className="px-3 py-1 bg-purple-50 text-[#6F2C91] rounded-lg text-xs font-black">
+                          {n}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100">
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 mb-6">
+                  Por área de interés
+                </h3>
+                {proyectoStats.areasOrdenadas.length === 0 ? (
+                  <p className="text-gray-400 text-sm">Sin datos.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {proyectoStats.areasOrdenadas.slice(0, 10).map(([k, n]) => (
+                      <div
+                        key={k}
+                        className="flex items-center justify-between py-2 border-b border-gray-50 last:border-b-0"
+                      >
+                        <span className="font-bold text-[#1D1D1F] truncate pr-3">
+                          {k}
+                        </span>
+                        <span className="px-3 py-1 bg-yellow-50 text-[#6F2C91] rounded-lg text-xs font-black flex-none">
+                          {n}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
             <div className="bg-white rounded-[2.5rem] shadow-[0_30px_100px_-20px_rgba(0,0,0,0.05)] overflow-hidden border border-gray-100">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse min-w-[2800px]">
@@ -1972,7 +2107,7 @@ function ContenidoTab() {
   ];
 
   return (
-    <div>
+    <div className="mx-auto max-w-5xl">
       <div className="bg-white rounded-[1.5rem] p-3 shadow-sm border border-gray-100 mb-8 flex gap-2 overflow-x-auto">
         {subTabs.map((s) => (
           <button

@@ -328,7 +328,7 @@ function LeyForm({ estado, onChange, uploading, onUpload }: LeyFormProps) {
       <div className="space-y-3">
         <div className="grid grid-cols-1 md:grid-cols-[1fr,100px] gap-3">
           <div>
-            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">
+            <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-1.5">
               Antetítulo (ej: "EMPLEO JOVEN")
             </label>
             <input
@@ -339,7 +339,7 @@ function LeyForm({ estado, onChange, uploading, onUpload }: LeyFormProps) {
             />
           </div>
           <div>
-            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">
+            <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-1.5">
               Orden
             </label>
             <input
@@ -352,7 +352,7 @@ function LeyForm({ estado, onChange, uploading, onUpload }: LeyFormProps) {
         </div>
 
         <div>
-          <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-1.5">
             Título principal (línea grande del card)
           </label>
           <input
@@ -364,7 +364,7 @@ function LeyForm({ estado, onChange, uploading, onUpload }: LeyFormProps) {
         </div>
 
         <div>
-          <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-1.5">
             URL de imagen (o sube nueva)
           </label>
           <input
@@ -376,7 +376,7 @@ function LeyForm({ estado, onChange, uploading, onUpload }: LeyFormProps) {
         </div>
 
         <div>
-          <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-1.5">
             Descripción corta (vista del card)
           </label>
           <textarea
@@ -388,7 +388,7 @@ function LeyForm({ estado, onChange, uploading, onUpload }: LeyFormProps) {
         </div>
 
         <div>
-          <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-1.5">
             Texto completo (al abrir el modal)
           </label>
           <textarea

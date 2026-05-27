@@ -175,7 +175,7 @@ export default function CmsAgendaEditor() {
         </div>
       )}
 
-      <div className="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-gray-100 space-y-6">
+      <div className="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
         {[
           { k: "title", l: "Título principal", t: "input" },
           { k: "tag", l: "Etiqueta (tag superior)", t: "input" },
@@ -188,8 +188,8 @@ export default function CmsAgendaEditor() {
           },
           { k: "quote", l: "Frase destacada (quote)", t: "textarea" },
         ].map((f) => (
-          <div key={f.k}>
-            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">
+          <div key={f.k} className={f.t === "textarea" ? "md:col-span-2" : ""}>
+            <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-1.5">
               {f.l}
             </label>
             {f.t === "textarea" ? (
@@ -214,8 +214,8 @@ export default function CmsAgendaEditor() {
           </div>
         ))}
 
-        <div>
-          <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">
+        <div className="md:col-span-2">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-1.5">
             Imagen
           </label>
           {data.image && (

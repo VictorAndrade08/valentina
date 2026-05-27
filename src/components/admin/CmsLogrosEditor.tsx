@@ -331,7 +331,7 @@ function LogroForm({ estado, onChange, uploading, onUpload }: LogroFormProps) {
       <div className="space-y-3">
         <div className="grid grid-cols-1 md:grid-cols-[1fr,140px,100px] gap-3">
           <div>
-            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">
+            <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-1.5">
               Título
             </label>
             <input
@@ -342,7 +342,7 @@ function LogroForm({ estado, onChange, uploading, onUpload }: LogroFormProps) {
             />
           </div>
           <div>
-            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">
+            <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-1.5">
               Ícono
             </label>
             <select
@@ -358,7 +358,7 @@ function LogroForm({ estado, onChange, uploading, onUpload }: LogroFormProps) {
             </select>
           </div>
           <div>
-            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">
+            <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-1.5">
               Orden
             </label>
             <input
@@ -371,7 +371,7 @@ function LogroForm({ estado, onChange, uploading, onUpload }: LogroFormProps) {
         </div>
 
         <div>
-          <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-1.5">
             URL de imagen
           </label>
           <input
@@ -383,7 +383,7 @@ function LogroForm({ estado, onChange, uploading, onUpload }: LogroFormProps) {
         </div>
 
         <div>
-          <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-1.5">
             Descripción (body)
           </label>
           <textarea
@@ -395,7 +395,7 @@ function LogroForm({ estado, onChange, uploading, onUpload }: LogroFormProps) {
         </div>
 
         <div>
-          <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-1.5">
             Título de sección (opcional — solo el primero usa este campo)
           </label>
           <input
