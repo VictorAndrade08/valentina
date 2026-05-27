@@ -42,9 +42,23 @@ type Mensaje = {
   mensaje: string;
   archivo_url: string | null;
   archivo_nombre: string | null;
+  estado: string;
+  responsable: string | null;
+  seguimiento: string | null;
+  actualizado_at: string | null;
 };
 
 type TabKey = "concurso" | "buzon" | "contenido";
+
+type EstadoCaso = "nuevo" | "en_proceso" | "resuelto";
+
+const ESTADOS: { key: EstadoCaso; label: string; badge: string; dot: string }[] = [
+  { key: "nuevo", label: "Nuevo", badge: "bg-gray-100 text-gray-600", dot: "bg-gray-400" },
+  { key: "en_proceso", label: "En proceso", badge: "bg-amber-100 text-amber-700", dot: "bg-amber-500" },
+  { key: "resuelto", label: "Resuelto", badge: "bg-emerald-100 text-emerald-700", dot: "bg-emerald-500" },
+];
+
+const estadoInfo = (k: string) => ESTADOS.find((e) => e.key === k) ?? ESTADOS[0];
 
 const MES_LABELS = [
   "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
@@ -212,6 +226,13 @@ export default function AdminPage() {
   const [desdeFiltro, setDesdeFiltro] = useState<string>("");
   const [hastaFiltro, setHastaFiltro] = useState<string>("");
   const [mensajeAbierto, setMensajeAbierto] = useState<string | null>(null);
+  const [estadoFiltro, setEstadoFiltro] = useState<string>("todos");
+  const [casoEdits, setCasoEdits] = useState<
+    Record<string, { estado: string; responsable: string; seguimiento: string }>
+  >({});
+  const [savingCasoId, setSavingCasoId] = useState<string | null>(null);
+  const [showResponsables, setShowResponsables] = useState(false);
+  const [renombrando, setRenombrando] = useState(false);
 
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportTipo, setReportTipo] = useState<"historico" | "mes" | "rango">(
@@ -301,6 +322,8 @@ export default function AdminPage() {
     return mensajes.filter((m) => {
       if (mesFiltro !== "todos" && monthKey(m.created_at) !== mesFiltro)
         return false;
+      if (estadoFiltro !== "todos" && (m.estado || "nuevo") !== estadoFiltro)
+        return false;
       const t = new Date(m.created_at).getTime();
       if (desdeMs !== null && t < desdeMs) return false;
       if (hastaMs !== null && t > hastaMs) return false;
@@ -313,13 +336,106 @@ export default function AdminPage() {
         (m.correo || "").toLowerCase().includes(term)
       );
     });
-  }, [mensajes, searchTermMensajes, mesFiltro, desdeFiltro, hastaFiltro]);
+  }, [mensajes, searchTermMensajes, mesFiltro, estadoFiltro, desdeFiltro, hastaFiltro]);
 
   const stats = useMemo(() => computeMensajeStats(mensajes), [mensajes]);
   const proyectoStats = useMemo(
     () => computeProyectoStats(proyectos),
     [proyectos]
   );
+
+  const responsablesDisponibles = useMemo(() => {
+    const set = new Set<string>();
+    mensajes.forEach((m) => {
+      const r = (m.responsable || "").trim();
+      if (r) set.add(r);
+    });
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [mensajes]);
+
+  const getCasoEdit = (m: Mensaje) =>
+    casoEdits[m.id] ?? {
+      estado: m.estado || "nuevo",
+      responsable: m.responsable || "",
+      seguimiento: m.seguimiento || "",
+    };
+
+  const setCasoField = (
+    m: Mensaje,
+    patch: Partial<{ estado: string; responsable: string; seguimiento: string }>
+  ) =>
+    setCasoEdits((prev) => {
+      const base = prev[m.id] ?? {
+        estado: m.estado || "nuevo",
+        responsable: m.responsable || "",
+        seguimiento: m.seguimiento || "",
+      };
+      return { ...prev, [m.id]: { ...base, ...patch } };
+    });
+
+  const guardarCaso = async (m: Mensaje) => {
+    const ed = getCasoEdit(m);
+    setSavingCasoId(m.id);
+    try {
+      const supabase = getSupabase();
+      const payload = {
+        estado: ed.estado || "nuevo",
+        responsable: ed.responsable.trim() || null,
+        seguimiento: ed.seguimiento.trim() || null,
+        actualizado_at: new Date().toISOString(),
+      };
+      const { data, error } = await supabase
+        .from("mensajes_buzon")
+        .update(payload)
+        .eq("id", m.id)
+        .select("id");
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        throw new Error(
+          "No se guardó (0 filas). Falta el permiso de UPDATE en Supabase (corré el SQL de la política RLS)."
+        );
+      }
+      setMensajes((prev) =>
+        prev.map((x) => (x.id === m.id ? { ...x, ...payload } : x))
+      );
+      setCasoEdits((prev) => {
+        const next = { ...prev };
+        delete next[m.id];
+        return next;
+      });
+    } catch (err) {
+      alert("Error guardando el caso: " + (err instanceof Error ? err.message : ""));
+    }
+    setSavingCasoId(null);
+  };
+
+  const renombrarResponsable = async (viejo: string, nuevo: string) => {
+    const nuevoNombre = nuevo.trim();
+    if (!nuevoNombre || nuevoNombre === viejo) return;
+    setRenombrando(true);
+    try {
+      const supabase = getSupabase();
+      const { data, error } = await supabase
+        .from("mensajes_buzon")
+        .update({ responsable: nuevoNombre, actualizado_at: new Date().toISOString() })
+        .eq("responsable", viejo)
+        .select("id");
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        throw new Error(
+          "No se renombró (0 filas). Falta el permiso de UPDATE en Supabase (corré el SQL de la política RLS)."
+        );
+      }
+      setMensajes((prev) =>
+        prev.map((x) =>
+          (x.responsable || "") === viejo ? { ...x, responsable: nuevoNombre } : x
+        )
+      );
+    } catch (err) {
+      alert("Error renombrando: " + (err instanceof Error ? err.message : ""));
+    }
+    setRenombrando(false);
+  };
 
   const exportProyectosExcel = () => {
     if (proyectosFiltrados.length === 0) return;
@@ -345,12 +461,15 @@ export default function AdminPage() {
     if (mensajesFiltrados.length === 0) return;
     const headers = [
       "Fecha", "Nombre", "Cantón / Provincia", "Correo", "WhatsApp",
-      "Asunto", "Mensaje", "Archivo",
+      "Asunto", "Mensaje", "Estado", "Responsable", "Seguimiento", "Archivo",
     ];
     const rows = mensajesFiltrados.map((m) => [
       new Date(m.created_at).toLocaleString(),
       m.nombre, m.canton, m.correo, m.whatsapp,
-      m.asunto, m.mensaje, m.archivo_url || "",
+      m.asunto, m.mensaje,
+      estadoInfo(m.estado || "nuevo").label,
+      m.responsable || "", m.seguimiento || "",
+      m.archivo_url || "",
     ]);
     const suffix =
       mesFiltro !== "todos" ? `_${mesFiltro}` : `_${new Date().toISOString().split("T")[0]}`;
@@ -1714,6 +1833,24 @@ export default function AdminPage() {
 
                 <div>
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">
+                    Estado
+                  </label>
+                  <select
+                    value={estadoFiltro}
+                    onChange={(e) => setEstadoFiltro(e.target.value)}
+                    className="py-3 px-4 rounded-xl border-2 border-transparent bg-[#F5F5F7] focus:bg-white focus:border-[#6F2C91] outline-none transition-all font-bold text-[#1D1D1F]"
+                  >
+                    <option value="todos">Todos los estados</option>
+                    {ESTADOS.map((e) => (
+                      <option key={e.key} value={e.key}>
+                        {e.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">
                     Desde
                   </label>
                   <input
@@ -1736,10 +1873,11 @@ export default function AdminPage() {
                   />
                 </div>
 
-                {(mesFiltro !== "todos" || desdeFiltro || hastaFiltro || searchTermMensajes) && (
+                {(mesFiltro !== "todos" || estadoFiltro !== "todos" || desdeFiltro || hastaFiltro || searchTermMensajes) && (
                   <button
                     onClick={() => {
                       setMesFiltro("todos");
+                      setEstadoFiltro("todos");
                       setDesdeFiltro("");
                       setHastaFiltro("");
                       setSearchTermMensajes("");
@@ -1758,6 +1896,42 @@ export default function AdminPage() {
               )}
             </div>
 
+            {/* GESTIÓN DE RESPONSABLES */}
+            <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 mb-6">
+              <button
+                onClick={() => setShowResponsables((s) => !s)}
+                className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[#6F2C91]"
+              >
+                <span>{showResponsables ? "▾" : "▸"}</span>
+                Responsables del equipo ({responsablesDisponibles.length})
+              </button>
+              {showResponsables && (
+                <div className="mt-4">
+                  <p className="text-xs text-gray-400 mb-3">
+                    Acá aparecen los responsables que ya asignaste. Podés editar el
+                    nombre y se actualiza en todos sus casos. Para agregar uno nuevo,
+                    escribilo al asignar un caso (campo "Responsable").
+                  </p>
+                  {responsablesDisponibles.length === 0 ? (
+                    <p className="text-sm text-gray-400 font-bold">
+                      Todavía no hay responsables asignados.
+                    </p>
+                  ) : (
+                    <div className="space-y-1">
+                      {responsablesDisponibles.map((r) => (
+                        <ResponsableRow
+                          key={r}
+                          nombre={r}
+                          disabled={renombrando}
+                          onRename={(nuevo) => renombrarResponsable(r, nuevo)}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
             {/* MESSAGE LIST */}
             <div className="bg-white rounded-[2.5rem] shadow-[0_30px_100px_-20px_rgba(0,0,0,0.05)] overflow-hidden border border-gray-100">
               <div className="overflow-x-auto">
@@ -1768,6 +1942,7 @@ export default function AdminPage() {
                       <th className="py-5 px-6">Nombre</th>
                       <th className="py-5 px-6">Cantón</th>
                       <th className="py-5 px-6">Asunto</th>
+                      <th className="py-5 px-6">Estado</th>
                       <th className="py-5 px-6">Contacto</th>
                       <th className="py-5 px-6 text-center">Acción</th>
                     </tr>
@@ -1775,7 +1950,7 @@ export default function AdminPage() {
                   <tbody className="divide-y divide-gray-50">
                     {mensajesFiltrados.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="py-24 text-center">
+                        <td colSpan={7} className="py-24 text-center">
                           <p className="text-gray-400 font-bold uppercase tracking-widest text-sm">
                             {loadingMensajes
                               ? "Cargando mensajes desde Supabase..."
@@ -1786,6 +1961,7 @@ export default function AdminPage() {
                     ) : (
                       mensajesFiltrados.map((m) => {
                         const open = mensajeAbierto === m.id;
+                        const ed = getCasoEdit(m);
                         return (
                           <Fragment key={m.id}>
                             <tr
@@ -1802,6 +1978,14 @@ export default function AdminPage() {
                               </td>
                               <td className="py-5 px-6 font-bold text-[#6F2C91]">
                                 {m.asunto}
+                              </td>
+                              <td className="py-5 px-6">
+                                <span
+                                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider whitespace-nowrap ${estadoInfo(m.estado || "nuevo").badge}`}
+                                >
+                                  <span className={`w-1.5 h-1.5 rounded-full ${estadoInfo(m.estado || "nuevo").dot}`} />
+                                  {estadoInfo(m.estado || "nuevo").label}
+                                </span>
                               </td>
                               <td className="py-5 px-6 text-xs text-gray-500">
                                 <div className="font-bold">{m.correo}</div>
@@ -1820,24 +2004,105 @@ export default function AdminPage() {
                             </tr>
                             {open && (
                               <tr key={m.id + "-detail"} className="bg-[#FBFBFD]">
-                                <td colSpan={6} className="py-6 px-6">
-                                  <div className="max-w-3xl">
-                                    <p className="whitespace-pre-wrap text-[#1D1D1F] leading-relaxed">
-                                      {m.mensaje}
-                                    </p>
-                                    {m.archivo_url && (
-                                      <a
-                                        href={m.archivo_url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-[#6F2C91] text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-[#5a2376] transition-all"
+                                <td colSpan={7} className="py-6 px-6">
+                                  <div className="grid grid-cols-1 lg:grid-cols-[1fr,380px] gap-6">
+                                    <div>
+                                      <p className="whitespace-pre-wrap text-[#1D1D1F] leading-relaxed">
+                                        {m.mensaje}
+                                      </p>
+                                      {m.archivo_url && (
+                                        <a
+                                          href={m.archivo_url}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-[#6F2C91] text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-[#5a2376] transition-all"
+                                        >
+                                          Ver archivo
+                                          {m.archivo_nombre ? `: ${m.archivo_nombre}` : ""}
+                                        </a>
+                                      )}
+                                    </div>
+
+                                    <div className="bg-white rounded-2xl border border-gray-100 p-5 space-y-4 shadow-sm">
+                                      <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-[#6F2C91]">
+                                        Gestión del caso
+                                      </h4>
+
+                                      <div>
+                                        <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-1.5">
+                                          Estado del pedido
+                                        </label>
+                                        <div className="flex gap-2 flex-wrap">
+                                          {ESTADOS.map((e) => {
+                                            const active = ed.estado === e.key;
+                                            return (
+                                              <button
+                                                key={e.key}
+                                                onClick={() => setCasoField(m, { estado: e.key })}
+                                                className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${
+                                                  active
+                                                    ? `${e.badge} ring-2 ring-[#6F2C91]`
+                                                    : "bg-gray-100 text-gray-400 hover:text-gray-600"
+                                                }`}
+                                              >
+                                                {e.label}
+                                              </button>
+                                            );
+                                          })}
+                                        </div>
+                                      </div>
+
+                                      <div>
+                                        <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-1.5">
+                                          Responsable del seguimiento
+                                        </label>
+                                        <input
+                                          list={`resp-${m.id}`}
+                                          value={ed.responsable}
+                                          onChange={(e) => setCasoField(m, { responsable: e.target.value })}
+                                          placeholder="Escribí un nombre o elegí uno ya usado..."
+                                          className="w-full py-2.5 px-3 rounded-lg bg-[#F5F5F7] focus:bg-white border-2 border-transparent focus:border-[#6F2C91] outline-none text-sm text-[#1D1D1F]"
+                                        />
+                                        <datalist id={`resp-${m.id}`}>
+                                          {responsablesDisponibles.map((r) => (
+                                            <option key={r} value={r} />
+                                          ))}
+                                        </datalist>
+                                      </div>
+
+                                      <div>
+                                        <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-1.5">
+                                          Seguimiento
+                                          {ed.estado === "en_proceso" && (
+                                            <span className="text-[#6F2C91] normal-case tracking-normal font-bold">
+                                              {" "}— ¿en qué parte del proceso va?
+                                            </span>
+                                          )}
+                                        </label>
+                                        <textarea
+                                          value={ed.seguimiento}
+                                          onChange={(e) => setCasoField(m, { seguimiento: e.target.value })}
+                                          rows={4}
+                                          placeholder="Notas del avance del caso..."
+                                          className="w-full py-2.5 px-3 rounded-lg bg-[#F5F5F7] focus:bg-white border-2 border-transparent focus:border-[#6F2C91] outline-none text-sm text-[#1D1D1F] resize-y leading-relaxed"
+                                        />
+                                      </div>
+
+                                      <button
+                                        disabled={savingCasoId === m.id}
+                                        onClick={() => guardarCaso(m)}
+                                        className="w-full py-3 rounded-xl bg-[#1D1D1F] text-[#EAE84B] font-black text-xs uppercase tracking-widest hover:bg-[#6F2C91] hover:text-white disabled:opacity-40 transition-all active:scale-95"
                                       >
-                                        Ver archivo
-                                        {m.archivo_nombre
-                                          ? `: ${m.archivo_nombre}`
-                                          : ""}
-                                      </a>
-                                    )}
+                                        {savingCasoId === m.id ? "Guardando..." : "Guardar caso"}
+                                      </button>
+
+                                      {m.actualizado_at && (
+                                        <p className="text-[10px] text-gray-400 text-center">
+                                          Última actualización:{" "}
+                                          {new Date(m.actualizado_at).toLocaleString()}
+                                        </p>
+                                      )}
+                                    </div>
                                   </div>
                                 </td>
                               </tr>
@@ -2164,6 +2429,63 @@ function ContenidoTab() {
       {seccion === "leyes" && <CmsLeyesEditor />}
       {seccion === "logros" && <CmsLogrosEditor />}
       {seccion === "biografia" && <CmsBiografiaEditor />}
+    </div>
+  );
+}
+
+function ResponsableRow({
+  nombre,
+  disabled,
+  onRename,
+}: {
+  nombre: string;
+  disabled: boolean;
+  onRename: (nuevo: string) => void;
+}) {
+  const [editando, setEditando] = useState(false);
+  const [valor, setValor] = useState(nombre);
+  useEffect(() => setValor(nombre), [nombre]);
+
+  return (
+    <div className="flex items-center gap-3 py-2 border-b border-gray-50 last:border-b-0">
+      {editando ? (
+        <>
+          <input
+            value={valor}
+            onChange={(e) => setValor(e.target.value)}
+            className="flex-1 py-2 px-3 rounded-lg bg-[#F5F5F7] focus:bg-white border-2 border-transparent focus:border-[#6F2C91] outline-none text-sm text-[#1D1D1F]"
+          />
+          <button
+            disabled={disabled || !valor.trim() || valor.trim() === nombre}
+            onClick={() => {
+              onRename(valor);
+              setEditando(false);
+            }}
+            className="px-4 py-2 rounded-lg bg-[#6F2C91] text-white font-black text-[10px] uppercase tracking-widest disabled:opacity-40 transition-all"
+          >
+            Guardar
+          </button>
+          <button
+            onClick={() => {
+              setValor(nombre);
+              setEditando(false);
+            }}
+            className="px-4 py-2 rounded-lg bg-gray-100 text-gray-600 font-black text-[10px] uppercase tracking-widest"
+          >
+            Cancelar
+          </button>
+        </>
+      ) : (
+        <>
+          <span className="flex-1 font-bold text-[#1D1D1F]">{nombre}</span>
+          <button
+            onClick={() => setEditando(true)}
+            className="px-4 py-2 rounded-lg bg-[#F5F5F7] text-[#1D1D1F] font-black text-[10px] uppercase tracking-widest hover:bg-[#6F2C91] hover:text-white transition-all"
+          >
+            Editar nombre
+          </button>
+        </>
+      )}
     </div>
   );
 }
