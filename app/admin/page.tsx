@@ -373,15 +373,17 @@ export default function AdminPage() {
       return { ...prev, [m.id]: { ...base, ...patch } };
     });
 
-  const guardarCaso = async (m: Mensaje) => {
-    const ed = getCasoEdit(m);
+  const persistCaso = async (
+    m: Mensaje,
+    vals: { estado: string; responsable: string; seguimiento: string }
+  ) => {
     setSavingCasoId(m.id);
     try {
       const supabase = getSupabase();
       const payload = {
-        estado: ed.estado || "nuevo",
-        responsable: ed.responsable.trim() || null,
-        seguimiento: ed.seguimiento.trim() || null,
+        estado: vals.estado || "nuevo",
+        responsable: vals.responsable.trim() || null,
+        seguimiento: vals.seguimiento.trim() || null,
         actualizado_at: new Date().toISOString(),
       };
       const { data, error } = await supabase
@@ -408,6 +410,8 @@ export default function AdminPage() {
     }
     setSavingCasoId(null);
   };
+
+  const guardarCaso = (m: Mensaje) => persistCaso(m, getCasoEdit(m));
 
   const renombrarResponsable = async (viejo: string, nuevo: string) => {
     const nuevoNombre = nuevo.trim();
@@ -1943,6 +1947,7 @@ export default function AdminPage() {
                       <th className="py-5 px-6">Cantón</th>
                       <th className="py-5 px-6">Asunto</th>
                       <th className="py-5 px-6">Estado</th>
+                      <th className="py-5 px-6">Responsable</th>
                       <th className="py-5 px-6">Contacto</th>
                       <th className="py-5 px-6 text-center">Acción</th>
                     </tr>
@@ -1950,7 +1955,7 @@ export default function AdminPage() {
                   <tbody className="divide-y divide-gray-50">
                     {mensajesFiltrados.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="py-24 text-center">
+                        <td colSpan={8} className="py-24 text-center">
                           <p className="text-gray-400 font-bold uppercase tracking-widest text-sm">
                             {loadingMensajes
                               ? "Cargando mensajes desde Supabase..."
@@ -1980,12 +1985,46 @@ export default function AdminPage() {
                                 {m.asunto}
                               </td>
                               <td className="py-5 px-6">
-                                <span
-                                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider whitespace-nowrap ${estadoInfo(m.estado || "nuevo").badge}`}
+                                <select
+                                  value={ed.estado}
+                                  disabled={savingCasoId === m.id}
+                                  onChange={(e) =>
+                                    persistCaso(m, { ...ed, estado: e.target.value })
+                                  }
+                                  className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider outline-none cursor-pointer border-0 disabled:opacity-50 ${estadoInfo(ed.estado).badge}`}
                                 >
-                                  <span className={`w-1.5 h-1.5 rounded-full ${estadoInfo(m.estado || "nuevo").dot}`} />
-                                  {estadoInfo(m.estado || "nuevo").label}
-                                </span>
+                                  {ESTADOS.map((opt) => (
+                                    <option key={opt.key} value={opt.key}>
+                                      {opt.label}
+                                    </option>
+                                  ))}
+                                </select>
+                              </td>
+                              <td className="py-5 px-6">
+                                <input
+                                  list={`resp-row-${m.id}`}
+                                  value={ed.responsable}
+                                  placeholder="Asignar…"
+                                  disabled={savingCasoId === m.id}
+                                  onChange={(e) =>
+                                    setCasoField(m, { responsable: e.target.value })
+                                  }
+                                  onBlur={() => {
+                                    const cur = getCasoEdit(m);
+                                    if ((cur.responsable || "") !== (m.responsable || ""))
+                                      persistCaso(m, cur);
+                                  }}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter")
+                                      (e.target as HTMLInputElement).blur();
+                                  }}
+                                  className="w-44 py-2 px-3 rounded-lg bg-[#F5F5F7] focus:bg-white border-2 border-transparent focus:border-[#6F2C91] outline-none text-xs font-bold text-[#1D1D1F] disabled:opacity-50"
+                                />
+                                <datalist id={`resp-row-${m.id}`}>
+                                  {responsablesDisponibles.map((r) => (
+                                    <option key={r} value={r} />
+                                  ))}
+                                </datalist>
                               </td>
                               <td className="py-5 px-6 text-xs text-gray-500">
                                 <div className="font-bold">{m.correo}</div>
@@ -2004,7 +2043,7 @@ export default function AdminPage() {
                             </tr>
                             {open && (
                               <tr key={m.id + "-detail"} className="bg-[#FBFBFD]">
-                                <td colSpan={7} className="py-6 px-6">
+                                <td colSpan={8} className="py-6 px-6">
                                   <div className="grid grid-cols-1 lg:grid-cols-[1fr,380px] gap-6">
                                     <div>
                                       <p className="whitespace-pre-wrap text-[#1D1D1F] leading-relaxed">
