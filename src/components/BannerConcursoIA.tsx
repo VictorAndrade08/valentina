@@ -13,9 +13,9 @@ type Data = {
   fecha_fin: string;
 };
 
-// Imagen IA por defecto (si no hay banner real cargado o si es placeholder de picsum)
+// Imagen IA por defecto, alojada en Supabase Storage del propio proyecto.
 const FALLBACK_AI_IMG =
-  "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1600&q=80";
+  "https://jcuromipofksetcixkyu.supabase.co/storage/v1/object/public/cms-imagenes/concurso_ia/banner_ia_placeholder.jpg";
 
 const fmtFecha = (s: string) => {
   if (!s) return "";
@@ -60,11 +60,13 @@ export default function BannerConcursoIA() {
   // Solo la parte principal del nombre (antes del " — ")
   const tituloCorto = data.nombre.split(" — ")[0] || data.nombre;
 
-  // Si el banner no está seteado o es placeholder (picsum), usar imagen IA real
-  const imageUrl =
-    !data.banner_url || data.banner_url.includes("picsum.photos")
-      ? FALLBACK_AI_IMG
-      : data.banner_url;
+  // Si no hay banner seteado, o es un placeholder de un dominio externo (picsum, unsplash, etc.),
+  // usar la imagen IA propia alojada en Supabase Storage.
+  const isExternal =
+    !data.banner_url ||
+    data.banner_url.includes("picsum.photos") ||
+    data.banner_url.includes("images.unsplash.com");
+  const imageUrl = isExternal ? FALLBACK_AI_IMG : data.banner_url;
 
   return (
     <section className="w-full py-8 md:py-12 bg-white">
