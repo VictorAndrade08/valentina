@@ -133,12 +133,14 @@ export default function LogrosManabi() {
             onClick={() => setModalData(item)}
             className="flex-none w-[85vw] md:w-[420px] h-[500px] md:h-[580px] relative rounded-[2.5rem] md:rounded-[3rem] overflow-hidden snap-center shadow-xl hover:shadow-2xl transition-all duration-500 cursor-pointer group border border-gray-100 active:scale-[0.98]"
           >
-            <img 
-                src={item.image} 
+            {item.image && (
+              <img
+                src={item.image}
                 loading="lazy"
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" 
-                alt="" 
-            />
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                alt=""
+              />
+            )}
             {/* Gradiente Oscuro */}
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-90" />
             

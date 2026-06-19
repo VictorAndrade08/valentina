@@ -96,7 +96,9 @@ export default function ProyectosQueVienen() {
             className="flex-none w-[88vw] md:w-[480px] h-[650px] relative rounded-[3rem] overflow-hidden snap-center group shadow-xl transition-all duration-700 hover:shadow-purple-200"
           >
             {/* Imagen Inmersiva */}
-            <img src={proy.imagen} className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt="" />
+            {proy.imagen && (
+              <img src={proy.imagen} className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt="" />
+            )}
             
             {/* Gradiente Morado Institucional */}
             <div className="absolute inset-0 bg-gradient-to-t from-[#6F2C91] via-[#6F2C91]/40 to-transparent opacity-90 group-hover:opacity-100 transition-opacity" />

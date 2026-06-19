@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { Oswald } from "next/font/google";
 import { getSupabase } from "@/lib/supabaseClient";
+import { validarCedulaEcuatoriana, MSG_CEDULA_INVALIDA } from "@/lib/validators";
 
 const oswald = Oswald({ subsets: ["latin"], weight: ["700"] });
 
@@ -118,6 +119,17 @@ export default function ConcursoIAForm() {
       setError("Por favor completá los campos requeridos (*).");
       return;
     }
+    if (!validarCedulaEcuatoriana(form.cedula_estudiante)) {
+      setError(MSG_CEDULA_INVALIDA);
+      return;
+    }
+    if (
+      form.cedula_representante &&
+      !validarCedulaEcuatoriana(form.cedula_representante)
+    ) {
+      setError("La cédula del representante no es válida.");
+      return;
+    }
     if (!acceptedTerms) {
       setShowTermsError(true);
       return;
@@ -154,7 +166,15 @@ export default function ConcursoIAForm() {
       const { error: insErr } = await supabase
         .from("inscripciones_concurso_ia")
         .insert(payload);
-      if (insErr) throw new Error(insErr.message);
+      if (insErr) {
+        // 23505 = unique_violation (cédula duplicada por el constraint UNIQUE)
+        if (insErr.code === "23505") {
+          throw new Error(
+            "Ya existe una inscripción registrada con esta cédula. Si crees que es un error, escribinos."
+          );
+        }
+        throw new Error(insErr.message);
+      }
       setOkMsg(
         "¡Inscripción enviada con éxito! Pronto te contactaremos por correo o WhatsApp."
       );

@@ -2,9 +2,9 @@
 
 import { useState, useRef, useEffect } from "react";
 
-// Credenciales de Supabase
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://jcuromipofksetcixkyu.supabase.co";
-const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY || "sb_publishable_wAiUv2aZWqYQDLcYqDf-Q_CPJnB2As";
+// Credenciales de Supabase desde .env.local (nunca hardcodear como fallback)
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY || "";
 
 type ConcursoState = {
   nombres: string;
