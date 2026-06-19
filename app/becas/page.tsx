@@ -120,7 +120,7 @@ export default function ConcursoIAPage() {
         )}
         <div className="relative max-w-[1400px] mx-auto px-6 py-24 md:py-32">
           <span className="inline-block px-4 py-1.5 rounded-full bg-[#EAE84B] text-[#6F2C91] font-bold text-xs uppercase tracking-widest mb-6">
-            Concurso
+            Iniciativa
           </span>
           <h1
             className={`${oswald.className} text-[clamp(2.5rem,6vw,5rem)] font-black uppercase leading-[0.95] max-w-4xl mb-6`}

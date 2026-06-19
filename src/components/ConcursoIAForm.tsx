@@ -455,7 +455,7 @@ export default function ConcursoIAForm() {
             </div>
             <div>
               <label className={labelCls}>
-                Autorización firmada del padre o representante (PDF o imagen, máx 5MB){" "}
+                Autorización de la madre/padre o representante firmada (PDF o imagen, máx 5MB){" "}
                 <span className="text-red-500">*</span>
               </label>
               <div className="flex flex-col sm:flex-row gap-4 items-stretch">

@@ -2718,7 +2718,7 @@ function ContenidoTab() {
     { key: "sobre-mi", label: "Sobre mí" },
     { key: "formacion", label: "Formación Dual" },
     { key: "noticias", label: "Noticias / Anuncios" },
-    { key: "concurso-ia", label: "Concurso IA" },
+    { key: "concurso-ia", label: "Becas IA" },
     { key: "agenda", label: "Agenda Internacional" },
     { key: "leyes", label: "Leyes / Logros legislativos" },
     { key: "logros", label: "Logros Manabí" },

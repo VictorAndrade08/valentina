@@ -147,12 +147,12 @@ export default function CmsConcursoIAEditor() {
             style={{ fontFamily: "'Oswald', sans-serif" }}
             className="text-3xl md:text-5xl text-[#1D1D1F] font-black uppercase leading-none mb-2"
           >
-            Concurso IA
+            Becas IA
           </h2>
           <p className="text-sm text-gray-500 max-w-2xl">
-            Textos del nuevo concurso de Becas de Formación en IA (página{" "}
+            Textos de la iniciativa de Becas de Formación en IA (página{" "}
             <code className="px-1 py-0.5 mx-1 bg-gray-100 rounded">
-              /concurso-ia
+              /becas
             </code>
             ).
           </p>

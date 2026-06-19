@@ -18,7 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
-      url: `${BASE_URL}/concurso-ia`,
+      url: `${BASE_URL}/becas`,
       lastModified: now,
       changeFrequency: "daily",
       priority: 0.9,

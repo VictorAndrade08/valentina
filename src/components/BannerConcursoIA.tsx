@@ -72,7 +72,7 @@ export default function BannerConcursoIA() {
     <section className="w-full py-8 md:py-12 bg-white">
       <div className="max-w-[1200px] mx-auto px-6">
         <Link
-          href="/concurso-ia"
+          href="/becas"
           className="block group relative rounded-[2rem] overflow-hidden bg-[#6F2C91] shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1"
         >
           <img
@@ -86,7 +86,7 @@ export default function BannerConcursoIA() {
           <div className="relative flex flex-col md:flex-row md:items-center gap-4 md:gap-6 p-6 md:p-8 lg:p-10">
             <div className="flex-1 min-w-0">
               <span className="inline-block px-3 py-1 rounded-full bg-[#EAE84B] text-[#6F2C91] font-bold text-[10px] uppercase tracking-widest mb-2">
-                Concurso
+                Iniciativa
               </span>
               <h2
                 className={`${oswald.className} text-white text-2xl md:text-3xl lg:text-4xl font-black uppercase leading-tight`}

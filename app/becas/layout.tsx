@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     title: "Desafío IA por la Educación — Valentina Centeno",
     description:
       "Postula a la Beca de IA. Inscripciones abiertas hasta el 30 de junio.",
-    url: "/concurso-ia",
+    url: "/becas",
     siteName: "Valentina Centeno",
     locale: "es_EC",
     type: "website",
