@@ -17,6 +17,7 @@ import AgendaInternacional from "@/components/AgendaInternacional";
 import BuzonCiudadano from "@/components/BuzonCiudadano";
 import BuzonFloatingCTA from "@/components/BuzonFloatingCTA";
 import CorchoNoticias from "@/components/CorchoNoticias";
+import BannerConcursoIA from "@/components/BannerConcursoIA";
 
 export default function Home() {
   return (
@@ -25,6 +26,10 @@ export default function Home() {
         
         {/* BLOQUE 1: CONEXIÓN E IDENTIDAD */}
         <Hero />
+
+        {/* APARTADO DESTACADO — CONCURSO IA (lee del CMS, oculto si no está activo) */}
+        <BannerConcursoIA />
+
         {/* AboutBio ahora carga sus datos internamente desde el CSV */}
         <AboutBio />
 
