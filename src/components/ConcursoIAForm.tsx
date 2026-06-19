@@ -210,12 +210,61 @@ export default function ConcursoIAForm() {
       )}
 
       <div className="space-y-10 mt-4">
-        {/* SECCIÓN: ESTUDIANTE */}
+        {/* SECCIÓN 1: UNIDAD EDUCATIVA */}
         <section>
           <h3
             className={`${oswald.className} text-xl md:text-2xl font-black uppercase text-[#6F2C91] mb-5`}
           >
-            1. Datos del estudiante
+            1. Datos de la Unidad Educativa
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="md:col-span-2">
+              <label className={labelCls}>
+                Colegio <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                required
+                value={form.colegio}
+                onChange={set("colegio")}
+                className={inputCls}
+              />
+            </div>
+            <div>
+              <label className={labelCls}>
+                Ciudad <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                required
+                value={form.ciudad}
+                onChange={set("ciudad", "letters")}
+                className={inputCls}
+              />
+            </div>
+            <div>
+              <label className={labelCls}>Provincia</label>
+              <input
+                type="text"
+                value="Manabí"
+                readOnly
+                disabled
+                aria-label="Provincia (bloqueada en Manabí)"
+                className={inputCls + " cursor-not-allowed opacity-70"}
+              />
+              <p className="text-[10px] text-gray-400 mt-1 font-medium">
+                Esta iniciativa es exclusiva para colegios de Manabí.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* SECCIÓN 2: ESTUDIANTE */}
+        <section>
+          <h3
+            className={`${oswald.className} text-xl md:text-2xl font-black uppercase text-[#6F2C91] mb-5`}
+          >
+            2. Datos del estudiante
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="md:col-span-2">
@@ -278,30 +327,7 @@ export default function ConcursoIAForm() {
                 <option value="prefiero_no_decir">Prefiero no decir</option>
               </select>
             </div>
-          </div>
-        </section>
-
-        {/* SECCIÓN: ACADÉMICO */}
-        <section>
-          <h3
-            className={`${oswald.className} text-xl md:text-2xl font-black uppercase text-[#6F2C91] mb-5`}
-          >
-            2. Datos académicos
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="md:col-span-2">
-              <label className={labelCls}>
-                Colegio <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                required
-                value={form.colegio}
-                onChange={set("colegio")}
-                className={inputCls}
-              />
-            </div>
-            <div>
               <label className={labelCls}>
                 Grado / Curso <span className="text-red-500">*</span>
               </label>
@@ -311,27 +337,6 @@ export default function ConcursoIAForm() {
                 value={form.grado}
                 onChange={set("grado")}
                 placeholder="Ej: 2do BGU"
-                className={inputCls}
-              />
-            </div>
-            <div>
-              <label className={labelCls}>
-                Ciudad <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                required
-                value={form.ciudad}
-                onChange={set("ciudad", "letters")}
-                className={inputCls}
-              />
-            </div>
-            <div className="md:col-span-2">
-              <label className={labelCls}>Provincia</label>
-              <input
-                type="text"
-                value={form.provincia}
-                onChange={set("provincia", "letters")}
                 className={inputCls}
               />
             </div>
@@ -442,14 +447,14 @@ export default function ConcursoIAForm() {
           <div className="space-y-5">
             <div>
               <label className={labelCls}>
-                ¿Por qué querés participar? (motivación){" "}
+                ¿Por qué quieres participar? (motivación){" "}
                 <span className="text-red-500">*</span>
               </label>
               <textarea
                 value={form.motivacion}
                 onChange={set("motivacion")}
                 rows={4}
-                placeholder="Contanos brevemente por qué te interesa el programa..."
+                placeholder="Cuéntanos brevemente por qué te interesa el programa..."
                 className={inputCls + " resize-y"}
               />
             </div>
