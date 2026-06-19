@@ -42,12 +42,12 @@ const Header: React.FC = () => {
         </Link>
 
         {/* NAVEGACIÓN DESKTOP */}
-        <nav className="hidden xl:flex items-center gap-8">
+        <nav className="hidden lg:flex items-center gap-5 xl:gap-8">
           {navItems.map((item) => (
             <Link
               key={item.name}
               href={item.href}
-              className={`text-white ${oswald.className} text-[14px] font-bold uppercase tracking-widest hover:text-[#EAE84B] transition-all relative group`}
+              className={`text-white ${oswald.className} text-[13px] xl:text-[14px] font-bold uppercase tracking-widest hover:text-[#EAE84B] transition-all relative group whitespace-nowrap`}
             >
               {item.name}
               <span className="absolute bottom-[-4px] left-0 w-0 h-[2px] bg-[#EAE84B] transition-all group-hover:w-full"></span>
@@ -79,7 +79,7 @@ const Header: React.FC = () => {
 
         {/* BOTÓN HAMBURGUESA MÓVIL */}
         <button
-          className="xl:hidden text-white focus:outline-none p-2 hover:bg-white/10 rounded-lg transition-colors"
+          className="lg:hidden text-white focus:outline-none p-2 hover:bg-white/10 rounded-lg transition-colors"
           onClick={toggleMenu}
           aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
         >
@@ -89,7 +89,7 @@ const Header: React.FC = () => {
 
       {/* MENÚ MÓVIL */}
       {isMenuOpen && (
-        <nav className="absolute top-[80px] left-0 w-full bg-[#6F2C91] flex flex-col items-center py-12 gap-8 shadow-2xl border-t border-white/10 xl:hidden animate-slide-down">
+        <nav className="absolute top-[80px] left-0 w-full bg-[#6F2C91] flex flex-col items-center py-12 gap-8 shadow-2xl border-t border-white/10 lg:hidden animate-slide-down">
           {navItems.map((item) => (
             <Link
               key={item.name}
