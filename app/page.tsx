@@ -16,6 +16,7 @@ import AgendaInternacional from "@/components/AgendaInternacional";
 // 3. Componentes de Interacción y Globales
 import BuzonCiudadano from "@/components/BuzonCiudadano";
 import BuzonFloatingCTA from "@/components/BuzonFloatingCTA";
+import CorchoNoticias from "@/components/CorchoNoticias";
 
 export default function Home() {
   return (
@@ -25,8 +26,11 @@ export default function Home() {
         {/* BLOQUE 1: CONEXIÓN E IDENTIDAD */}
         <Hero />
         {/* AboutBio ahora carga sus datos internamente desde el CSV */}
-        <AboutBio /> 
-        
+        <AboutBio />
+
+        {/* CORCHO DE NOTICIAS — solo se muestra si hay noticias activas */}
+        <CorchoNoticias />
+
         {/* BLOQUE 2: PROPUESTA Y MARCO LEGAL */}
         <section className="bg-[#FBFBFD]">
           <IniciativasLegislativas />

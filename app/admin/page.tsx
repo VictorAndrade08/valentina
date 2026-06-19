@@ -10,6 +10,8 @@ import CmsAgendaEditor from "@/components/admin/CmsAgendaEditor";
 import CmsLeyesEditor from "@/components/admin/CmsLeyesEditor";
 import CmsLogrosEditor from "@/components/admin/CmsLogrosEditor";
 import CmsBiografiaEditor from "@/components/admin/CmsBiografiaEditor";
+import CmsNoticiasEditor from "@/components/admin/CmsNoticiasEditor";
+import CmsConcursoIAEditor from "@/components/admin/CmsConcursoIAEditor";
 
 const PASSWORD_ACCESO = "admin123";
 
@@ -48,7 +50,31 @@ type Mensaje = {
   actualizado_at: string | null;
 };
 
-type TabKey = "concurso" | "buzon" | "contenido";
+type TabKey = "concurso" | "buzon" | "concurso-ia" | "contenido";
+
+type Inscripcion = {
+  id: string;
+  created_at: string;
+  nombres_estudiante: string;
+  cedula_estudiante: string;
+  fecha_nacimiento: string | null;
+  edad: string;
+  genero: string;
+  colegio: string;
+  grado: string;
+  ciudad: string;
+  provincia: string;
+  correo: string;
+  whatsapp: string;
+  nombres_representante: string;
+  cedula_representante: string;
+  correo_representante: string;
+  telefono_representante: string;
+  motivacion: string;
+  proyecto: string;
+  archivo_url: string | null;
+  archivo_nombre: string | null;
+};
 
 type EstadoCaso = "nuevo" | "en_proceso" | "resuelto";
 
@@ -234,6 +260,11 @@ export default function AdminPage() {
   const [showResponsables, setShowResponsables] = useState(false);
   const [renombrando, setRenombrando] = useState(false);
 
+  const [inscripcionesIA, setInscripcionesIA] = useState<Inscripcion[]>([]);
+  const [loadingInscripcionesIA, setLoadingInscripcionesIA] = useState(false);
+  const [searchInscripcionesIA, setSearchInscripcionesIA] = useState("");
+  const [inscripcionAbierta, setInscripcionAbierta] = useState<string | null>(null);
+
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportTipo, setReportTipo] = useState<"historico" | "mes" | "rango">(
     "historico"
@@ -286,10 +317,27 @@ export default function AdminPage() {
     setLoadingMensajes(false);
   };
 
+  const fetchInscripcionesIA = async () => {
+    setLoadingInscripcionesIA(true);
+    try {
+      const supabase = getSupabase();
+      const { data, error } = await supabase
+        .from("inscripciones_concurso_ia")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      setInscripcionesIA((data as Inscripcion[]) || []);
+    } catch (err) {
+      console.error("Error cargando inscripciones IA:", err);
+    }
+    setLoadingInscripcionesIA(false);
+  };
+
   useEffect(() => {
     if (!isAuthenticated) return;
     if (proyectos.length === 0) fetchProyectos();
     if (mensajes.length === 0) fetchMensajes();
+    if (inscripcionesIA.length === 0) fetchInscripcionesIA();
   }, [isAuthenticated]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const proyectosFiltrados = useMemo(() => {
@@ -337,6 +385,19 @@ export default function AdminPage() {
       );
     });
   }, [mensajes, searchTermMensajes, mesFiltro, estadoFiltro, desdeFiltro, hastaFiltro]);
+
+  const inscripcionesIAFiltradas = useMemo(() => {
+    const term = searchInscripcionesIA.toLowerCase();
+    if (!term) return inscripcionesIA;
+    return inscripcionesIA.filter(
+      (i) =>
+        (i.nombres_estudiante || "").toLowerCase().includes(term) ||
+        (i.cedula_estudiante || "").includes(term) ||
+        (i.colegio || "").toLowerCase().includes(term) ||
+        (i.ciudad || "").toLowerCase().includes(term) ||
+        (i.correo || "").toLowerCase().includes(term)
+    );
+  }, [inscripcionesIA, searchInscripcionesIA]);
 
   const stats = useMemo(() => computeMensajeStats(mensajes), [mensajes]);
   const proyectoStats = useMemo(
@@ -478,6 +539,30 @@ export default function AdminPage() {
     const suffix =
       mesFiltro !== "todos" ? `_${mesFiltro}` : `_${new Date().toISOString().split("T")[0]}`;
     downloadCsv(`Reporte_Buzon_Valentina${suffix}.csv`, headers, rows);
+  };
+
+  const exportInscripcionesIAExcel = () => {
+    if (inscripcionesIAFiltradas.length === 0) return;
+    const headers = [
+      "Fecha", "Estudiante", "Cédula", "Edad", "Género", "Colegio", "Grado",
+      "Ciudad", "Provincia", "Correo", "WhatsApp",
+      "Representante", "Cédula Rep.", "Correo Rep.", "Tel Rep.",
+      "Motivación", "Proyecto", "Archivo",
+    ];
+    const rows = inscripcionesIAFiltradas.map((i) => [
+      new Date(i.created_at).toLocaleString(),
+      i.nombres_estudiante, i.cedula_estudiante, i.edad, i.genero,
+      i.colegio, i.grado, i.ciudad, i.provincia,
+      i.correo, i.whatsapp,
+      i.nombres_representante, i.cedula_representante,
+      i.correo_representante, i.telefono_representante,
+      i.motivacion, i.proyecto, i.archivo_url || "",
+    ]);
+    downloadCsv(
+      `Inscripciones_ConcursoIA_${new Date().toISOString().split("T")[0]}.csv`,
+      headers,
+      rows
+    );
   };
 
   const exportBuzonPdf = () => {
@@ -1282,6 +1367,16 @@ export default function AdminPage() {
               }`}
             >
               Buzón Ciudadano
+            </button>
+            <button
+              onClick={() => setTab("concurso-ia")}
+              className={`px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-sm ${
+                tab === "concurso-ia"
+                  ? "bg-[#1D1D1F] text-[#EAE84B]"
+                  : "bg-white text-gray-500 hover:text-[#6F2C91]"
+              }`}
+            >
+              Concurso IA
             </button>
             <button
               onClick={() => setTab("contenido")}
@@ -2157,6 +2252,222 @@ export default function AdminPage() {
           </>
         )}
 
+        {tab === "concurso-ia" && (
+          <>
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10">
+              <div>
+                <h2
+                  style={{ fontFamily: "'Oswald', sans-serif" }}
+                  className="text-4xl md:text-6xl text-[#1D1D1F] font-black uppercase leading-none mb-3"
+                >
+                  INSCRITOS <span className="text-[#6F2C91]">CONCURSO IA</span>
+                </h2>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span className="px-4 py-1.5 bg-[#EAE84B] text-[#6F2C91] font-bold text-sm rounded-lg shadow-sm">
+                    {inscripcionesIA.length} inscritos
+                  </span>
+                  {loadingInscripcionesIA && (
+                    <span className="text-[#6F2C91] text-xs font-bold animate-pulse">
+                      Sincronizando...
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="relative flex-1 min-w-[280px]">
+                  <input
+                    type="text"
+                    placeholder="Buscar nombre, cédula, colegio, ciudad..."
+                    value={searchInscripcionesIA}
+                    onChange={(e) => setSearchInscripcionesIA(e.target.value)}
+                    className="w-full py-4 px-6 rounded-2xl border-2 border-transparent bg-white shadow-sm focus:border-[#6F2C91] outline-none transition-all font-medium text-black"
+                  />
+                </div>
+                <button
+                  onClick={fetchInscripcionesIA}
+                  className="p-4 rounded-2xl bg-white text-[#1D1D1F] hover:text-[#6F2C91] shadow-sm transition-all active:scale-95"
+                  title="Actualizar"
+                >
+                  <svg
+                    className={`w-6 h-6 ${loadingInscripcionesIA ? "animate-spin" : ""}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357-2H15"
+                    />
+                  </svg>
+                </button>
+                <button
+                  onClick={exportInscripcionesIAExcel}
+                  disabled={inscripcionesIAFiltradas.length === 0}
+                  className="flex items-center gap-3 px-8 py-4 rounded-2xl bg-[#1D1D1F] text-[#EAE84B] font-black uppercase tracking-widest hover:bg-[#6F2C91] hover:text-white disabled:opacity-30 disabled:grayscale transition-all shadow-xl active:scale-95"
+                >
+                  EXPORTAR CSV
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-[2.5rem] shadow-[0_30px_100px_-20px_rgba(0,0,0,0.05)] overflow-hidden border border-gray-100">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse min-w-[1600px]">
+                  <thead>
+                    <tr className="bg-[#1D1D1F] text-[#EAE84B] text-[10px] font-black uppercase tracking-[0.2em]">
+                      <th className="py-5 px-6">Fecha</th>
+                      <th className="py-5 px-6">Estudiante</th>
+                      <th className="py-5 px-6">Cédula</th>
+                      <th className="py-5 px-6">Edad</th>
+                      <th className="py-5 px-6">Colegio</th>
+                      <th className="py-5 px-6">Grado</th>
+                      <th className="py-5 px-6">Ciudad</th>
+                      <th className="py-5 px-6">Contacto</th>
+                      <th className="py-5 px-6 text-center">Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {inscripcionesIAFiltradas.length === 0 ? (
+                      <tr>
+                        <td colSpan={9} className="py-24 text-center">
+                          <p className="text-gray-400 font-bold uppercase tracking-widest text-sm">
+                            {loadingInscripcionesIA
+                              ? "Cargando inscripciones desde Supabase..."
+                              : "No hay inscritos todavía."}
+                          </p>
+                        </td>
+                      </tr>
+                    ) : (
+                      inscripcionesIAFiltradas.map((i) => {
+                        const open = inscripcionAbierta === i.id;
+                        return (
+                          <Fragment key={i.id}>
+                            <tr className="hover:bg-[#FBFBFD] transition-colors text-sm">
+                              <td className="py-5 px-6 text-gray-400 font-medium whitespace-nowrap">
+                                {new Date(i.created_at).toLocaleString()}
+                              </td>
+                              <td className="py-5 px-6 font-black text-[#1D1D1F] capitalize">
+                                {i.nombres_estudiante}
+                              </td>
+                              <td className="py-5 px-6 font-bold text-gray-500 whitespace-nowrap">
+                                {i.cedula_estudiante}
+                              </td>
+                              <td className="py-5 px-6 font-bold text-gray-700">
+                                {i.edad}
+                              </td>
+                              <td className="py-5 px-6 font-medium text-gray-700">
+                                {i.colegio}
+                              </td>
+                              <td className="py-5 px-6">
+                                <span className="px-3 py-1 bg-purple-50 text-[#6F2C91] rounded-lg text-[10px] font-black uppercase tracking-wider whitespace-nowrap">
+                                  {i.grado}
+                                </span>
+                              </td>
+                              <td className="py-5 px-6 font-bold text-gray-700">
+                                {i.ciudad}
+                              </td>
+                              <td className="py-5 px-6 text-xs text-gray-500">
+                                <div className="font-bold">{i.correo}</div>
+                                <div>{i.whatsapp}</div>
+                              </td>
+                              <td className="py-5 px-6 text-center">
+                                <button
+                                  onClick={() =>
+                                    setInscripcionAbierta(open ? null : i.id)
+                                  }
+                                  className="px-4 py-2 bg-[#F5F5F7] text-[#1D1D1F] rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-[#6F2C91] hover:text-white transition-all whitespace-nowrap"
+                                >
+                                  {open ? "Ocultar" : "Ver detalles"}
+                                </button>
+                              </td>
+                            </tr>
+                            {open && (
+                              <tr className="bg-[#FBFBFD]">
+                                <td colSpan={9} className="py-6 px-6">
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl">
+                                    <div>
+                                      <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">
+                                        Representante
+                                      </h4>
+                                      <p className="font-bold text-[#1D1D1F] capitalize">
+                                        {i.nombres_representante}
+                                      </p>
+                                      <p className="text-sm text-gray-600">
+                                        CI: {i.cedula_representante || "—"}
+                                      </p>
+                                      <p className="text-sm text-gray-600">
+                                        Tel: {i.telefono_representante}
+                                      </p>
+                                      <p className="text-sm text-gray-600 break-all">
+                                        Correo: {i.correo_representante || "—"}
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">
+                                        Adicionales
+                                      </h4>
+                                      <p className="text-sm text-gray-600">
+                                        <b>Provincia:</b> {i.provincia || "—"}
+                                      </p>
+                                      <p className="text-sm text-gray-600">
+                                        <b>Género:</b> {i.genero || "—"}
+                                      </p>
+                                      <p className="text-sm text-gray-600">
+                                        <b>Fecha de nacimiento:</b>{" "}
+                                        {i.fecha_nacimiento || "—"}
+                                      </p>
+                                    </div>
+                                    {i.motivacion && (
+                                      <div className="md:col-span-2">
+                                        <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">
+                                          Motivación
+                                        </h4>
+                                        <p className="text-sm text-[#1D1D1F] whitespace-pre-wrap leading-relaxed">
+                                          {i.motivacion}
+                                        </p>
+                                      </div>
+                                    )}
+                                    {i.proyecto && (
+                                      <div className="md:col-span-2">
+                                        <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">
+                                          Proyecto / Idea
+                                        </h4>
+                                        <p className="text-sm text-[#1D1D1F] whitespace-pre-wrap leading-relaxed">
+                                          {i.proyecto}
+                                        </p>
+                                      </div>
+                                    )}
+                                    {i.archivo_url && (
+                                      <div className="md:col-span-2">
+                                        <a
+                                          href={i.archivo_url}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="inline-flex items-center gap-2 px-4 py-2 bg-[#6F2C91] text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-[#5a2376] transition-all"
+                                        >
+                                          Ver archivo
+                                          {i.archivo_nombre ? `: ${i.archivo_nombre}` : ""}
+                                        </a>
+                                      </div>
+                                    )}
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </Fragment>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
+        )}
+
         {tab === "contenido" && <ContenidoTab />}
 
         <div className="mt-8 flex justify-between items-center px-4">
@@ -2392,6 +2703,8 @@ type ContenidoSeccion =
   | "banners"
   | "sobre-mi"
   | "formacion"
+  | "noticias"
+  | "concurso-ia"
   | "agenda"
   | "leyes"
   | "logros"
@@ -2404,6 +2717,8 @@ function ContenidoTab() {
     { key: "banners", label: "Banners (carrusel)" },
     { key: "sobre-mi", label: "Sobre mí" },
     { key: "formacion", label: "Formación Dual" },
+    { key: "noticias", label: "Noticias / Anuncios" },
+    { key: "concurso-ia", label: "Concurso IA" },
     { key: "agenda", label: "Agenda Internacional" },
     { key: "leyes", label: "Leyes / Logros legislativos" },
     { key: "logros", label: "Logros Manabí" },
@@ -2464,6 +2779,8 @@ function ContenidoTab() {
           ]}
         />
       )}
+      {seccion === "noticias" && <CmsNoticiasEditor />}
+      {seccion === "concurso-ia" && <CmsConcursoIAEditor />}
       {seccion === "agenda" && <CmsAgendaEditor />}
       {seccion === "leyes" && <CmsLeyesEditor />}
       {seccion === "logros" && <CmsLogrosEditor />}
