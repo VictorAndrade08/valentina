@@ -79,36 +79,60 @@ export default function CorchoNoticias() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {noticias.map((n) => (
-            <button
-              key={n.id}
-              onClick={() => setModal(n)}
-              className="group relative rounded-[2rem] overflow-hidden bg-gray-100 shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all text-left"
-            >
-              <div className="aspect-[4/5] w-full overflow-hidden">
-                <img
-                  src={n.imagen}
-                  alt={n.titulo || "Noticia"}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-6">
-                {n.fecha && (
-                  <span className="inline-block px-3 py-1 rounded-full bg-[#EAE84B] text-[#6F2C91] font-bold text-[10px] uppercase tracking-widest mb-2">
-                    {fmtFecha(n.fecha)}
-                  </span>
-                )}
-                {n.titulo && (
-                  <h3
-                    className={`${oswald.className} text-white text-xl md:text-2xl font-black uppercase leading-tight drop-shadow-md line-clamp-2`}
-                  >
-                    {n.titulo}
-                  </h3>
-                )}
-              </div>
-            </button>
-          ))}
+          {noticias.map((n) => {
+            const cardClass =
+              "group relative rounded-[2rem] overflow-hidden bg-gray-100 shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all text-left block w-full";
+            const cardContent = (
+              <>
+                <div className="aspect-[4/5] w-full overflow-hidden">
+                  <img
+                    src={n.imagen}
+                    alt={n.titulo || "Noticia"}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
+                <div className="absolute bottom-0 left-0 right-0 p-6">
+                  {n.fecha && (
+                    <span className="inline-block px-3 py-1 rounded-full bg-[#EAE84B] text-[#6F2C91] font-bold text-[10px] uppercase tracking-widest mb-2">
+                      {fmtFecha(n.fecha)}
+                    </span>
+                  )}
+                  {n.titulo && (
+                    <h3
+                      className={`${oswald.className} text-white text-xl md:text-2xl font-black uppercase leading-tight drop-shadow-md line-clamp-2`}
+                    >
+                      {n.titulo}
+                    </h3>
+                  )}
+                </div>
+              </>
+            );
+            // Si tiene link → click directo a esa URL en pestaña nueva
+            if (n.link_opcional) {
+              return (
+                <a
+                  key={n.id}
+                  href={n.link_opcional}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cardClass}
+                >
+                  {cardContent}
+                </a>
+              );
+            }
+            // Sin link → modal con la imagen ampliada
+            return (
+              <button
+                key={n.id}
+                onClick={() => setModal(n)}
+                className={cardClass}
+              >
+                {cardContent}
+              </button>
+            );
+          })}
         </div>
       </div>
 
