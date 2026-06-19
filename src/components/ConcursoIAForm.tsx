@@ -42,7 +42,7 @@ const EMPTY: FormState = {
   colegio: "",
   grado: "",
   ciudad: "",
-  provincia: "",
+  provincia: "Manabí",
   correo: "",
   whatsapp: "",
   nombres_representante: "",
