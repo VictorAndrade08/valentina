@@ -137,8 +137,11 @@ export default function ConcursoIAPage() {
             href="#inscripcion"
             className="inline-block mt-8 px-8 py-4 rounded-full bg-[#EAE84B] text-[#6F2C91] font-black uppercase tracking-widest text-sm hover:bg-white transition-all shadow-xl active:scale-95"
           >
-            Quiero inscribirme
+            Inscripción de colegios
           </a>
+          <p className="mt-4 text-sm md:text-base text-white/85 font-medium max-w-xl leading-snug">
+            Iniciativa exclusiva para estudiantes de colegios de Manabí.
+          </p>
         </div>
       </section>
 
@@ -149,7 +152,7 @@ export default function ConcursoIAPage() {
             <h2
               className={`${oswald.className} text-3xl md:text-5xl font-black uppercase text-[#1D1D1F] mb-6`}
             >
-              Sobre el <span className="text-[#6F2C91]">concurso</span>
+              Sobre la <span className="text-[#6F2C91]">iniciativa</span>
             </h2>
             <p className="text-lg md:text-xl text-[#424245] leading-relaxed whitespace-pre-line">
               {data.introduccion}
