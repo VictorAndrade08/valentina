@@ -1,5 +1,5 @@
 import "./globals.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Oswald, Bebas_Neue, Montserrat } from "next/font/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer"; // 👈 NUEVO
@@ -36,6 +36,22 @@ export const metadata: Metadata = {
   title: "Valentina Centeno | Asambleísta Nacional",
   description:
     "Sitio oficial de Valentina Centeno, Asambleísta Nacional por la Bancada ADN.",
+  manifest: "/site.webmanifest",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
+    ],
+    apple: [
+      { url: "/favicon-180x180.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
+};
+
+// Color de la barra del navegador en mobile (PWA / Chrome Android / Safari).
+export const viewport: Viewport = {
+  themeColor: "#74278F",
 };
 
 // =========================

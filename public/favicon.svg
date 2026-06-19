@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Favicon VC">
+  <rect width="512" height="512" rx="112" fill="#74278F"/>
+  <circle cx="427" cy="88" r="32" fill="#E7EB2C"/>
+  <text x="256" y="338" text-anchor="middle"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="238" font-weight="800" letter-spacing="-18"
+        fill="#FFFFFF">VC</text>
+  <rect x="153" y="405" width="206" height="18" rx="9" fill="#E7EB2C"/>
+</svg>

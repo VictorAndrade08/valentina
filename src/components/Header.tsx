@@ -21,6 +21,7 @@ const navItems: MenuItem[] = [
   { name: "ACERCA DE MÍ", href: "/#acerca-de-mi" },
   { name: "LEYES", href: "/#ley" },
   { name: "MANABÍ", href: "/#logros-manabi" },
+  { name: "CONCURSO IA", href: "/concurso-ia" },
   { name: "AGENDA INTERNACIONAL", href: "/#agenda-internacional" },
 ];
 
