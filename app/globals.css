@@ -60,3 +60,34 @@ body {
 html, body {
   overflow-x: hidden;
 }
+
+/* =============================
+   FIX iOS ZOOM EN INPUTS
+   --------------------------------
+   iOS Safari hace zoom automático cuando el font-size del input es < 16px.
+   Forzamos 16px en mobile para que el teclado NO dispare zoom.
+   En desktop usamos Tailwind normal (text-sm = 14px) sin problema.
+============================= */
+@media screen and (max-width: 768px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* Permitir tap rápido sin delay de 300ms en mobile */
+html {
+  touch-action: manipulation;
+}
+
+/* Selección de texto con color de marca */
+::selection {
+  background: rgba(111, 44, 145, 0.2);
+  color: #1d1d1f;
+}
+
+/* Smooth scroll cuando se hace click en anchors (#inicio, #buzon, etc.) */
+html {
+  scroll-behavior: smooth;
+}
