@@ -20,9 +20,7 @@ export default function TestVersionOverlay() {
       <div className="fixed top-0 left-0 right-0 z-[9999] bg-red-600 text-white py-1.5 md:py-2 px-3 shadow-lg pointer-events-none">
         <div className="max-w-[1400px] mx-auto flex items-center justify-center gap-2 text-[10px] md:text-xs font-black uppercase tracking-widest text-center">
           <span aria-hidden>⚠️</span>
-          <span>
-            Versión de prueba · Pendiente de aprobación y pago para activación
-          </span>
+          <span>Test Version · Pending approval</span>
           <span aria-hidden>⚠️</span>
         </div>
       </div>
@@ -31,10 +29,7 @@ export default function TestVersionOverlay() {
       <div className="fixed bottom-0 left-0 right-0 z-[9999] bg-red-600 text-white py-1.5 md:py-2 px-3 shadow-lg pointer-events-none">
         <div className="max-w-[1400px] mx-auto flex items-center justify-center gap-2 text-[10px] md:text-xs font-black uppercase tracking-widest text-center">
           <span aria-hidden>⚠️</span>
-          <span>
-            Esta es una versión preliminar — Contenido pendiente de
-            confirmación
-          </span>
+          <span>Test Version · Preview only</span>
           <span aria-hidden>⚠️</span>
         </div>
       </div>
@@ -59,7 +54,7 @@ export default function TestVersionOverlay() {
                 lineHeight: 1,
               }}
             >
-              VERSIÓN DE PRUEBA · VERSIÓN DE PRUEBA · VERSIÓN DE PRUEBA
+              TEST VERSION · TEST VERSION · TEST VERSION · TEST VERSION
             </div>
           ))}
         </div>
