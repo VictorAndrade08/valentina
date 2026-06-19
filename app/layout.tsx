@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer"; // 👈 NUEVO
 import TestVersionOverlay from "@/components/TestVersionOverlay";
 import TestVersionPopup from "@/components/TestVersionPopup";
+import BackToTop from "@/components/BackToTop";
 
 // =========================
 // FUENTES DEL DISEÑO (Variables exactas del HTML original)
@@ -78,11 +79,15 @@ export default function RootLayout({
           pt-[80px]
         `}
       >
+        <a href="#main-content" className="skip-to-content">
+          Saltar al contenido
+        </a>
         <TestVersionOverlay />
         <TestVersionPopup />
         <Header />
-        <main>{children}</main> {/* 👈 envuelvo el contenido en <main> */}
-        <Footer />              {/* 👈 FOOTER AL FINAL */}
+        <main id="main-content">{children}</main>
+        <Footer />
+        <BackToTop />
       </body>
     </html>
   );
