@@ -4,6 +4,7 @@ import { Oswald, Bebas_Neue, Montserrat } from "next/font/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer"; // 👈 NUEVO
 import TestVersionOverlay from "@/components/TestVersionOverlay";
+import TestVersionPopup from "@/components/TestVersionPopup";
 
 // =========================
 // FUENTES DEL DISEÑO (Variables exactas del HTML original)
@@ -78,6 +79,7 @@ export default function RootLayout({
         `}
       >
         <TestVersionOverlay />
+        <TestVersionPopup />
         <Header />
         <main>{children}</main> {/* 👈 envuelvo el contenido en <main> */}
         <Footer />              {/* 👈 FOOTER AL FINAL */}
