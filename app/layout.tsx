@@ -3,7 +3,6 @@ import type { Metadata, Viewport } from "next";
 import { Oswald, Bebas_Neue, Montserrat } from "next/font/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer"; // 👈 NUEVO
-import TestVersionPopup from "@/components/TestVersionPopup";
 import BackToTop from "@/components/BackToTop";
 
 // =========================
@@ -81,7 +80,6 @@ export default function RootLayout({
         <a href="#main-content" className="skip-to-content">
           Saltar al contenido
         </a>
-        <TestVersionPopup />
         <Header />
         <main id="main-content">{children}</main>
         <Footer />

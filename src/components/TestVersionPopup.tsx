@@ -12,7 +12,7 @@
  *   setear ENABLED = false acá abajo. Único cambio necesario.
  */
 
-const ENABLED = true;
+const ENABLED = false;
 
 export default function TestVersionPopup() {
   if (!ENABLED) return null;
