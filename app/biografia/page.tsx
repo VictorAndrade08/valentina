@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { 
@@ -219,13 +218,11 @@ export default function AboutBio() {
             >
               <div className="relative z-10 w-full aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl border-4 border-white bg-slate-100">
                 {data.hero.imageMain ? (
-                  <Image
+                  <img
                     src={data.hero.imageMain}
                     alt={data.hero.title}
-                    fill
-                    className="object-cover"
-                    priority
-                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className="absolute inset-0 w-full h-full object-cover"
+                    loading="eager"
                   />
                 ) : (
                    <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">Sin imagen</div>
@@ -235,11 +232,11 @@ export default function AboutBio() {
               {/* Imagen secundaria (Oculta en móvil para limpiar la vista) */}
               {data.hero.imageSec && (
                 <div className="absolute -bottom-10 -right-10 w-2/3 aspect-square rounded-2xl overflow-hidden shadow-xl border-4 border-white z-20 hidden lg:block bg-[#6F2C91]">
-                   <Image
+                   <img
                      src={data.hero.imageSec}
                      alt="Detalle"
-                     fill
-                     className="object-cover opacity-90"
+                     className="absolute inset-0 w-full h-full object-cover opacity-90"
+                     loading="lazy"
                    />
                 </div>
               )}
@@ -369,12 +366,11 @@ export default function AboutBio() {
                     className={`${desktopClasses} relative rounded-2xl overflow-hidden group bg-slate-100 h-[250px] md:h-auto`}
                   >
                     {item.image ? (
-                      <Image 
-                        src={item.image} 
-                        alt={item.title || "Galería"} 
-                        fill 
-                        className="object-cover transition-transform duration-700 group-hover:scale-110"
-                        sizes="(max-width: 768px) 100vw, 33vw"
+                      <img
+                        src={item.image}
+                        alt={item.title || "Galería"}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        loading="lazy"
                       />
                     ) : (
                       <div className="flex items-center justify-center w-full h-full bg-slate-200"><AlertCircle className="text-slate-400" /></div>

@@ -13,16 +13,17 @@ const oswald = Oswald({
 interface MenuItem {
   name: string;
   href: string;
+  hideUntilXL?: boolean; // En lg (1024-1279) ocultar para que no haya cramping
 }
 
 const navItems: MenuItem[] = [
   { name: "INICIO", href: "/#inicio" },
   { name: "BIOGRAFÍA", href: "/biografia" },
-  { name: "ACERCA DE MÍ", href: "/#acerca-de-mi" },
+  { name: "ACERCA DE MÍ", href: "/#acerca-de-mi", hideUntilXL: true },
   { name: "LEYES", href: "/#ley" },
   { name: "MANABÍ", href: "/#logros-manabi" },
   { name: "BECAS", href: "/becas" },
-  { name: "AGENDA INTERNACIONAL", href: "/#agenda-internacional" },
+  { name: "AGENDA INTERNACIONAL", href: "/#agenda-internacional", hideUntilXL: true },
 ];
 
 const Header: React.FC = () => {
@@ -42,12 +43,12 @@ const Header: React.FC = () => {
         </Link>
 
         {/* NAVEGACIÓN DESKTOP */}
-        <nav className="hidden lg:flex items-center gap-5 xl:gap-8">
+        <nav className="hidden lg:flex items-center gap-4 xl:gap-7">
           {navItems.map((item) => (
             <Link
               key={item.name}
               href={item.href}
-              className={`text-white ${oswald.className} text-[13px] xl:text-[14px] font-bold uppercase tracking-widest hover:text-[#EAE84B] transition-all relative group whitespace-nowrap`}
+              className={`text-white ${oswald.className} text-[13px] xl:text-[14px] font-bold uppercase tracking-widest hover:text-[#EAE84B] transition-all relative group whitespace-nowrap ${item.hideUntilXL ? "hidden xl:inline-block" : ""}`}
             >
               {item.name}
               <span className="absolute bottom-[-4px] left-0 w-0 h-[2px] bg-[#EAE84B] transition-all group-hover:w-full"></span>

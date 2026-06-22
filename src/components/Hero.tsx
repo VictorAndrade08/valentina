@@ -151,7 +151,9 @@ export default function Hero() {
                     {slide.img && (
                       <img
                         src={slide.img}
-                        alt={`Slide ${i + 1}`}
+                        alt={`Banner ${i + 1} - Valentina Centeno`}
+                        loading={i === 0 ? "eager" : "lazy"}
+                        fetchPriority={i === 0 ? "high" : "auto"}
                         className="
                           w-full h-full
                           object-contain object-center
@@ -164,7 +166,9 @@ export default function Hero() {
                   slide.img && (
                     <img
                       src={slide.img}
-                      alt={`Slide ${i + 1}`}
+                      alt={`Banner ${i + 1} - Valentina Centeno`}
+                      loading={i === 0 ? "eager" : "lazy"}
+                      fetchPriority={i === 0 ? "high" : "auto"}
                       className="
                         w-full h-full
                         object-contain object-center
@@ -179,22 +183,27 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* INDICADORES (PUNTOS) */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-4 z-20">
+      {/* INDICADORES (PUNTOS) — tap target accesible (~36px) con dot visual pequeño */}
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-20">
         {slides.map((_, i) => (
           <button
             key={i}
             onClick={() => setIndex(i)}
             aria-label={`Ir a slide ${i + 1}`}
-            className={`
-              rounded-full transition-all duration-300 shadow-sm border border-white/20
-              ${
-                i === index
-                  ? "bg-[#EAE84B] w-3 h-3 scale-110 shadow-[0_0_10px_rgba(234,232,75,0.6)]"
-                  : "bg-white/40 w-2 h-2 hover:bg-white/90"
-              }
-            `}
-          />
+            aria-current={i === index ? "true" : undefined}
+            className="p-3 flex items-center justify-center group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EAE84B] rounded-full"
+          >
+            <span
+              className={`
+                block rounded-full transition-all duration-300 shadow-sm border border-white/20
+                ${
+                  i === index
+                    ? "bg-[#EAE84B] w-3 h-3 scale-110 shadow-[0_0_10px_rgba(234,232,75,0.6)]"
+                    : "bg-white/40 w-2 h-2 group-hover:bg-white/90 group-hover:scale-110"
+                }
+              `}
+            />
+          </button>
         ))}
       </div>
     </section>

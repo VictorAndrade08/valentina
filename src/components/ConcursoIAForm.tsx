@@ -91,7 +91,7 @@ export default function ConcursoIAForm() {
       return;
     }
     if (f.size > 5 * 1024 * 1024) {
-      alert("El archivo supera 5MB.");
+      setError("El archivo supera 5MB. Por favor subí uno más liviano.");
       e.target.value = "";
       setFileName("");
       return;

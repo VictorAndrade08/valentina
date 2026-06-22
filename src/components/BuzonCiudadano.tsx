@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { FaWhatsapp } from "react-icons/fa";
 import { getSupabase } from "@/lib/supabaseClient";
+
+type Feedback = { type: "success" | "error"; message: string } | null;
 
 const WHATSAPP_DEST_NUMBER = "593963730513";
 const STORAGE_BUCKET = "buzon-archivos";
@@ -31,7 +33,16 @@ export default function BuzonCiudadano() {
   const [fileName, setFileName] = useState<string>(
     "Ningún archivo seleccionado"
   );
+  const [feedback, setFeedback] = useState<Feedback>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Auto-dismiss success después de 6 segundos
+  useEffect(() => {
+    if (feedback?.type === "success") {
+      const timer = setTimeout(() => setFeedback(null), 6000);
+      return () => clearTimeout(timer);
+    }
+  }, [feedback]);
 
   const onlyLetters = (value: string) =>
     value.replace(/[^a-zA-ZÁÉÍÓÚáéíóúÑñüÜ\s]/g, "");
@@ -56,17 +67,18 @@ export default function BuzonCiudadano() {
     }
     const allowed = ["image/jpeg", "image/png", "application/pdf"];
     if (!allowed.includes(file.type)) {
-      alert("Solo se permiten imágenes JPG/PNG o PDF.");
+      setFeedback({ type: "error", message: "Solo se permiten imágenes JPG/PNG o PDF." });
       e.target.value = "";
       setFileName("Ningún archivo seleccionado");
       return;
     }
     if (file.size > 1024 * 1024) {
-      alert("El archivo supera el límite de 1MB.");
+      setFeedback({ type: "error", message: "El archivo supera el límite de 1MB." });
       e.target.value = "";
       setFileName("Ningún archivo seleccionado");
       return;
     }
+    setFeedback(null);
     setFileName(file.name);
   };
 
@@ -96,9 +108,10 @@ export default function BuzonCiudadano() {
     if (loading) return;
     const { nombre, canton, correo, whatsapp, asunto, mensaje } = formState;
     if (!nombre || !canton || !correo || !whatsapp || !asunto || !mensaje) {
-      alert("Por favor completa todos los campos antes de enviar.");
+      setFeedback({ type: "error", message: "Por favor completá todos los campos antes de enviar." });
       return;
     }
+    setFeedback(null);
     if (!acceptedTerms) {
       setShowTermsError(true);
       return;
@@ -149,7 +162,7 @@ export default function BuzonCiudadano() {
         throw new Error(insertError.message);
       }
 
-      alert("¡Gracias! Tu mensaje ha sido enviado.");
+      setFeedback({ type: "success", message: "¡Gracias! Tu mensaje fue enviado. Te responderemos pronto." });
       formElement.reset();
       setFormState({
         nombre: "",
@@ -165,7 +178,7 @@ export default function BuzonCiudadano() {
     } catch (err) {
       const msg =
         err instanceof Error ? err.message : "Error enviando los datos.";
-      alert("Error: " + msg);
+      setFeedback({ type: "error", message: msg });
     }
     setLoading(false);
   };
@@ -195,7 +208,36 @@ export default function BuzonCiudadano() {
           <div className="absolute top-0 left-0 w-full h-2 md:h-3 bg-[#EAE84B]" />
           
           <form onSubmit={handleSubmit} encType="multipart/form-data" noValidate className="space-y-6 md:space-y-8 mt-4">
-            
+
+            {/* BANNER DE FEEDBACK (success / error) */}
+            {feedback && (
+              <div
+                role={feedback.type === "error" ? "alert" : "status"}
+                aria-live={feedback.type === "error" ? "assertive" : "polite"}
+                className={`
+                  flex items-start gap-3 rounded-2xl border-2 p-4 md:p-5
+                  ${feedback.type === "success"
+                    ? "bg-green-50 border-green-300 text-green-800"
+                    : "bg-red-50 border-red-300 text-red-800"}
+                `}
+              >
+                <span className="text-2xl leading-none shrink-0" aria-hidden>
+                  {feedback.type === "success" ? "✓" : "⚠"}
+                </span>
+                <p className="text-sm md:text-base font-medium leading-relaxed flex-1">
+                  {feedback.message}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setFeedback(null)}
+                  aria-label="Cerrar mensaje"
+                  className="text-current opacity-60 hover:opacity-100 text-xl shrink-0 px-2"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+
             {/* Grid 2 Columnas */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
               <div className="space-y-2">

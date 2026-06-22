@@ -97,7 +97,7 @@ export default function ProyectosQueVienen() {
           >
             {/* Imagen Inmersiva */}
             {proy.imagen && (
-              <img src={proy.imagen} className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt="" />
+              <img src={proy.imagen} className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt={proy.titulo} loading="lazy" />
             )}
             
             {/* Gradiente Morado Institucional */}
