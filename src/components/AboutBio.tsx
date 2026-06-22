@@ -38,7 +38,7 @@ export default function AboutBio() {
     return !val || val.trim() === "" ? fallback : val;
   };
 
-  const videoUrl = get("video", "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2025/12/copy_C43FC71E-9FD5-41A2-B37E-88F0523A6E74.mp4");
+  const videoUrl = get("video", "/imagenes/bio-video.mp4");
 
   return (
     <section id="acerca-de-mi" className="w-full bg-[#FDFDFD] py-16 md:py-24 border-t-[6px] border-[#6F2C91] overflow-hidden">

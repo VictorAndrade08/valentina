@@ -43,7 +43,7 @@ export default function PresentacionFormacionDual() {
 
   const getGallery = () => {
     const galleryString = get("fd_galeria", "");
-    if (!galleryString) return ["https://via.placeholder.com/1080x1920?text=Imagen+Próximamente"];
+    if (!galleryString) return ["/imagenes/placeholder-iniciativa.svg"];
     return galleryString.split(",").map(url => url.trim());
   };
 

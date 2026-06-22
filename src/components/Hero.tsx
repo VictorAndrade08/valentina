@@ -13,27 +13,27 @@ type HeroSlide = {
 const fallbackSlides: HeroSlide[] = [
   {
     id: "fb-1",
-    img: "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2025/12/Banners-Pagina-WEB_Mesa-de-trabajo-1-7.webp",
+    img: "/imagenes/hero-1.webp",
     link: "#buzon",
   },
   {
     id: "fb-2",
-    img: "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2025/12/Banners-Pagina-WEB-03.webp",
+    img: "/imagenes/hero-2.webp",
     link: "#buzon",
   },
   {
     id: "fb-3",
-    img: "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2026/01/Valentina-Banner_Mesa-de-trabajo-1-copia-2.jpg.webp",
+    img: "/imagenes/hero-3.webp",
     link: "#buzon",
   },
   {
     id: "fb-4",
-    img: "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2026/01/Valentina-Banner1_Mesa-de-trabajo-1-copia-3.webp",
+    img: "/imagenes/hero-4.webp",
     link: "#ley",
   },
   {
     id: "fb-5",
-    img: "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2026/03/BannerAI.webp",
+    img: "/imagenes/hero-banner-ai.webp",
     link: "concurso",
   },
 ];

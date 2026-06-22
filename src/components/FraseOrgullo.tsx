@@ -16,8 +16,7 @@ export default function FraseOrgullo() {
             overflow-hidden
           "
           style={{
-            backgroundImage:
-              "url('https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2025/12/port-1.webp')",
+            backgroundImage: "url('/imagenes/frase-port.webp')",
           }}
         />
       </div>

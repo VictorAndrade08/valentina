@@ -32,7 +32,7 @@ export default function ProyectosQueVienen() {
         estado: "PLANIFICACIÓN",
         entrega: "Q3 2026",
         descripcion: "Un espacio dedicado al desarrollo de habilidades digitales para jóvenes manabitas.",
-        imagen: "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2025/12/PUERTO-DE-MANTA-3.jpg"
+        imagen: "/imagenes/proyecto-puerto-manta.jpg"
       },
       {
         id: "2",
@@ -41,7 +41,7 @@ export default function ProyectosQueVienen() {
         estado: "PRÓXIMAMENTE",
         entrega: "Agosto 2026",
         descripcion: "Líneas de crédito y tecnificación para pequeños productores de la zona norte.",
-        imagen: "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2025/12/ZONAS-FRANCAS-2.webp"
+        imagen: "/imagenes/proyecto-zonas-francas.webp"
       },
       {
         id: "3",
@@ -50,7 +50,7 @@ export default function ProyectosQueVienen() {
         estado: "EN PROCESO",
         entrega: "Diciembre 2026",
         descripcion: "Extensión de redes de alcantarillado y agua potable para parroquias rurales.",
-        imagen: "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2025/12/ALIVIO-FINANCIERO-BIESS.webp"
+        imagen: "/imagenes/proyecto-biess.webp"
       }
     ];
     setProyectos(mockData);

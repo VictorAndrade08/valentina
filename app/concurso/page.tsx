@@ -191,7 +191,7 @@ export default function ConcursoForm() {
         
         <div className="max-w-[900px] mx-auto mb-16 rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] relative z-10 border-4 md:border-8 border-white bg-white group cursor-default">
           <img 
-            src="https://darkturquoise-capybara-951908.hostingersite.com/wp-content/uploads/2026/03/BannerAI.jpg.webp" 
+            src="/imagenes/concurso-banner.webp"
             alt="Banner Concurso de Proyectos" 
             className="w-full h-auto object-cover transform transition-transform duration-700 group-hover:scale-[1.03]"
           />

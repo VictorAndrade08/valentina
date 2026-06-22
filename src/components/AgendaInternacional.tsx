@@ -37,8 +37,7 @@ const fallback: AgendaData = {
   ],
   quote:
     '"Con este liderazgo, llevo al Ecuador a los espacios donde se toman decisiones que impactan al mundo."',
-  image:
-    "https://peachpuff-cod-624982.hostingersite.com/wp-content/uploads/2025/12/ONU-UIP-1.webp",
+  image: "/imagenes/agenda-onu.webp",
 };
 
 export default function AgendaInternacional() {
