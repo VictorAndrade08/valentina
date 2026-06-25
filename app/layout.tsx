@@ -33,9 +33,9 @@ const montserrat = Montserrat({
 // METADATA GLOBAL
 // =========================
 export const metadata: Metadata = {
-  title: "Valentina Centeno | Asambleísta Nacional",
+  title: "Valentina Centeno | Asambleísta Ecuatoriana",
   description:
-    "Sitio oficial de Valentina Centeno, Asambleísta Nacional por la Bancada ADN.",
+    "Sitio oficial de Valentina Centeno, Asambleísta ecuatoriana por Acción Democrática Nacional.",
   manifest: "/site.webmanifest",
   icons: {
     icon: [
