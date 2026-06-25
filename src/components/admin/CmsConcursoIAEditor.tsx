@@ -13,6 +13,11 @@ type ConcursoIA = {
   fecha_fin: string;
   link_bases: string;
   activo: boolean;
+  // Fase 2 — bases completas
+  cronograma: string;
+  premios: string;
+  obligaciones: string;
+  contacto: string;
 };
 
 const EMPTY: ConcursoIA = {
@@ -24,6 +29,10 @@ const EMPTY: ConcursoIA = {
   fecha_fin: "",
   link_bases: "",
   activo: true,
+  cronograma: "",
+  premios: "",
+  obligaciones: "",
+  contacto: "",
 };
 
 const STORAGE_BUCKET = "cms-imagenes";
@@ -60,6 +69,10 @@ export default function CmsConcursoIAEditor() {
           fecha_fin: r.fecha_fin || "",
           link_bases: r.link_bases || "",
           activo: r.activo ?? true,
+          cronograma: r.cronograma || "",
+          premios: r.premios || "",
+          obligaciones: r.obligaciones || "",
+          contacto: r.contacto || "",
         };
         setData(next);
         setOriginal(next);
@@ -112,6 +125,10 @@ export default function CmsConcursoIAEditor() {
         fecha_fin: data.fecha_fin || null,
         link_bases: data.link_bases || null,
         activo: data.activo,
+        cronograma: data.cronograma || null,
+        premios: data.premios || null,
+        obligaciones: data.obligaciones || null,
+        contacto: data.contacto || null,
         updated_at: new Date().toISOString(),
       };
       if (rowId) {
@@ -259,6 +276,70 @@ export default function CmsConcursoIAEditor() {
               setData((p) => ({ ...p, reglas: e.target.value }))
             }
             rows={10}
+            className="w-full py-3 px-4 rounded-xl bg-[#F5F5F7] focus:bg-white border-2 border-transparent focus:border-[#6F2C91] outline-none text-sm text-[#1D1D1F] resize-y"
+          />
+        </div>
+
+        {/* FASE 2 — Bases completas (4 columnas) */}
+        <div className="md:col-span-2 pt-4">
+          <div className="bg-[#EAE84B]/20 border border-[#EAE84B] rounded-xl px-4 py-2">
+            <p className="text-xs font-bold uppercase tracking-wider text-[#6F2C91]">
+              📋 Bases completas (Fase 2) — se muestran como tarjetas en /becas
+            </p>
+            <p className="text-[11px] text-gray-600 mt-1">
+              Si querés ocultar alguna tarjeta, dejá el campo vacío. Una línea por punto.
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-1.5">
+            📅 Cronograma
+          </label>
+          <textarea
+            value={data.cronograma}
+            onChange={(e) => setData((p) => ({ ...p, cronograma: e.target.value }))}
+            rows={6}
+            placeholder="1) Apertura: ..."
+            className="w-full py-3 px-4 rounded-xl bg-[#F5F5F7] focus:bg-white border-2 border-transparent focus:border-[#6F2C91] outline-none text-sm text-[#1D1D1F] resize-y"
+          />
+        </div>
+
+        <div>
+          <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-1.5">
+            🏆 Premios
+          </label>
+          <textarea
+            value={data.premios}
+            onChange={(e) => setData((p) => ({ ...p, premios: e.target.value }))}
+            rows={6}
+            placeholder="• Beca completa para curso de IA..."
+            className="w-full py-3 px-4 rounded-xl bg-[#F5F5F7] focus:bg-white border-2 border-transparent focus:border-[#6F2C91] outline-none text-sm text-[#1D1D1F] resize-y"
+          />
+        </div>
+
+        <div>
+          <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-1.5">
+            📋 Obligaciones del participante
+          </label>
+          <textarea
+            value={data.obligaciones}
+            onChange={(e) => setData((p) => ({ ...p, obligaciones: e.target.value }))}
+            rows={6}
+            placeholder="• Ser estudiante de Manabí..."
+            className="w-full py-3 px-4 rounded-xl bg-[#F5F5F7] focus:bg-white border-2 border-transparent focus:border-[#6F2C91] outline-none text-sm text-[#1D1D1F] resize-y"
+          />
+        </div>
+
+        <div>
+          <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-1.5">
+            ✉️ Contacto
+          </label>
+          <textarea
+            value={data.contacto}
+            onChange={(e) => setData((p) => ({ ...p, contacto: e.target.value }))}
+            rows={6}
+            placeholder="Por consultas, escribí al buzón..."
             className="w-full py-3 px-4 rounded-xl bg-[#F5F5F7] focus:bg-white border-2 border-transparent focus:border-[#6F2C91] outline-none text-sm text-[#1D1D1F] resize-y"
           />
         </div>

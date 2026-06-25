@@ -18,6 +18,7 @@ import BuzonCiudadano from "@/components/BuzonCiudadano";
 import BuzonFloatingCTA from "@/components/BuzonFloatingCTA";
 import CorchoNoticias from "@/components/CorchoNoticias";
 import BannerConcursoIA from "@/components/BannerConcursoIA";
+import OperacionValentia from "@/components/OperacionValentia";
 
 export default function Home() {
   return (
@@ -46,6 +47,9 @@ export default function Home() {
         {/* BLOQUE 3: IMPACTO EMOCIONAL Y TERRITORIAL */}
         <FraseOrgullo />
         <LogrosManabi />
+
+        {/* OPERACIÓN VALENTÍA — sección destacada (CMS, se oculta si no está activa) */}
+        <OperacionValentia />
 
         {/* BLOQUE 4: VISIÓN E INTERNACIONALIZACIÓN */}
         <section className="bg-[#FBFBFD]">

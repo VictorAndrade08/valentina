@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" preserveAspectRatio="xMidYMid slice" role="img" aria-labelledby="ov-title">
+  <title id="ov-title">Operación Valentía — iniciativa ciudadana</title>
+
+  <!-- Fondo morado degradado -->
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7d3aa1"/>
+      <stop offset="60%" stop-color="#6F2C91"/>
+      <stop offset="100%" stop-color="#5a2178"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#EAE84B" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#EAE84B" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="800" height="1000" fill="url(#bg)"/>
+  <rect width="800" height="1000" fill="url(#glow)"/>
+
+  <!-- Patrón decorativo de puntos -->
+  <g opacity="0.08" fill="#EAE84B">
+    <circle cx="120" cy="140" r="3"/>
+    <circle cx="240" cy="220" r="2"/>
+    <circle cx="380" cy="160" r="2.5"/>
+    <circle cx="540" cy="240" r="3"/>
+    <circle cx="680" cy="120" r="2"/>
+    <circle cx="180" cy="380" r="2"/>
+    <circle cx="320" cy="440" r="3"/>
+    <circle cx="640" cy="420" r="2.5"/>
+    <circle cx="100" cy="620" r="2.5"/>
+    <circle cx="280" cy="700" r="2"/>
+    <circle cx="500" cy="660" r="3"/>
+    <circle cx="700" cy="720" r="2"/>
+    <circle cx="200" cy="880" r="2.5"/>
+    <circle cx="420" cy="920" r="3"/>
+    <circle cx="620" cy="860" r="2"/>
+  </g>
+
+  <!-- Marco amarillo punteado -->
+  <rect x="50" y="50" width="700" height="900" fill="none" stroke="#EAE84B" stroke-width="4" stroke-dasharray="24 12" opacity="0.35" rx="40"/>
+
+  <!-- Estrella central (símbolo) -->
+  <g transform="translate(400 380)">
+    <circle r="120" fill="#EAE84B" opacity="0.12"/>
+    <circle r="90" fill="none" stroke="#EAE84B" stroke-width="3" opacity="0.4"/>
+    <g fill="#EAE84B">
+      <polygon points="0,-70 21,-22 71,-22 31,8 46,58 0,28 -46,58 -31,8 -71,-22 -21,-22"/>
+    </g>
+  </g>
+
+  <!-- TEXTO -->
+  <g text-anchor="middle" font-family="Oswald, Arial Black, sans-serif">
+    <text x="400" y="600" fill="#EAE84B" font-size="32" font-weight="700" letter-spacing="8" opacity="0.85">INICIATIVA CIUDADANA</text>
+
+    <text x="400" y="700" fill="#FFFFFF" font-size="92" font-weight="700" letter-spacing="2">OPERACIÓN</text>
+    <text x="400" y="800" fill="#EAE84B" font-size="92" font-weight="700" letter-spacing="2">VALENTÍA</text>
+
+    <line x1="280" y1="850" x2="520" y2="850" stroke="#EAE84B" stroke-width="2" opacity="0.6"/>
+
+    <text x="400" y="900" fill="#FFFFFF" font-size="24" font-weight="500" letter-spacing="4" opacity="0.85">VALENTINA CENTENO</text>
+  </g>
+</svg>

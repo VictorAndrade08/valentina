@@ -12,6 +12,7 @@ import CmsLogrosEditor from "@/components/admin/CmsLogrosEditor";
 import CmsBiografiaEditor from "@/components/admin/CmsBiografiaEditor";
 import CmsNoticiasEditor from "@/components/admin/CmsNoticiasEditor";
 import CmsConcursoIAEditor from "@/components/admin/CmsConcursoIAEditor";
+import CmsOperacionValentiaEditor from "@/components/admin/CmsOperacionValentiaEditor";
 
 const PASSWORD_ACCESO = "admin123";
 
@@ -114,6 +115,8 @@ type MensajeStats = {
   cantonesOrdenados: [string, number][];
   asuntosOrdenados: [string, number][];
   maxMes: number;
+  // BONUS Fase 2 — conteo por estado del caso (Operación Valentía / buzón)
+  porEstado: { nuevo: number; en_proceso: number; resuelto: number };
 };
 
 type ProyectoStats = {
@@ -135,6 +138,7 @@ function computeMensajeStats(msgs: Mensaje[]): MensajeStats {
   const porMes = new Map<string, number>();
   const porCanton = new Map<string, number>();
   const porAsunto = new Map<string, number>();
+  const porEstado = { nuevo: 0, en_proceso: 0, resuelto: 0 };
   msgs.forEach((m) => {
     const mk = monthKey(m.created_at);
     porMes.set(mk, (porMes.get(mk) || 0) + 1);
@@ -142,6 +146,9 @@ function computeMensajeStats(msgs: Mensaje[]): MensajeStats {
     porCanton.set(canton, (porCanton.get(canton) || 0) + 1);
     const asunto = (m.asunto || "Sin asunto").trim();
     porAsunto.set(asunto, (porAsunto.get(asunto) || 0) + 1);
+    const est = (m.estado || "nuevo") as keyof typeof porEstado;
+    if (est in porEstado) porEstado[est]++;
+    else porEstado.nuevo++;
   });
   const mesesOrdenados = Array.from(porMes.entries()).sort((a, b) =>
     a[0] < b[0] ? 1 : -1
@@ -165,6 +172,7 @@ function computeMensajeStats(msgs: Mensaje[]): MensajeStats {
     cantonesOrdenados,
     asuntosOrdenados,
     maxMes,
+    porEstado,
   };
 }
 
@@ -653,7 +661,46 @@ export default function AdminPage() {
       PURPLE
     );
 
-    cursorY = kpiY + kpiBoxHeight + 30;
+    cursorY = kpiY + kpiBoxHeight + 25;
+
+    // BONUS Fase 2 — Estado de los casos (Operación Valentía)
+    doc.setTextColor(...DARK);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.text("Estado de los casos", margin, cursorY);
+    cursorY += 10;
+
+    const estadoY = cursorY + 8;
+    const NEW: [number, number, number] = [156, 163, 175]; // gray-400 estilo "nuevo"
+    const PROC: [number, number, number] = [245, 158, 11]; // amber-500 "en_proceso"
+    const RES: [number, number, number] = [16, 185, 129];  // emerald-500 "resuelto"
+
+    drawKpi(
+      margin,
+      "Nuevos / Sin abrir",
+      String(stats.porEstado.nuevo),
+      "esperan revisión",
+      NEW,
+      [255, 255, 255]
+    );
+    drawKpi(
+      margin + kpiBoxWidth + 10,
+      "En proceso",
+      String(stats.porEstado.en_proceso),
+      "en seguimiento",
+      PROC,
+      [255, 255, 255]
+    );
+    drawKpi(
+      margin + (kpiBoxWidth + 10) * 2,
+      "Resueltos",
+      String(stats.porEstado.resuelto),
+      "cerrados",
+      RES,
+      [255, 255, 255]
+    );
+
+    cursorY = estadoY + kpiBoxHeight + 30;
 
     // Mensajes por mes
     autoTable(doc, {
@@ -1017,10 +1064,24 @@ export default function AdminPage() {
     doc.addPage();
     let y = drawSectionTitle("SECCIÓN 1 — BUZÓN CIUDADANO", `${statsLocal.totalGeneral} mensajes`, margin);
 
+    // BONUS Fase 2 — Estado de los casos (Operación Valentía)
     doc.setTextColor(...DARK);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
-    doc.text("1.1 Mensajes por mes (con variación vs mes anterior)", margin, y);
+    doc.text("1.1 Estado de los casos", margin, y);
+    y += 8;
+
+    const stateW = (pageWidth - margin * 2 - 20) / 3;
+    const stateH = 60;
+    drawKpi(margin, y, stateW, stateH, "Nuevos / Sin abrir", String(statsLocal.porEstado.nuevo), "esperan revisión", [156, 163, 175], WHITE);
+    drawKpi(margin + stateW + 10, y, stateW, stateH, "En proceso", String(statsLocal.porEstado.en_proceso), "en seguimiento activo", [245, 158, 11], WHITE);
+    drawKpi(margin + (stateW + 10) * 2, y, stateW, stateH, "Resueltos", String(statsLocal.porEstado.resuelto), "casos cerrados", [16, 185, 129], WHITE);
+    y += stateH + 25;
+
+    doc.setTextColor(...DARK);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.text("1.2 Mensajes por mes (con variación vs mes anterior)", margin, y);
     y += 10;
 
     const buzonMesAsc = [...statsLocal.mesesOrdenados].reverse();
@@ -1046,7 +1107,7 @@ export default function AdminPage() {
     doc.setTextColor(...DARK);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
-    doc.text("1.2 Top 15 ubicaciones (cantón / provincia)", margin, y);
+    doc.text("1.3 Top 15 ubicaciones (cantón / provincia)", margin, y);
 
     const totalMsg = Math.max(statsLocal.totalGeneral, 1);
     autoTable(doc, {
@@ -1066,7 +1127,7 @@ export default function AdminPage() {
     if (y > pageHeight - 150) { doc.addPage(); y = margin; }
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
-    doc.text("1.3 Top 15 temas (asunto del mensaje)", margin, y);
+    doc.text("1.4 Top 15 temas (asunto del mensaje)", margin, y);
 
     autoTable(doc, {
       startY: y + 10,
@@ -1083,7 +1144,7 @@ export default function AdminPage() {
 
     // 1.4 Listado COMPLETO de mensajes
     doc.addPage();
-    y = drawSectionTitle("1.4 LISTADO COMPLETO DE MENSAJES", `${msgsUsed.length} mensajes`, margin);
+    y = drawSectionTitle("1.5 LISTADO COMPLETO DE MENSAJES", `${msgsUsed.length} mensajes`, margin);
 
     if (msgsUsed.length === 0) {
       doc.setFont("helvetica", "italic");
@@ -2705,6 +2766,7 @@ type ContenidoSeccion =
   | "formacion"
   | "noticias"
   | "concurso-ia"
+  | "operacion-valentia"
   | "agenda"
   | "leyes"
   | "logros"
@@ -2719,6 +2781,7 @@ function ContenidoTab() {
     { key: "formacion", label: "Formación Dual" },
     { key: "noticias", label: "Noticias / Anuncios" },
     { key: "concurso-ia", label: "Becas IA" },
+    { key: "operacion-valentia", label: "Operación Valentía" },
     { key: "agenda", label: "Agenda Internacional" },
     { key: "leyes", label: "Leyes / Logros legislativos" },
     { key: "logros", label: "Logros Manabí" },
@@ -2781,6 +2844,7 @@ function ContenidoTab() {
       )}
       {seccion === "noticias" && <CmsNoticiasEditor />}
       {seccion === "concurso-ia" && <CmsConcursoIAEditor />}
+      {seccion === "operacion-valentia" && <CmsOperacionValentiaEditor />}
       {seccion === "agenda" && <CmsAgendaEditor />}
       {seccion === "leyes" && <CmsLeyesEditor />}
       {seccion === "logros" && <CmsLogrosEditor />}

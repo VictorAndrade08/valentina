@@ -15,6 +15,10 @@ type Data = {
   fecha_inicio: string;
   fecha_fin: string;
   link_bases: string;
+  cronograma: string;
+  premios: string;
+  obligaciones: string;
+  contacto: string;
 };
 
 const EMPTY: Data = {
@@ -25,6 +29,10 @@ const EMPTY: Data = {
   fecha_inicio: "",
   fecha_fin: "",
   link_bases: "",
+  cronograma: "",
+  premios: "",
+  obligaciones: "",
+  contacto: "",
 };
 
 const fmtFecha = (s: string) => {
@@ -99,6 +107,10 @@ export default function ConcursoIAPage() {
           fecha_inicio: r.fecha_inicio || "",
           fecha_fin: r.fecha_fin || "",
           link_bases: r.link_bases || "",
+          cronograma: r.cronograma || "",
+          premios: r.premios || "",
+          obligaciones: r.obligaciones || "",
+          contacto: r.contacto || "",
         });
       } catch {
         // silencio: deja los EMPTY si falla
@@ -249,6 +261,74 @@ export default function ConcursoIAPage() {
                 </a>
               </div>
             )}
+          </div>
+        </section>
+      )}
+
+      {/* CRONOGRAMA / PREMIOS / OBLIGACIONES / CONTACTO — Fase 2 */}
+      {(data.cronograma || data.premios || data.obligaciones || data.contacto) && (
+        <section className="bg-[#FBFBFD] py-20">
+          <div className="max-w-[1100px] mx-auto px-6">
+            <div className="text-center mb-12">
+              <span className="inline-block px-4 py-1.5 rounded-full bg-[#EAE84B] text-[#6F2C91] font-bold text-xs uppercase tracking-widest mb-3">
+                Información adicional
+              </span>
+              <h2
+                className={`${oswald.className} text-3xl md:text-5xl font-black uppercase text-[#1D1D1F] leading-tight`}
+              >
+                Detalles de la <span className="text-[#6F2C91]">convocatoria</span>
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
+              {data.cronograma && (
+                <article className="bg-white rounded-3xl border-2 border-[#6F2C91]/15 p-6 md:p-8 shadow-sm hover:shadow-lg transition-shadow">
+                  <h3 className={`${oswald.className} flex items-center gap-3 text-xl md:text-2xl font-black uppercase text-[#6F2C91] mb-4`}>
+                    <span aria-hidden className="text-3xl">📅</span>
+                    Cronograma
+                  </h3>
+                  <div className="text-[#424245] text-sm md:text-base leading-relaxed whitespace-pre-line">
+                    {data.cronograma}
+                  </div>
+                </article>
+              )}
+
+              {data.premios && (
+                <article className="bg-white rounded-3xl border-2 border-[#EAE84B]/40 p-6 md:p-8 shadow-sm hover:shadow-lg transition-shadow">
+                  <h3 className={`${oswald.className} flex items-center gap-3 text-xl md:text-2xl font-black uppercase text-[#6F2C91] mb-4`}>
+                    <span aria-hidden className="text-3xl">🏆</span>
+                    Premios
+                  </h3>
+                  <div className="text-[#424245] text-sm md:text-base leading-relaxed whitespace-pre-line">
+                    {data.premios}
+                  </div>
+                </article>
+              )}
+
+              {data.obligaciones && (
+                <article className="bg-white rounded-3xl border-2 border-[#6F2C91]/15 p-6 md:p-8 shadow-sm hover:shadow-lg transition-shadow">
+                  <h3 className={`${oswald.className} flex items-center gap-3 text-xl md:text-2xl font-black uppercase text-[#6F2C91] mb-4`}>
+                    <span aria-hidden className="text-3xl">📋</span>
+                    Obligaciones del participante
+                  </h3>
+                  <div className="text-[#424245] text-sm md:text-base leading-relaxed whitespace-pre-line">
+                    {data.obligaciones}
+                  </div>
+                </article>
+              )}
+
+              {data.contacto && (
+                <article className="bg-[#6F2C91] text-white rounded-3xl p-6 md:p-8 shadow-sm hover:shadow-lg transition-shadow">
+                  <h3 className={`${oswald.className} flex items-center gap-3 text-xl md:text-2xl font-black uppercase text-[#EAE84B] mb-4`}>
+                    <span aria-hidden className="text-3xl">✉️</span>
+                    Contacto
+                  </h3>
+                  <div className="text-white/90 text-sm md:text-base leading-relaxed whitespace-pre-line">
+                    {data.contacto}
+                  </div>
+                </article>
+              )}
+            </div>
           </div>
         </section>
       )}
