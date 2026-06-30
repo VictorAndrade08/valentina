@@ -14,6 +14,7 @@ import CmsNoticiasEditor from "@/components/admin/CmsNoticiasEditor";
 import CmsConcursoIAEditor from "@/components/admin/CmsConcursoIAEditor";
 import CmsOperacionValentiaEditor from "@/components/admin/CmsOperacionValentiaEditor";
 import VisitasTab from "@/components/admin/VisitasTab";
+import DashboardTab from "@/components/admin/DashboardTab";
 
 const PASSWORD_ACCESO = "admin123";
 
@@ -52,7 +53,7 @@ type Mensaje = {
   actualizado_at: string | null;
 };
 
-type TabKey = "concurso" | "buzon" | "concurso-ia" | "contenido" | "visitas";
+type TabKey = "dashboard" | "concurso" | "buzon" | "concurso-ia" | "contenido" | "visitas";
 
 type Inscripcion = {
   id: string;
@@ -248,7 +249,7 @@ export default function AdminPage() {
   const [passwordInput, setPasswordInput] = useState("");
   const [errorLogin, setErrorLogin] = useState(false);
 
-  const [tab, setTab] = useState<TabKey>("concurso");
+  const [tab, setTab] = useState<TabKey>("dashboard");
 
   const [proyectos, setProyectos] = useState<Proyecto[]>([]);
   const [loadingProyectos, setLoadingProyectos] = useState(false);
@@ -1441,6 +1442,16 @@ export default function AdminPage() {
         <div className="flex gap-3 mb-10 flex-wrap items-center justify-between">
           <div className="flex gap-3 flex-wrap">
             <button
+              onClick={() => setTab("dashboard")}
+              className={`px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-sm ${
+                tab === "dashboard"
+                  ? "bg-[#1D1D1F] text-[#EAE84B]"
+                  : "bg-white text-gray-500 hover:text-[#6F2C91]"
+              }`}
+            >
+              Dashboard
+            </button>
+            <button
               onClick={() => setTab("concurso")}
               className={`px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-sm ${
                 tab === "concurso"
@@ -2568,6 +2579,10 @@ export default function AdminPage() {
               </div>
             </div>
           </>
+        )}
+
+        {tab === "dashboard" && (
+          <DashboardTab mensajes={mensajes} inscripciones={inscripcionesIA} />
         )}
 
         {tab === "contenido" && <ContenidoTab />}

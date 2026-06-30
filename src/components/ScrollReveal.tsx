@@ -20,6 +20,9 @@ export default function ScrollReveal() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    // No correr animaciones en el admin (interfieren con su UI)
+    if (pathname?.startsWith("/admin")) return;
+
     // Respeta accesibilidad
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReduced) return;
