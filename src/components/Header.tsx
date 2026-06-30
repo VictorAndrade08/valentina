@@ -121,23 +121,24 @@ const Header: React.FC = () => {
               );
             })}
 
-            {/* BOTÓN ENVIAR MENSAJE (Desktop) */}
+            {/* BOTÓN ENVIAR MENSAJE (Desktop) — compacto + nunca wrap */}
             <Link
               href="/#buzon"
               className={`
-                relative overflow-hidden group
-                bg-[#EAE84B] text-[#6F2C91] px-7 py-2.5 rounded-full
-                ${oswald.className} font-bold uppercase text-[15px] tracking-widest
-                shadow-[0_0_20px_rgba(234,232,75,0.3)]
-                hover:shadow-[0_0_25px_rgba(234,232,75,0.6)]
-                hover:bg-white transition-all duration-300 transform hover:-translate-y-1
-                flex items-center gap-2 animate-button-pulse min-h-[44px]
+                relative overflow-hidden group shrink-0
+                bg-[#EAE84B] text-[#6F2C91]
+                px-4 xl:px-6 py-2.5 rounded-full min-h-[44px]
+                ${oswald.className} font-bold uppercase text-[12px] xl:text-[13px] tracking-wider
+                shadow-[0_4px_14px_rgba(234,232,75,0.35)]
+                hover:shadow-[0_6px_20px_rgba(234,232,75,0.55)]
+                hover:bg-white hover:-translate-y-0.5
+                transition-all duration-300
+                flex items-center gap-2 whitespace-nowrap
               `}
             >
-              <div className="shimmer-sweep absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-linear-to-r from-transparent via-white/60 to-transparent opacity-50" />
-              <Mail size={18} className="relative z-10 transition-transform group-hover:scale-110" />
+              <div className="shimmer-sweep absolute top-0 -inset-full h-full w-1/2 z-[5] block transform -skew-x-12 bg-linear-to-r from-transparent via-white/60 to-transparent opacity-50" />
+              <Mail size={16} className="relative z-10 transition-transform group-hover:scale-110" strokeWidth={2.5} />
               <span className="relative z-10">ENVIAR MENSAJE</span>
-              <span className="absolute inset-0 rounded-full animate-ping bg-[#EAE84B] opacity-10 group-hover:hidden"></span>
             </Link>
           </nav>
 
