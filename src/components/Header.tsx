@@ -43,6 +43,9 @@ const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
 
+  // No renderizamos el header público en /admin (el admin tiene su propio shell)
+  if (pathname?.startsWith("/admin")) return null;
+
   // Lock body scroll cuando el menú móvil está abierto
   useEffect(() => {
     if (isMenuOpen) {

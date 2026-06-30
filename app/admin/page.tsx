@@ -1405,8 +1405,38 @@ export default function AdminPage() {
   }
 
   return (
-    <section className="min-h-screen bg-[#FBFBFD] py-12 px-4 md:px-10">
+    <section className="min-h-screen bg-[#FBFBFD] py-6 md:py-10 px-4 md:px-10">
       <div className="max-w-[2800px] mx-auto">
+
+        {/* HEADER PROPIO DEL ADMIN — logo izq + logout der */}
+        <div className="flex items-center justify-between mb-8 md:mb-10 pb-5 border-b border-gray-200">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-[#6F2C91] flex items-center justify-center text-[#EAE84B] font-black text-sm shadow-sm">
+              VC
+            </div>
+            <div className="flex flex-col">
+              <p className="font-black text-[#1D1D1F] text-base md:text-lg leading-none uppercase tracking-wide">
+                Panel Admin
+              </p>
+              <p className="text-[10px] md:text-xs text-gray-500 mt-0.5 leading-none">
+                Valentina Centeno
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsAuthenticated(false)}
+            className="flex items-center gap-2 px-4 md:px-5 py-2.5 rounded-xl bg-white border border-gray-200 hover:border-red-300 hover:bg-red-50 text-gray-600 hover:text-red-600 font-bold text-xs uppercase tracking-widest shadow-sm transition-all"
+            aria-label="Cerrar sesión"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            <span className="hidden sm:inline">Cerrar sesión</span>
+            <span className="sm:hidden">Salir</span>
+          </button>
+        </div>
+
         {/* TABS + REPORTE COMPLETO */}
         <div className="flex gap-3 mb-10 flex-wrap items-center justify-between">
           <div className="flex gap-3 flex-wrap">

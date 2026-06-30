@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { usePathname } from "next/navigation";
 import { Oswald } from "next/font/google";
 
 // =======================
@@ -15,6 +16,10 @@ const oswald = Oswald({
 // FOOTER
 // =======================
 const Footer: React.FC = () => {
+  const pathname = usePathname();
+  // No mostramos el footer público en /admin (el admin tiene su propio shell)
+  if (pathname?.startsWith("/admin")) return null;
+
   return (
     <footer className="bg-[#6F2C91]">
       <div className="max-w-[1400px] mx-auto px-6 md:px-8 py-10 md:py-14 flex flex-col items-center justify-center gap-4">
