@@ -23,7 +23,7 @@ const navItems: MenuItem[] = [
   { name: "LEYES", href: "/#ley" },
   { name: "MANABÍ", href: "/#logros-manabi" },
   { name: "BECAS", href: "/becas" },
-  // OP. VALENTÍA — ocultada del menú hasta lanzamiento oficial (pedido Génesis)
+  { name: "OP. VALENTÍA", href: "/operacion-valentia", hideUntilXL: true },
   { name: "AGENDA INTERNACIONAL", href: "/#agenda-internacional", hideUntilXL: true },
 ];
 

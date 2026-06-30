@@ -10,9 +10,7 @@ const oswald = Oswald({ subsets: ["latin"], weight: ["700"] });
 type Cms = Record<string, string>;
 
 const FALLBACK: Cms = {
-  // Oculto por pedido de Génesis hasta el lanzamiento oficial.
-  // Para reactivar: poner "true" o editar desde el admin.
-  activo: "false",
+  activo: "true",
   tag: "Iniciativa ciudadana",
   titulo: "OPERACIÓN VALENTÍA",
   subtitulo:
