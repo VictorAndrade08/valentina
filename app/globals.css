@@ -25,12 +25,8 @@
   --breakpoint-xs: 400px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* Sitio en light mode siempre — no respetamos dark del sistema
+   para que las brand colors (morado + amarillo) se vean igual a todos. */
 
 /* =============================
    CLASES DE TIPOGRAFÍA (IMPORTANTE)
@@ -136,4 +132,89 @@ html {
 /* Smooth scroll cuando se hace click en anchors (#inicio, #buzon, etc.) */
 html {
   scroll-behavior: smooth;
+}
+
+/* =============================
+   ANIMACIONES UX/UI 2027 — CSS puro, costo cero
+   --------------------------------
+   Trends usados:
+   · Scroll-driven reveal con animation-timeline (Chrome/Edge/Safari 26+)
+   · Stagger natural por nth-child sin JS
+   · Respeta prefers-reduced-motion automáticamente
+============================= */
+
+/* Fade-up al entrar en viewport */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Aplicamos scroll-driven animation a todas las <section> que no sean Hero */
+@supports (animation-timeline: view()) {
+  main > section,
+  main > div > section {
+    animation: fade-up 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 50%;
+  }
+  main > section:first-child,
+  main > div:first-child > section {
+    /* El Hero se ve de una, no fade */
+    animation: none;
+  }
+}
+
+/* Fallback para browsers sin scroll-driven animations:
+   IntersectionObserver vía data-reveal handles. Mientras se carga JS,
+   muestra el contenido con fade-in suave para no ver "flash". */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 600ms cubic-bezier(0.22, 1, 0.36, 1),
+              transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger pequeño para hijos directos en grids */
+.reveal-stagger > * {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 500ms cubic-bezier(0.22, 1, 0.36, 1),
+              transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal-stagger.is-visible > *:nth-child(1) { transition-delay: 60ms; }
+.reveal-stagger.is-visible > *:nth-child(2) { transition-delay: 140ms; }
+.reveal-stagger.is-visible > *:nth-child(3) { transition-delay: 220ms; }
+.reveal-stagger.is-visible > *:nth-child(4) { transition-delay: 300ms; }
+.reveal-stagger.is-visible > *:nth-child(5) { transition-delay: 380ms; }
+.reveal-stagger.is-visible > *:nth-child(6) { transition-delay: 460ms; }
+.reveal-stagger.is-visible > * {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main > section,
+  main > div > section,
+  .reveal,
+  .reveal-stagger > * {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }

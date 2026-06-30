@@ -94,17 +94,46 @@ export default function OperacionValentia() {
       </div>
 
       <div className="relative max-w-[1300px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-        {/* IMAGEN */}
+        {/* POSTER TIPOGRÁFICO — Google Fonts (Oswald), 0 imagen AI */}
         <div className="lg:col-span-5 order-2 lg:order-1">
-          <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border-4 border-[#EAE84B]/20">
-            <img
-              src={imgSrc}
-              alt={cms.titulo || "Operación Valentía"}
-              loading="lazy"
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-            <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#6F2C91] to-transparent pointer-events-none" />
-          </div>
+          {imgSrc && !imgSrc.endsWith(".svg") ? (
+            // Si Génesis sube una imagen real al CMS, se usa esa
+            <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border-4 border-[#EAE84B]/20">
+              <img
+                src={imgSrc}
+                alt={cms.titulo || "Operación Valentía"}
+                loading="lazy"
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#6F2C91] to-transparent pointer-events-none" />
+            </div>
+          ) : (
+            // Default: poster tipográfico con Oswald (Google Fonts)
+            <div
+              className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border-4 border-[#EAE84B]/30 flex flex-col items-center justify-center px-6 text-center"
+              style={{
+                background:
+                  "linear-gradient(135deg, #7d3aa1 0%, #6F2C91 60%, #5a2178 100%)",
+              }}
+              aria-label="Operación Valentía"
+            >
+              <span className={`${oswald.className} text-[#EAE84B]/90 text-xs sm:text-sm font-bold uppercase tracking-[0.4em] mb-4`}>
+                Iniciativa
+              </span>
+              <div className={`${oswald.className} font-bold leading-[0.92] uppercase`}>
+                <div className="text-white text-5xl sm:text-6xl md:text-7xl">
+                  OPERACIÓN
+                </div>
+                <div className="text-[#EAE84B] text-5xl sm:text-6xl md:text-7xl mt-1">
+                  VALENTÍA
+                </div>
+              </div>
+              <div className="w-16 h-[3px] bg-[#EAE84B] my-6 rounded-full" />
+              <span className={`${oswald.className} text-white/80 text-xs sm:text-sm font-bold uppercase tracking-[0.3em]`}>
+                Valentina Centeno
+              </span>
+            </div>
+          )}
         </div>
 
         {/* TEXTO */}

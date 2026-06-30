@@ -117,8 +117,8 @@ export default function Hero() {
       id="inicio"
       className="
         relative w-full
-        aspect-[16/9] max-h-[calc(75vh-72px)]
-        md:aspect-auto md:h-[calc(85vh-80px)] md:min-h-[560px]
+        aspect-[16/9] max-h-[70vh]
+        md:aspect-auto md:h-[78vh] md:min-h-[520px]
         flex items-center justify-center
         overflow-hidden
         bg-[#6F2C91]

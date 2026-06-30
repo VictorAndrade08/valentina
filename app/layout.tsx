@@ -1,9 +1,11 @@
 import "./globals.css";
+import { Suspense } from "react";
 import type { Metadata, Viewport } from "next";
 import { Oswald, Bebas_Neue, Montserrat } from "next/font/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer"; // 👈 NUEVO
 import VisitTracker from "@/components/VisitTracker";
+import TopProgress from "@/components/TopProgress";
 
 // =========================
 // FUENTES DEL DISEÑO (Variables exactas del HTML original)
@@ -74,16 +76,20 @@ export default function RootLayout({
           antialiased
           bg-white
           text-gray-900
-          pt-[72px] md:pt-20
         `}
       >
         <a href="#main-content" className="skip-to-content">
           Saltar al contenido
         </a>
+        <Suspense fallback={null}>
+          <TopProgress />
+        </Suspense>
         <Header />
         <main id="main-content">{children}</main>
         <Footer />
-        <VisitTracker />
+        <Suspense fallback={null}>
+          <VisitTracker />
+        </Suspense>
       </body>
     </html>
   );

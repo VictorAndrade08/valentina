@@ -41,16 +41,7 @@ const navItems: MenuItem[] = [
  */
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
-
-  // Detectar scroll para activar glass-morphism
-  useEffect(() => {
-    const onScroll = () => setIsScrolled(window.scrollY > 20);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   // Lock body scroll cuando el menú móvil está abierto
   useEffect(() => {
@@ -87,28 +78,19 @@ const Header: React.FC = () => {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-          isScrolled
-            ? "bg-[#6F2C91]/90 backdrop-blur-md shadow-lg"
-            : "bg-[#6F2C91] shadow-md"
-        }`}
+        className="relative w-full z-40 bg-[#6F2C91] shadow-md"
         style={{ paddingTop: "env(safe-area-inset-top)" }}
       >
         <div className="mx-auto w-full max-w-[1400px] h-[72px] md:h-[80px] px-5 sm:px-6 md:px-8 flex justify-between items-center">
 
-          {/* LOGO — responsive */}
+          {/* LOGO — nombre completo siempre visible, tamaño escalado por breakpoint */}
           <Link
             href="/"
             onClick={closeMenu}
-            className={`flex items-center text-white ${oswald.className} font-bold tracking-wide transition-opacity hover:opacity-80`}
+            className={`flex items-center text-white ${oswald.className} font-bold transition-opacity hover:opacity-80 whitespace-nowrap`}
             aria-label="Ir a la página de inicio - Valentina Centeno"
           >
-            {/* Mobile xs (<400px): solo iniciales | sm: nombre corto | md+: completo */}
-            <span className="text-xl xs:text-2xl md:hidden">
-              <span className="sm:hidden">VC</span>
-              <span className="hidden sm:inline">VALENTINA C.</span>
-            </span>
-            <span className="hidden md:inline text-2xl lg:text-3xl">
+            <span className="text-lg xs:text-xl sm:text-2xl md:text-3xl lg:text-4xl tracking-tight md:tracking-wide">
               VALENTINA CENTENO
             </span>
           </Link>
@@ -196,19 +178,19 @@ const Header: React.FC = () => {
         aria-hidden={!isMenuOpen}
         tabIndex={-1}
         onClick={closeMenu}
-        className={`fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${
+        className={`fixed inset-0 z-[55] bg-black/40 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${
           isMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
       />
 
-      {/* MENÚ MÓVIL — drawer desde arriba con stagger */}
+      {/* MENÚ MÓVIL — overlay full-screen (independiente del header no-sticky) */}
       <nav
         id="mobile-nav"
         aria-label="Navegación móvil"
         aria-hidden={!isMenuOpen}
         className={`
-          fixed left-0 right-0 z-40 lg:hidden
-          bg-[#6F2C91]/95 backdrop-blur-md border-t border-white/10
+          fixed top-0 left-0 right-0 z-[56] lg:hidden
+          bg-[#6F2C91]/97 backdrop-blur-md
           shadow-2xl
           transition-all duration-300 ease-out
           ${isMenuOpen
@@ -217,11 +199,27 @@ const Header: React.FC = () => {
           }
         `}
         style={{
-          top: "calc(72px + env(safe-area-inset-top))",
-          maxHeight: "calc(100vh - 72px - env(safe-area-inset-top))",
+          paddingTop: "env(safe-area-inset-top)",
+          maxHeight: "100vh",
           overflowY: "auto",
         }}
       >
+        {/* Mini header del overlay: logo + botón X */}
+        <div className="flex items-center justify-between h-[72px] px-5 sm:px-6 border-b border-white/10">
+          <span className={`${oswald.className} text-white text-base font-bold tracking-tight whitespace-nowrap`}>
+            VALENTINA CENTENO
+          </span>
+          <button
+            type="button"
+            onClick={closeMenu}
+            aria-label="Cerrar menú"
+            className="relative w-12 h-12 flex items-center justify-center rounded-xl hover:bg-white/10 active:bg-white/20 transition-colors focus-visible:ring-2 focus-visible:ring-[#EAE84B] focus-visible:outline-none"
+          >
+            <span aria-hidden className="absolute block h-[2.5px] w-7 bg-white rounded-full rotate-45" />
+            <span aria-hidden className="absolute block h-[2.5px] w-7 bg-white rounded-full -rotate-45" />
+          </button>
+        </div>
+
         <div className="flex flex-col items-stretch py-6 px-4 gap-1.5">
           {navItems.map((item, i) => {
             const active = isActive(item.href);
