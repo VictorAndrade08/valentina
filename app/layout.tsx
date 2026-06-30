@@ -12,11 +12,12 @@ import ScrollReveal from "@/components/ScrollReveal";
 // FUENTES DEL DISEÑO (Variables exactas del HTML original)
 // =========================
 
-// --font-boruino  → Oswald (titulares)
+// --font-boruino  → Oswald (titulares). display:swap → render instantáneo.
 const oswald = Oswald({
   subsets: ["latin"],
   variable: "--font-boruino",
   weight: ["500", "700"],
+  display: "swap",
 });
 
 // --font-bebas → Bebas Neue (subtítulos)
@@ -24,20 +25,23 @@ const bebasNeue = Bebas_Neue({
   subsets: ["latin"],
   variable: "--font-bebas",
   weight: ["400"],
+  display: "swap",
 });
 
-// --font-body → Montserrat (cuerpo de texto)
+// --font-body → Montserrat. Solo 3 weights críticos (era 5 → -40% peso).
 const montserrat = Montserrat({
   subsets: ["latin"],
   variable: "--font-body",
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["400", "600", "700"],
+  display: "swap",
 });
 
-// --font-lead → Plus Jakarta Sans (trending Google Font 2027, para lead text + subtítulos)
+// --font-lead → Plus Jakarta Sans. Solo 2 weights (era 5 → -60% peso).
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-lead",
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["500", "700"],
+  display: "swap",
 });
 
 // =========================

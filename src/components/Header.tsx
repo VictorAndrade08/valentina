@@ -121,24 +121,23 @@ const Header: React.FC = () => {
               );
             })}
 
-            {/* BOTÓN ENVIAR MENSAJE (Desktop) — compacto + nunca wrap */}
+            {/* BOTÓN ENVIAR MENSAJE (Desktop) — compacto, sin shimmer (perf) */}
             <Link
               href="/#buzon"
               className={`
-                relative overflow-hidden group shrink-0
+                shrink-0
                 bg-[#EAE84B] text-[#6F2C91]
                 px-4 xl:px-6 py-2.5 rounded-full min-h-[44px]
                 ${oswald.className} font-bold uppercase text-[12px] xl:text-[13px] tracking-wider
                 shadow-[0_4px_14px_rgba(234,232,75,0.35)]
-                hover:shadow-[0_6px_20px_rgba(234,232,75,0.55)]
-                hover:bg-white hover:-translate-y-0.5
-                transition-all duration-300
+                hover:shadow-[0_6px_20px_rgba(234,232,75,0.5)]
+                hover:bg-white
+                transition-[background-color,box-shadow] duration-200
                 flex items-center gap-2 whitespace-nowrap
               `}
             >
-              <div className="shimmer-sweep absolute top-0 -inset-full h-full w-1/2 z-[5] block transform -skew-x-12 bg-linear-to-r from-transparent via-white/60 to-transparent opacity-50" />
-              <Mail size={16} className="relative z-10 transition-transform group-hover:scale-110" strokeWidth={2.5} />
-              <span className="relative z-10">ENVIAR MENSAJE</span>
+              <Mail size={16} strokeWidth={2.5} />
+              <span>ENVIAR MENSAJE</span>
             </Link>
           </nav>
 
@@ -173,30 +172,30 @@ const Header: React.FC = () => {
         </div>
       </header>
 
-      {/* BACKDROP del menú móvil — full screen con blur */}
+      {/* BACKDROP del menú móvil — sin blur (caro en GPU mobile) */}
       <button
         type="button"
         aria-hidden={!isMenuOpen}
         tabIndex={-1}
         onClick={closeMenu}
-        className={`fixed inset-0 z-[55] bg-black/40 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${
+        className={`fixed inset-0 z-[55] bg-black/60 transition-opacity duration-200 lg:hidden ${
           isMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
       />
 
-      {/* MENÚ MÓVIL — overlay full-screen (independiente del header no-sticky) */}
+      {/* MENÚ MÓVIL — overlay sólido (sin blur, mejor performance) */}
       <nav
         id="mobile-nav"
         aria-label="Navegación móvil"
         aria-hidden={!isMenuOpen}
         className={`
           fixed top-0 left-0 right-0 z-[56] lg:hidden
-          bg-[#6F2C91]/97 backdrop-blur-md
+          bg-[#6F2C91]
           shadow-2xl
-          transition-all duration-300 ease-out
+          transition-transform duration-200 ease-out
           ${isMenuOpen
-            ? "opacity-100 translate-y-0 pointer-events-auto"
-            : "opacity-0 -translate-y-4 pointer-events-none"
+            ? "translate-y-0 pointer-events-auto"
+            : "-translate-y-full pointer-events-none"
           }
         `}
         style={{
@@ -285,34 +284,8 @@ const Header: React.FC = () => {
 
       {/* ESTILOS GLOBALES */}
       <style jsx global>{`
-        @keyframes sweep {
-          0% { left: -100%; }
-          30% { left: 150%; }
-          100% { left: 150%; }
-        }
-
-        @keyframes pulse-soft {
-          0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(234, 232, 75, 0.3); }
-          50% { transform: scale(1.03); box-shadow: 0 0 30px rgba(234, 232, 75, 0.5); }
-        }
-
-        .shimmer-sweep {
-          animation: sweep 4s infinite ease-in-out;
-        }
-
-        .animate-button-pulse {
-          animation: pulse-soft 3s infinite ease-in-out;
-        }
-
         .no-scrollbar::-webkit-scrollbar {
           display: none;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .animate-button-pulse,
-          .shimmer-sweep {
-            animation: none !important;
-          }
         }
       `}</style>
     </>

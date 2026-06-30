@@ -51,10 +51,12 @@
 }
 
 /* =============================
-   BODY GLOBAL
+   BODY GLOBAL — fondo con mesh gradient (webp 6KB) + fallback liso
 ============================= */
 body {
-  background: var(--background);
+  background: #ffffff url('/imagenes/fondo-pagina.webp') no-repeat center top;
+  background-size: cover;
+  background-attachment: scroll; /* scroll (NO fixed) → 0 lag mobile */
   color: var(--foreground);
   font-family: var(--font-body);
 

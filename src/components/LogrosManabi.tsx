@@ -145,7 +145,7 @@ export default function LogrosManabi() {
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-90" />
             
             <div className="absolute inset-0 p-8 md:p-10 flex flex-col justify-between z-10">
-              <div className="self-start p-4 rounded-2xl bg-black/30 backdrop-blur-xl border border-white/20 text-[#FFD100] text-3xl shadow-2xl">
+              <div className="self-start p-4 rounded-2xl bg-black/40 border border-white/20 text-[#FFD100] text-3xl shadow-2xl">
                 {iconMap[item.iconKey] ?? iconMap.helmet}
               </div>
               <div className="space-y-4 translate-y-2 group-hover:translate-y-0 transition-transform duration-500">

@@ -91,10 +91,10 @@ export default function PresentacionFormacionDual() {
 
               {/* Botón Play */}
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 z-10">
-                <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#EAE84B]/90 backdrop-blur-sm flex items-center justify-center shadow-[0_0_30px_rgba(234,232,75,0.4)] group-hover:scale-110 transition-transform duration-300 animate-pulse-slow">
+                <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#EAE84B] flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-200">
                   <FaPlay className="text-[#6F2C91] text-2xl md:text-3xl ml-1" />
                 </div>
-                <span className="text-white font-bold text-xs md:text-sm uppercase tracking-widest bg-black/40 px-4 py-1.5 rounded-full backdrop-blur-md border border-white/10">
+                <span className="text-white font-bold text-xs md:text-sm uppercase tracking-widest bg-black/60 px-4 py-1.5 rounded-full border border-white/10">
                   Ver Video
                 </span>
               </div>

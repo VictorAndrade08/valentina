@@ -27,19 +27,15 @@ export default function ScrollReveal() {
     const main = document.querySelector("main");
     if (!main) return;
 
-    // Selectores de los elementos que vamos a animar
+    // Solo sections top-level (perf: menos observers = más rápido)
     const targets = main.querySelectorAll<HTMLElement>(
-      "section, article, h2, h3, .reveal, .reveal-stagger, [data-reveal]"
+      "section, [data-reveal]"
     );
 
-    // Marcar todos con data-reveal si no lo tienen ya
-    targets.forEach((el, i) => {
+    // Marcar con data-reveal up si no lo tienen
+    targets.forEach((el) => {
       if (!el.hasAttribute("data-reveal")) {
         el.setAttribute("data-reveal", "up");
-      }
-      // Pequeño delay incremental para los primeros 6 en cada grupo
-      if (!el.style.transitionDelay && i < 6) {
-        el.style.transitionDelay = `${i * 60}ms`;
       }
     });
 

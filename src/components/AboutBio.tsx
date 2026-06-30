@@ -61,19 +61,21 @@ export default function AboutBio() {
                   loop
                   muted
                   playsInline
+                  preload="metadata"
+                  poster=""
                />
              )}
              
              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
 
              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-16 h-16 md:w-20 md:h-20 bg-[#6F2C91]/90 backdrop-blur-md rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300 animate-pulse-soft">
+                <div className="w-16 h-16 md:w-20 md:h-20 bg-[#6F2C91] rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
                    <FaPlay className="text-white text-2xl md:text-3xl ml-1" />
                 </div>
              </div>
 
              <div className="absolute bottom-6 left-0 right-0 text-center">
-                <span className="bg-white/90 backdrop-blur-md text-[#6F2C91] px-5 py-2.5 rounded-full text-xs md:text-sm font-bold uppercase tracking-widest shadow-md transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                <span className="bg-white text-[#6F2C91] px-5 py-2.5 rounded-full text-xs md:text-sm font-bold uppercase tracking-widest shadow-md transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
                   Ver Video Historia
                 </span>
              </div>
