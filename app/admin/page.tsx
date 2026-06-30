@@ -1,20 +1,36 @@
 "use client";
 
 import { Fragment, useState, useEffect, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { getSupabase } from "@/lib/supabaseClient";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import CmsHeroEditor from "@/components/admin/CmsHeroEditor";
-import CmsTextosEditor from "@/components/admin/CmsTextosEditor";
-import CmsAgendaEditor from "@/components/admin/CmsAgendaEditor";
-import CmsLeyesEditor from "@/components/admin/CmsLeyesEditor";
-import CmsLogrosEditor from "@/components/admin/CmsLogrosEditor";
-import CmsBiografiaEditor from "@/components/admin/CmsBiografiaEditor";
-import CmsNoticiasEditor from "@/components/admin/CmsNoticiasEditor";
-import CmsConcursoIAEditor from "@/components/admin/CmsConcursoIAEditor";
-import CmsOperacionValentiaEditor from "@/components/admin/CmsOperacionValentiaEditor";
-import VisitasTab from "@/components/admin/VisitasTab";
+
+// DashboardTab carga inmediato (es el default → tiene que estar listo)
 import DashboardTab from "@/components/admin/DashboardTab";
+
+// === LAZY LOAD del resto ===
+// Los editores solo se descargan cuando el usuario abre esa tab.
+// Cada uno reduce ~10-30 KB del bundle inicial del admin.
+
+const CmsHeroEditor = dynamic(() => import("@/components/admin/CmsHeroEditor"), { ssr: false, loading: () => <TabLoader /> });
+const CmsTextosEditor = dynamic(() => import("@/components/admin/CmsTextosEditor"), { ssr: false, loading: () => <TabLoader /> });
+const CmsAgendaEditor = dynamic(() => import("@/components/admin/CmsAgendaEditor"), { ssr: false, loading: () => <TabLoader /> });
+const CmsLeyesEditor = dynamic(() => import("@/components/admin/CmsLeyesEditor"), { ssr: false, loading: () => <TabLoader /> });
+const CmsLogrosEditor = dynamic(() => import("@/components/admin/CmsLogrosEditor"), { ssr: false, loading: () => <TabLoader /> });
+const CmsBiografiaEditor = dynamic(() => import("@/components/admin/CmsBiografiaEditor"), { ssr: false, loading: () => <TabLoader /> });
+const CmsNoticiasEditor = dynamic(() => import("@/components/admin/CmsNoticiasEditor"), { ssr: false, loading: () => <TabLoader /> });
+const CmsConcursoIAEditor = dynamic(() => import("@/components/admin/CmsConcursoIAEditor"), { ssr: false, loading: () => <TabLoader /> });
+const CmsOperacionValentiaEditor = dynamic(() => import("@/components/admin/CmsOperacionValentiaEditor"), { ssr: false, loading: () => <TabLoader /> });
+const VisitasTab = dynamic(() => import("@/components/admin/VisitasTab"), { ssr: false, loading: () => <TabLoader /> });
+
+function TabLoader() {
+  return (
+    <div className="bg-white rounded-3xl p-10 text-center text-gray-400 text-sm font-medium animate-pulse">
+      Cargando editor...
+    </div>
+  );
+}
 
 const PASSWORD_ACCESO = "admin123";
 
@@ -248,6 +264,12 @@ export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
   const [errorLogin, setErrorLogin] = useState(false);
+
+  // Desactiva el mesh gradient del body cuando estamos en /admin (perf)
+  useEffect(() => {
+    document.body.classList.add("no-bg");
+    return () => { document.body.classList.remove("no-bg"); };
+  }, []);
 
   const [tab, setTab] = useState<TabKey>("dashboard");
 

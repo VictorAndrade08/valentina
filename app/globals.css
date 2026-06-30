@@ -67,8 +67,9 @@ body {
    Pseudo-elemento + opacidad 0.18 → apenas perceptible.
    Saturate reducido → tonos pastel ultra-suaves sobre blanco.
    pointer-events: none → no bloquea interacciones.
-   z-index: -1 → siempre detrás del contenido. */
-body::before {
+   z-index: -1 → siempre detrás del contenido.
+   :not(.no-bg) en body → /admin lo deshabilita poniendo class "no-bg" */
+body:not(.no-bg)::before {
   content: "";
   position: fixed;
   inset: 0;

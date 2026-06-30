@@ -71,16 +71,19 @@ export default function DashboardTab({ mensajes, inscripciones }: Props) {
   const [chartMode, setChartMode] = useState<ChartMode>("visitas");
   const [loadingVisits, setLoadingVisits] = useState(true);
 
-  // Cargar visitas (en paralelo con lo que ya tiene el admin)
+  // Cargar visitas — solo últimos 30 días (suficiente para chart + KPIs)
   useEffect(() => {
     (async () => {
       try {
         const supabase = getSupabase();
+        const since = new Date();
+        since.setDate(since.getDate() - 30);
         const { data } = await supabase
           .from("page_views")
           .select("id, path, created_at")
+          .gte("created_at", since.toISOString())
           .order("created_at", { ascending: false })
-          .limit(5000);
+          .limit(800);
         setVisits(data || []);
       } catch {
         // silencio: si no existe la tabla, dashboard sigue funcionando
@@ -278,25 +281,28 @@ export default function DashboardTab({ mensajes, inscripciones }: Props) {
         {/* COLUMNA DER — 3 KPI cards apiladas */}
         <div className="space-y-4 md:space-y-5">
           <KpiCard
-            icon="💌"
+            iconPath="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+            tone="purple"
             label="Mensajes totales"
             value={kpis.totalMensajes}
             trend={kpis.trendMensajes}
             sub={`${kpis.mensajesSemana} esta semana`}
           />
           <KpiCard
-            icon="🎓"
+            iconPath="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"
+            tone="yellow"
             label="Inscritos al concurso"
             value={kpis.totalInscritos}
             trend={kpis.trendInscritos}
             sub={`${kpis.inscritosSemana} esta semana`}
           />
           <KpiCard
-            icon="📊"
+            iconPath="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+            tone="dark"
             label="Visitas hoy"
             value={loadingVisits ? 0 : kpis.visitasHoy}
             trend={kpis.trendVisitas}
-            sub={`${kpis.totalVisitas.toLocaleString()} acumulado`}
+            sub={`${kpis.totalVisitas.toLocaleString()} últimos 30 días`}
           />
         </div>
       </div>
@@ -432,20 +438,27 @@ export default function DashboardTab({ mensajes, inscripciones }: Props) {
 }
 
 function KpiCard({
-  icon, label, value, trend, sub,
+  iconPath, tone, label, value, trend, sub,
 }: {
-  icon: string;
+  iconPath: string;
+  tone: "purple" | "yellow" | "dark";
   label: string;
   value: number;
   trend: number;
   sub: string;
 }) {
   const trendUp = trend >= 0;
+  const iconBg =
+    tone === "purple" ? "bg-[#6F2C91]/10 text-[#6F2C91]" :
+    tone === "yellow" ? "bg-[#EAE84B]/40 text-[#6F2C91]" :
+    "bg-[#1D1D1F]/5 text-[#1D1D1F]";
   return (
     <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-5 md:p-6">
       <div className="flex items-center justify-between mb-4">
-        <div className="w-11 h-11 rounded-2xl bg-gray-50 flex items-center justify-center text-2xl">
-          {icon}
+        <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${iconBg}`}>
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d={iconPath} />
+          </svg>
         </div>
         <div className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold ${
           trendUp ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"
