@@ -96,7 +96,7 @@ export default function AgendaInternacional() {
             
             {/* Tag */}
             <div className="flex justify-start">
-              <span className="bg-[#EAE84B] text-[#6F2C91] font-bold text-[10px] md:text-xs tracking-[0.15em] px-4 py-1.5 rounded-full uppercase shadow-sm">
+              <span className="bg-[#EAE84B] text-[#6F2C91] font-black text-base md:text-lg tracking-[0.18em] px-6 py-3 rounded-full uppercase shadow-md">
                 {data.tag}
               </span>
             </div>

@@ -195,6 +195,58 @@ html {
   transform: translateY(0);
 }
 
+/* =============================
+   SCROLL REVEAL — activado por <ScrollReveal />
+   Cualquier elemento con [data-reveal] entra con fade+translate
+============================= */
+[data-reveal="up"] {
+  opacity: 0;
+  transform: translateY(36px);
+  transition: opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+              transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+[data-reveal="up"].is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+[data-reveal="left"] {
+  opacity: 0;
+  transform: translateX(-40px);
+  transition: opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+              transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+[data-reveal="left"].is-revealed {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+[data-reveal="right"] {
+  opacity: 0;
+  transform: translateX(40px);
+  transition: opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+              transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+[data-reveal="right"].is-revealed {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+[data-reveal="scale"] {
+  opacity: 0;
+  transform: scale(0.94);
+  transition: opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+              transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+[data-reveal="scale"].is-revealed {
+  opacity: 1;
+  transform: scale(1);
+}
+
 /* Stagger pequeño para hijos directos en grids */
 .reveal-stagger > * {
   opacity: 0;

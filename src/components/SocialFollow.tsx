@@ -102,8 +102,8 @@ export default function SocialFollow() {
 
         {/* CTA FINAL */}
         <div className="mt-20 flex flex-col items-center gap-4">
-          <p className="text-[#86868B] font-medium text-sm md:text-lg uppercase tracking-[0.3em]">
-            Únete a nuestra comunidad digital
+          <p className="text-[#1D1D1F] font-black text-base md:text-2xl uppercase tracking-[0.25em]">
+            Únete a nuestra <span className="text-[#6F2C91]">comunidad digital</span>
           </p>
           <div className="flex gap-1">
             <div className="w-2 h-2 rounded-full bg-[#6F2C91] animate-bounce" />

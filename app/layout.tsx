@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer"; // 👈 NUEVO
 import VisitTracker from "@/components/VisitTracker";
 import TopProgress from "@/components/TopProgress";
+import ScrollReveal from "@/components/ScrollReveal";
 
 // =========================
 // FUENTES DEL DISEÑO (Variables exactas del HTML original)
@@ -94,6 +95,9 @@ export default function RootLayout({
         </Suspense>
         <Header />
         <main id="main-content">{children}</main>
+        <Suspense fallback={null}>
+          <ScrollReveal />
+        </Suspense>
         <Footer />
         <Suspense fallback={null}>
           <VisitTracker />
