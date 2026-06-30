@@ -81,22 +81,22 @@ const Header: React.FC = () => {
         className="relative w-full z-40 bg-[#6F2C91] shadow-md"
         style={{ paddingTop: "env(safe-area-inset-top)" }}
       >
-        <div className="mx-auto w-full max-w-[1400px] h-[72px] md:h-[80px] px-5 sm:px-6 md:px-8 flex justify-between items-center">
+        <div className="mx-auto w-full max-w-[1400px] h-[72px] md:h-[80px] px-5 sm:px-6 md:px-8 flex justify-between items-center gap-6 lg:gap-10">
 
           {/* LOGO — nombre completo siempre visible, tamaño escalado por breakpoint */}
           <Link
             href="/"
             onClick={closeMenu}
-            className={`flex items-center text-white ${oswald.className} font-bold transition-opacity hover:opacity-80 whitespace-nowrap`}
+            className={`flex items-center text-white ${oswald.className} font-bold transition-opacity hover:opacity-80 whitespace-nowrap shrink-0`}
             aria-label="Ir a la página de inicio - Valentina Centeno"
           >
-            <span className="text-lg xs:text-xl sm:text-2xl md:text-3xl lg:text-4xl tracking-tight md:tracking-wide">
+            <span className="text-lg xs:text-xl sm:text-2xl md:text-2xl lg:text-2xl xl:text-3xl tracking-tight md:tracking-wide">
               VALENTINA CENTENO
             </span>
           </Link>
 
           {/* NAVEGACIÓN DESKTOP */}
-          <nav className="hidden lg:flex items-center gap-4 xl:gap-7" aria-label="Navegación principal">
+          <nav className="hidden lg:flex items-center gap-3 xl:gap-5 2xl:gap-7" aria-label="Navegación principal">
             {navItems.map((item) => {
               const active = isActive(item.href);
               return (
