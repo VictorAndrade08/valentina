@@ -1,7 +1,7 @@
 import "./globals.css";
 import { Suspense } from "react";
 import type { Metadata, Viewport } from "next";
-import { Oswald, Bebas_Neue, Montserrat } from "next/font/google";
+import { Oswald, Bebas_Neue, Montserrat, Plus_Jakarta_Sans } from "next/font/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer"; // 👈 NUEVO
 import VisitTracker from "@/components/VisitTracker";
@@ -30,6 +30,13 @@ const montserrat = Montserrat({
   subsets: ["latin"],
   variable: "--font-body",
   weight: ["300", "400", "500", "600", "700"],
+});
+
+// --font-lead → Plus Jakarta Sans (trending Google Font 2027, para lead text + subtítulos)
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-lead",
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 // =========================
@@ -72,6 +79,7 @@ export default function RootLayout({
           ${oswald.variable}
           ${bebasNeue.variable}
           ${montserrat.variable}
+          ${plusJakarta.variable}
           font-[--font-body]
           antialiased
           bg-white

@@ -96,26 +96,26 @@ export default function OperacionValentiaPage() {
         <div className="relative max-w-[1300px] mx-auto px-6 py-20 md:py-28 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           <div className="lg:col-span-7 order-2 lg:order-1">
             {cms.tag && (
-              <div className="inline-flex items-center gap-2 bg-[#EAE84B] text-[#6F2C91] font-bold uppercase text-[11px] md:text-xs tracking-widest px-4 py-1.5 rounded-full mb-5">
+              <div className="inline-flex items-center gap-2 bg-[#EAE84B] text-[#6F2C91] font-bold uppercase text-xs md:text-sm tracking-widest px-5 py-2 rounded-full mb-6">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#6F2C91] animate-pulse" />
                 {cms.tag}
               </div>
             )}
 
             <h1
-              className={`${oswald.className} text-5xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight leading-[0.95] mb-5`}
+              className={`${oswald.className} text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-black uppercase tracking-tight leading-[0.9] mb-6`}
             >
               {cms.titulo || "OPERACIÓN VALENTÍA"}
             </h1>
 
             {cms.subtitulo && (
-              <p className="text-[#EAE84B] text-lg md:text-2xl font-medium leading-snug mb-6 max-w-2xl">
+              <p className="font-lead text-[#EAE84B] text-2xl md:text-3xl lg:text-4xl font-medium leading-tight mb-8 max-w-3xl">
                 {cms.subtitulo}
               </p>
             )}
 
             {cms.descripcion && (
-              <p className="text-white/90 text-base md:text-lg leading-relaxed max-w-2xl">
+              <p className="font-lead text-white/90 text-lg md:text-xl lg:text-2xl leading-relaxed max-w-3xl">
                 {cms.descripcion}
               </p>
             )}
@@ -165,12 +165,12 @@ export default function OperacionValentiaPage() {
       {ejes.length > 0 && (
         <section className="bg-[#FBFBFD] py-20 md:py-28">
           <div className="max-w-[1200px] mx-auto px-6">
-            <div className="text-center mb-12 md:mb-16">
-              <span className="inline-block px-4 py-1.5 rounded-full bg-[#EAE84B] text-[#6F2C91] font-bold text-xs uppercase tracking-widest mb-3">
+            <div className="text-center mb-14 md:mb-20">
+              <span className="inline-block px-5 py-2 rounded-full bg-[#EAE84B] text-[#6F2C91] font-bold text-sm uppercase tracking-widest mb-4">
                 Nuestros ejes
               </span>
               <h2
-                className={`${oswald.className} text-3xl md:text-5xl font-black uppercase text-[#1D1D1F] leading-tight`}
+                className={`${oswald.className} text-5xl md:text-6xl lg:text-7xl font-black uppercase text-[#1D1D1F] leading-[0.95]`}
               >
                 Tres frentes, <span className="text-[#6F2C91]">un mismo objetivo</span>
               </h2>
@@ -180,15 +180,15 @@ export default function OperacionValentiaPage() {
               {ejes.map((eje, i) => (
                 <article
                   key={i}
-                  className="bg-white rounded-3xl border border-gray-100 p-7 md:p-9 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all"
+                  className="bg-white rounded-3xl border border-gray-100 p-8 md:p-10 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all"
                 >
-                  <div className={`${oswald.className} text-[#6F2C91] font-black text-5xl mb-4 leading-none`}>
+                  <div className={`${oswald.className} text-[#6F2C91] font-black text-6xl md:text-7xl mb-5 leading-none`}>
                     {String(i + 1).padStart(2, "0")}
                   </div>
-                  <h3 className={`${oswald.className} text-[#1D1D1F] font-black uppercase text-xl md:text-2xl tracking-wide mb-3`}>
+                  <h3 className={`${oswald.className} text-[#1D1D1F] font-black uppercase text-2xl md:text-3xl tracking-tight mb-4`}>
                     {eje.titulo}
                   </h3>
-                  <p className="text-[#424245] text-sm md:text-base leading-relaxed">
+                  <p className="font-lead text-[#424245] text-base md:text-lg leading-relaxed">
                     {eje.desc}
                   </p>
                 </article>
@@ -202,14 +202,14 @@ export default function OperacionValentiaPage() {
       <section className="bg-[#6F2C91] text-white pt-20 md:pt-28 pb-12 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1 bg-[#EAE84B]" />
         <div className="max-w-[900px] mx-auto px-6 text-center">
-          <h2 className={`${oswald.className} text-3xl md:text-5xl font-black uppercase leading-tight mb-6`}>
+          <h2 className={`${oswald.className} text-5xl md:text-6xl lg:text-7xl font-black uppercase leading-[0.95] mb-8`}>
             ¿Querés ser parte?
           </h2>
-          <p className="text-white/85 text-base md:text-lg leading-relaxed mb-4 max-w-2xl mx-auto">
+          <p className="font-lead text-white/90 text-lg md:text-2xl leading-relaxed mb-6 max-w-3xl mx-auto">
             Cada mensaje, cada caso, cada propuesta cuenta. Sumate a Operación
             Valentía dejándonos tu mensaje en el formulario de abajo.
           </p>
-          <p className="text-[#EAE84B] text-sm font-bold uppercase tracking-widest mt-6">
+          <p className="text-[#EAE84B] text-base md:text-lg font-bold uppercase tracking-widest mt-8">
             ↓ Escribinos acá ↓
           </p>
         </div>

@@ -147,38 +147,38 @@ export default function OperacionValentia() {
 
           <h2
             id="operacion-valentia-title"
-            className={`${oswald.className} text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight leading-[0.95] mb-5`}
+            className={`${oswald.className} text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black uppercase tracking-tight leading-[0.92] mb-6`}
           >
             {cms.titulo || "OPERACIÓN VALENTÍA"}
           </h2>
 
           {cms.subtitulo && (
-            <p className="text-[#EAE84B] text-lg md:text-xl font-medium leading-snug mb-6 max-w-2xl">
+            <p className="font-lead text-[#EAE84B] text-xl md:text-2xl lg:text-3xl font-medium leading-tight mb-8 max-w-2xl">
               {cms.subtitulo}
             </p>
           )}
 
           {cms.descripcion && (
-            <p className="text-white/90 text-base md:text-lg leading-relaxed mb-10 max-w-2xl">
+            <p className="font-lead text-white/90 text-lg md:text-xl leading-relaxed mb-12 max-w-2xl">
               {cms.descripcion}
             </p>
           )}
 
           {/* EJES (hasta 3 columnas) */}
           {ejes.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
               {ejes.map((eje, i) => (
                 <div
                   key={i}
-                  className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-5 hover:bg-white/15 transition-colors"
+                  className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 hover:bg-white/15 transition-colors"
                 >
-                  <div className="text-[#EAE84B] font-black text-3xl mb-2 leading-none">
+                  <div className="text-[#EAE84B] font-black text-4xl md:text-5xl mb-3 leading-none">
                     {String(i + 1).padStart(2, "0")}
                   </div>
-                  <h3 className={`${oswald.className} text-white font-bold uppercase text-sm tracking-wide mb-2`}>
+                  <h3 className={`${oswald.className} text-white font-bold uppercase text-base md:text-lg tracking-wide mb-3`}>
                     {eje.titulo}
                   </h3>
-                  <p className="text-white/80 text-sm leading-relaxed">
+                  <p className="font-lead text-white/85 text-base leading-relaxed">
                     {eje.desc}
                   </p>
                 </div>
@@ -190,7 +190,7 @@ export default function OperacionValentia() {
           {cms.cta_texto && cms.cta_link && (
             <Link
               href={cms.cta_link}
-              className={`${oswald.className} inline-flex items-center gap-3 bg-[#EAE84B] text-[#6F2C91] font-black uppercase text-sm md:text-base tracking-widest px-8 py-4 rounded-full hover:bg-white transition-colors shadow-lg hover:shadow-2xl active:scale-95 min-h-[48px]`}
+              className={`${oswald.className} inline-flex items-center gap-3 bg-[#EAE84B] text-[#6F2C91] font-black uppercase text-base md:text-lg tracking-widest px-10 py-5 rounded-full hover:bg-white transition-colors shadow-lg hover:shadow-2xl active:scale-95 min-h-[56px]`}
             >
               {cms.cta_texto}
               <span aria-hidden>→</span>

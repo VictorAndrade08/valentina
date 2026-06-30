@@ -44,6 +44,12 @@
   font-family: var(--font-body);
 }
 
+/* Plus Jakarta Sans — Google Font tendencia 2027 para lead text */
+.font-lead {
+  font-family: var(--font-lead), system-ui, sans-serif;
+  letter-spacing: -0.01em;
+}
+
 /* =============================
    BODY GLOBAL
 ============================= */
