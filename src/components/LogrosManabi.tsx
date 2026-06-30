@@ -9,6 +9,7 @@ import {
   FaHeartPulse,
 } from "react-icons/fa6";
 import { getSupabase } from "@/lib/supabaseClient";
+import { safeImageUrl } from "@/lib/safeImage";
 
 type BlogroData = {
   id: string;
@@ -55,7 +56,7 @@ export default function LogrosManabi() {
             iconKey: (r.icon_key || "helmet").toLowerCase(),
             title: r.title,
             body: r.body || "",
-            image: r.image || undefined,
+            image: safeImageUrl(r.image) || undefined,
           });
         }
         if (parsed.length > 0) setItems(parsed);

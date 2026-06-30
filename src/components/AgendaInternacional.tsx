@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Oswald } from "next/font/google";
 import { getSupabase } from "@/lib/supabaseClient";
+import { safeImageUrl } from "@/lib/safeImage";
 
 const oswald = Oswald({
   subsets: ["latin"],
@@ -65,7 +66,7 @@ export default function AgendaInternacional() {
           description: r.description || fallback.description,
           bullets,
           quote: r.quote || fallback.quote,
-          image: r.image || fallback.image,
+          image: safeImageUrl(r.image) || fallback.image,
         });
       } catch {
         // Silencio: mantiene fallback

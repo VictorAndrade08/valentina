@@ -5,6 +5,7 @@ import Link from "next/link";
 import { FaPlay, FaTimes } from "react-icons/fa";
 import { Oswald } from "next/font/google";
 import { getSupabase } from "@/lib/supabaseClient";
+import { safeImageUrl } from "@/lib/safeImage";
 
 const oswald = Oswald({ subsets: ["latin"], weight: ["700"] });
 
@@ -38,7 +39,7 @@ export default function AboutBio() {
     return !val || val.trim() === "" ? fallback : val;
   };
 
-  const videoUrl = get("video", "/imagenes/bio-video.mp4");
+  const videoUrl = safeImageUrl(get("video", "/imagenes/bio-video.mp4")) || "/imagenes/bio-video.mp4";
 
   return (
     <section id="acerca-de-mi" className="w-full bg-[#FDFDFD] py-16 md:py-24 border-t-[6px] border-[#6F2C91] overflow-hidden">

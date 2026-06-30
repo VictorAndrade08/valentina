@@ -51,17 +51,33 @@
 }
 
 /* =============================
-   BODY GLOBAL — fondo con mesh gradient (webp 6KB) + fallback liso
+   BODY GLOBAL — fondo blanco con mesh gradient sutil overlay
 ============================= */
 body {
-  background: #ffffff url('/imagenes/fondo-pagina.webp') no-repeat center top;
-  background-size: cover;
-  background-attachment: scroll; /* scroll (NO fixed) → 0 lag mobile */
+  background: #ffffff;
   color: var(--foreground);
   font-family: var(--font-body);
+  position: relative;
 
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Mesh gradient como capa de fondo MUY SUTIL.
+   Pseudo-elemento + opacidad 0.18 → apenas perceptible.
+   Saturate reducido → tonos pastel ultra-suaves sobre blanco.
+   pointer-events: none → no bloquea interacciones.
+   z-index: -1 → siempre detrás del contenido. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: url('/imagenes/fondo-pagina.webp') no-repeat center;
+  background-size: cover;
+  opacity: 0.18;
+  filter: saturate(0.85);
+  z-index: -1;
+  pointer-events: none;
 }
 
 html, body {

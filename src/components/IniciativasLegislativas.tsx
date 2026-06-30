@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Oswald } from "next/font/google";
 import { FaGraduationCap, FaPlay, FaCheckCircle, FaTimes, FaExpand } from "react-icons/fa";
 import { getSupabase } from "@/lib/supabaseClient";
+import { safeImageUrl } from "@/lib/safeImage";
 
 const oswald = Oswald({
   subsets: ["latin"],
@@ -44,11 +45,15 @@ export default function PresentacionFormacionDual() {
   const getGallery = () => {
     const galleryString = get("fd_galeria", "");
     if (!galleryString) return ["/imagenes/placeholder-iniciativa.svg"];
-    return galleryString.split(",").map(url => url.trim());
+    const filtered = galleryString
+      .split(",")
+      .map((url) => safeImageUrl(url.trim()))
+      .filter((u): u is string => !!u);
+    return filtered.length > 0 ? filtered : ["/imagenes/placeholder-iniciativa.svg"];
   };
 
   const galleryImages = getGallery();
-  const videoUrl = get("fd_video", "");
+  const videoUrl = safeImageUrl(get("fd_video", "")) || "";
 
   return (
     <section id="ley" className="w-full py-16 md:py-24 bg-white scroll-mt-20 overflow-hidden">

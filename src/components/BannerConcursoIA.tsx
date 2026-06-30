@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Oswald } from "next/font/google";
 import { getSupabase } from "@/lib/supabaseClient";
+import { safeImageUrl } from "@/lib/safeImage";
 
 const oswald = Oswald({ subsets: ["latin"], weight: ["700"] });
 
@@ -44,7 +45,7 @@ export default function BannerConcursoIA() {
         if (rows && rows[0] && rows[0].nombre) {
           setData({
             nombre: rows[0].nombre,
-            banner_url: rows[0].banner_url || "",
+            banner_url: safeImageUrl(rows[0].banner_url) || "",
             fecha_fin: rows[0].fecha_fin || "",
           });
         }

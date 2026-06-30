@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Oswald } from "next/font/google";
 import { getSupabase } from "@/lib/supabaseClient";
+import { safeImageUrl } from "@/lib/safeImage";
 
 const oswald = Oswald({ subsets: ["latin"], weight: ["700"] });
 
@@ -70,7 +71,7 @@ export default function OperacionValentia() {
     { titulo: cms.eje_3_titulo || "", desc: cms.eje_3_desc || "" },
   ].filter((e) => e.titulo);
 
-  const imgSrc = cms.imagen?.trim() || FALLBACK.imagen;
+  const imgSrc = safeImageUrl(cms.imagen?.trim()) || FALLBACK.imagen;
 
   return (
     <section

@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { getSupabase } from "@/lib/supabaseClient";
+import { safeImageUrl } from "@/lib/safeImage";
 
 type HeroSlide = {
   id: string;
@@ -64,9 +65,10 @@ export default function Hero() {
           .filter((row) => row.img && String(row.img).trim() !== "")
           .map((row) => ({
             id: String(row.id),
-            img: String(row.img).trim(),
+            img: safeImageUrl(String(row.img).trim()),
             link: row.link ? String(row.link).trim() : "",
-          }));
+          }))
+          .filter((s) => s.img !== null) as HeroSlide[];
 
         if (parsed.length > 0) setSlides(parsed);
       } catch {

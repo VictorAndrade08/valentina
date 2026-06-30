@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Oswald } from "next/font/google";
 import { getSupabase } from "@/lib/supabaseClient";
+import { safeImageUrl } from "@/lib/safeImage";
 
 const oswald = Oswald({ subsets: ["latin"], weight: ["700"] });
 
@@ -46,7 +47,7 @@ export default function CorchoNoticias() {
           .map((r) => ({
             id: String(r.id),
             titulo: r.titulo || "",
-            imagen: r.imagen,
+            imagen: safeImageUrl(r.imagen) || "",
             link_opcional: r.link_opcional || null,
             fecha: r.fecha || null,
           }));
