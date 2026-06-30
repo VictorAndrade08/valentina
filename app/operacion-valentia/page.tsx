@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Oswald } from "next/font/google";
 import { getSupabase } from "@/lib/supabaseClient";
+import BuzonCiudadano from "@/components/BuzonCiudadano";
 
 const oswald = Oswald({ subsets: ["latin"], weight: ["700"] });
 
@@ -169,35 +170,36 @@ export default function OperacionValentiaPage() {
         </section>
       )}
 
-      {/* CTA FINAL */}
-      <section className="bg-[#6F2C91] text-white py-20 md:py-28 relative overflow-hidden">
+      {/* CTA + INTRO AL FORMULARIO */}
+      <section className="bg-[#6F2C91] text-white pt-20 md:pt-28 pb-12 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1 bg-[#EAE84B]" />
         <div className="max-w-[900px] mx-auto px-6 text-center">
           <h2 className={`${oswald.className} text-3xl md:text-5xl font-black uppercase leading-tight mb-6`}>
             ¿Querés ser parte?
           </h2>
-          <p className="text-white/85 text-base md:text-lg leading-relaxed mb-10 max-w-2xl mx-auto">
-            Cada mensaje, cada caso, cada propuesta cuenta. El buzón ciudadano
-            es el primer paso para que tu voz se convierta en acción legislativa.
+          <p className="text-white/85 text-base md:text-lg leading-relaxed mb-4 max-w-2xl mx-auto">
+            Cada mensaje, cada caso, cada propuesta cuenta. Sumate a Operación
+            Valentía dejándonos tu mensaje en el formulario de abajo.
           </p>
-          {cms.cta_texto && (
-            <Link
-              href={cms.cta_link || "/#buzon"}
-              className={`${oswald.className} inline-flex items-center gap-3 bg-[#EAE84B] text-[#6F2C91] font-black uppercase text-sm md:text-base tracking-widest px-10 py-5 rounded-full hover:bg-white transition-colors shadow-xl hover:shadow-2xl active:scale-95 min-h-[52px]`}
-            >
-              {cms.cta_texto}
-              <span aria-hidden>→</span>
-            </Link>
-          )}
-          <div className="mt-10">
-            <Link
-              href="/"
-              className="text-white/70 hover:text-[#EAE84B] text-sm font-medium uppercase tracking-widest transition-colors"
-            >
-              ← Volver al inicio
-            </Link>
-          </div>
+          <p className="text-[#EAE84B] text-sm font-bold uppercase tracking-widest mt-6">
+            ↓ Escribinos acá ↓
+          </p>
         </div>
+      </section>
+
+      {/* FORMULARIO DEL BUZÓN — mismo componente que el home */}
+      <div id="formulario-operacion">
+        <BuzonCiudadano />
+      </div>
+
+      {/* PIE — volver al inicio */}
+      <section className="bg-[#FBFBFD] py-10 text-center border-t border-gray-200">
+        <Link
+          href="/"
+          className="text-[#6F2C91] hover:text-[#1D1D1F] text-sm font-bold uppercase tracking-widest transition-colors"
+        >
+          ← Volver al inicio
+        </Link>
       </section>
     </main>
   );

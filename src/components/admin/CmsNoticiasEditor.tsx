@@ -11,6 +11,9 @@ type Noticia = {
   link_opcional: string | null;
   fecha: string | null;
   activo: boolean;
+  // Blog mode (opcional)
+  resumen: string | null;
+  contenido: string | null;
 };
 
 type EditState = Omit<Noticia, "id">;
@@ -24,6 +27,8 @@ const empty = (orden: number): EditState => ({
   link_opcional: "",
   fecha: new Date().toISOString().split("T")[0],
   activo: true,
+  resumen: "",
+  contenido: "",
 });
 
 export default function CmsNoticiasEditor() {
@@ -59,6 +64,8 @@ export default function CmsNoticiasEditor() {
           link_opcional: n.link_opcional || "",
           fecha: n.fecha ? n.fecha.split("T")[0] : "",
           activo: n.activo,
+          resumen: n.resumen || "",
+          contenido: n.contenido || "",
         };
       });
       setEdits(initial);
@@ -362,16 +369,54 @@ function NoticiaForm({ estado, onChange, uploading, onUpload }: FormProps) {
         </div>
         <div className="md:col-span-2">
           <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-1.5">
-            Link opcional (a un post, página externa, etc.)
+            Link externo opcional (si lo dejás vacío, abre la página de la noticia)
           </label>
           <input
             type="url"
             value={estado.link_opcional || ""}
             onChange={(e) => set({ link_opcional: e.target.value })}
-            placeholder="https://..."
+            placeholder="https://... (vacío = blog interno)"
             className="w-full py-2.5 px-3 rounded-lg bg-[#F5F5F7] focus:bg-white border-2 border-transparent focus:border-[#6F2C91] outline-none text-sm text-[#1D1D1F]"
           />
         </div>
+
+        {/* MODO BLOG — sólo se usa si no hay link externo */}
+        <div className="md:col-span-2 bg-[#EAE84B]/15 border border-[#EAE84B] rounded-xl px-4 py-2">
+          <p className="text-xs font-bold uppercase tracking-wider text-[#6F2C91]">
+            📝 Modo blog (opcional)
+          </p>
+          <p className="text-[11px] text-gray-600 mt-1">
+            Si NO ponés link externo arriba, la noticia abre una página propia en
+            /noticias/[id] con este resumen + contenido.
+          </p>
+        </div>
+
+        <div className="md:col-span-2">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-1.5">
+            Resumen (1-2 oraciones)
+          </label>
+          <textarea
+            value={estado.resumen || ""}
+            onChange={(e) => set({ resumen: e.target.value })}
+            rows={2}
+            placeholder="Aparece debajo del título de la noticia, destacado en amarillo."
+            className="w-full py-2.5 px-3 rounded-lg bg-[#F5F5F7] focus:bg-white border-2 border-transparent focus:border-[#6F2C91] outline-none text-sm text-[#1D1D1F] resize-y"
+          />
+        </div>
+
+        <div className="md:col-span-2">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-1.5">
+            Contenido completo (cuerpo del artículo)
+          </label>
+          <textarea
+            value={estado.contenido || ""}
+            onChange={(e) => set({ contenido: e.target.value })}
+            rows={8}
+            placeholder="Cuerpo completo de la noticia. Cada doble salto de línea genera un párrafo nuevo."
+            className="w-full py-2.5 px-3 rounded-lg bg-[#F5F5F7] focus:bg-white border-2 border-transparent focus:border-[#6F2C91] outline-none text-sm text-[#1D1D1F] resize-y"
+          />
+        </div>
+
         <label className="flex items-center gap-2 cursor-pointer md:col-span-2">
           <input
             type="checkbox"

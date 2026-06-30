@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Oswald } from "next/font/google";
-import { FaTimes, FaExternalLinkAlt } from "react-icons/fa";
 import { getSupabase } from "@/lib/supabaseClient";
 
 const oswald = Oswald({ subsets: ["latin"], weight: ["700"] });
@@ -30,7 +30,6 @@ const fmtFecha = (iso: string | null) => {
 
 export default function CorchoNoticias() {
   const [noticias, setNoticias] = useState<Noticia[]>([]);
-  const [modal, setModal] = useState<Noticia | null>(null);
 
   useEffect(() => {
     const cargar = async () => {
@@ -108,7 +107,7 @@ export default function CorchoNoticias() {
                 </div>
               </>
             );
-            // Si tiene link → click directo a esa URL en pestaña nueva
+            // 1) Si tiene link externo → click directo a esa URL en pestaña nueva
             if (n.link_opcional) {
               return (
                 <a
@@ -122,71 +121,19 @@ export default function CorchoNoticias() {
                 </a>
               );
             }
-            // Sin link → modal con la imagen ampliada
+            // 2) Sin link → abre la página /noticias/[id] (estilo blog)
             return (
-              <button
+              <Link
                 key={n.id}
-                onClick={() => setModal(n)}
+                href={`/noticias/${n.id}`}
                 className={cardClass}
               >
                 {cardContent}
-              </button>
+              </Link>
             );
           })}
         </div>
       </div>
-
-      {modal && (
-        <div
-          className="fixed inset-0 bg-black/80 backdrop-blur-md z-[999] flex items-center justify-center p-4"
-          onClick={() => setModal(null)}
-        >
-          <div
-            className="bg-white w-full max-w-3xl max-h-[90vh] overflow-hidden rounded-[2.5rem] relative shadow-2xl flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="relative">
-              <img
-                src={modal.imagen}
-                alt={modal.titulo}
-                className="w-full max-h-[70vh] object-contain bg-gray-50"
-              />
-              <button
-                onClick={() => setModal(null)}
-                className="absolute top-5 right-5 w-11 h-11 bg-black/40 backdrop-blur-md text-white rounded-full flex items-center justify-center hover:bg-[#6F2C91] transition-all"
-              >
-                <FaTimes />
-              </button>
-            </div>
-            {(modal.titulo || modal.fecha || modal.link_opcional) && (
-              <div className="p-6 md:p-8 space-y-3 bg-white">
-                {modal.fecha && (
-                  <span className="inline-block px-3 py-1 rounded-full bg-[#EAE84B] text-[#6F2C91] font-bold text-xs uppercase tracking-widest">
-                    {fmtFecha(modal.fecha)}
-                  </span>
-                )}
-                {modal.titulo && (
-                  <h3
-                    className={`${oswald.className} text-2xl md:text-3xl font-black uppercase text-[#1D1D1F] leading-tight`}
-                  >
-                    {modal.titulo}
-                  </h3>
-                )}
-                {modal.link_opcional && (
-                  <a
-                    href={modal.link_opcional}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 mt-2 px-5 py-3 rounded-xl bg-[#6F2C91] text-white font-bold text-xs uppercase tracking-widest hover:bg-[#5a2376] transition-all"
-                  >
-                    Saber más <FaExternalLinkAlt size={11} />
-                  </a>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </section>
   );
 }
