@@ -447,9 +447,6 @@ export default function BuzonCiudadano() {
                   Enviar por WhatsApp
                 </div>
               </button>
-              <p className="text-center text-xs text-[#86868B] mt-3">
-                Abre WhatsApp con tu mensaje listo para enviar.
-              </p>
             </div>
 
             {loading && (
@@ -457,10 +454,6 @@ export default function BuzonCiudadano() {
                 Procesando envío, por favor no recargues la página...
               </p>
             )}
-
-            <div className="flex items-center justify-center gap-2 text-gray-400 text-[10px] md:text-xs font-bold pt-6 border-t border-gray-100 mt-8">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> TUS DATOS ESTÁN PROTEGIDOS Y SON CONFIDENCIALES
-            </div>
           </form>
         </div>
       </div>
