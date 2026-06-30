@@ -117,11 +117,10 @@ export default function Hero() {
       id="inicio"
       className="
         relative w-full
-        h-[50vh] min-h-[350px]
-        md:h-[80vh] md:min-h-[600px]
+        aspect-[16/9] max-h-[calc(75vh-72px)]
+        md:aspect-auto md:h-[calc(85vh-80px)] md:min-h-[560px]
         flex items-center justify-center
         overflow-hidden
-        -mt-[80px] pt-[80px]
         bg-[#6F2C91]
       "
       onTouchStart={onTouchStart}

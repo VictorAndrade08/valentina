@@ -74,7 +74,7 @@ export default function RootLayout({
           antialiased
           bg-white
           text-gray-900
-          pt-[80px]
+          pt-[72px] md:pt-20
         `}
       >
         <a href="#main-content" className="skip-to-content">

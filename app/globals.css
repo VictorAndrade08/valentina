@@ -20,6 +20,9 @@
 
   --font-sans: var(--font-body);
   --font-mono: var(--font-body);
+
+  /* Breakpoint extra-pequeño para iPhone SE / Galaxy plegado */
+  --breakpoint-xs: 400px;
 }
 
 @media (prefers-color-scheme: dark) {
