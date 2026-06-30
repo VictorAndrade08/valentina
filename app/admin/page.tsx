@@ -13,6 +13,7 @@ import CmsBiografiaEditor from "@/components/admin/CmsBiografiaEditor";
 import CmsNoticiasEditor from "@/components/admin/CmsNoticiasEditor";
 import CmsConcursoIAEditor from "@/components/admin/CmsConcursoIAEditor";
 import CmsOperacionValentiaEditor from "@/components/admin/CmsOperacionValentiaEditor";
+import VisitasTab from "@/components/admin/VisitasTab";
 
 const PASSWORD_ACCESO = "admin123";
 
@@ -51,7 +52,7 @@ type Mensaje = {
   actualizado_at: string | null;
 };
 
-type TabKey = "concurso" | "buzon" | "concurso-ia" | "contenido";
+type TabKey = "concurso" | "buzon" | "concurso-ia" | "contenido" | "visitas";
 
 type Inscripcion = {
   id: string;
@@ -1449,6 +1450,16 @@ export default function AdminPage() {
             >
               Contenido
             </button>
+            <button
+              onClick={() => setTab("visitas")}
+              className={`px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-sm ${
+                tab === "visitas"
+                  ? "bg-[#1D1D1F] text-[#EAE84B]"
+                  : "bg-white text-gray-500 hover:text-[#6F2C91]"
+              }`}
+            >
+              Visitas
+            </button>
           </div>
 
           <button
@@ -2530,6 +2541,8 @@ export default function AdminPage() {
         )}
 
         {tab === "contenido" && <ContenidoTab />}
+
+        {tab === "visitas" && <VisitasTab />}
 
         <div className="mt-8 flex justify-between items-center px-4">
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">

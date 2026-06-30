@@ -162,7 +162,7 @@ export default function BuzonCiudadano() {
         throw new Error(insertError.message);
       }
 
-      setFeedback({ type: "success", message: "¡Gracias! Tu mensaje fue enviado. Te responderemos pronto." });
+      setFeedback({ type: "success", message: "¡Gracias por comunicarte con Valentina! En breve un miembro de nuestro equipo te va a contactar." });
       formElement.reset();
       setFormState({
         nombre: "",

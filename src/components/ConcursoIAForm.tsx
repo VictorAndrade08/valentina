@@ -176,7 +176,7 @@ export default function ConcursoIAForm() {
         throw new Error(insErr.message);
       }
       setOkMsg(
-        "¡Inscripción enviada con éxito! Pronto te contactaremos por correo o WhatsApp."
+        "¡Gracias por sumarte! Tu inscripción quedó registrada. Pronto recibirás novedades por correo o WhatsApp."
       );
       setForm(EMPTY);
       if (fileInputRef.current) fileInputRef.current.value = "";
