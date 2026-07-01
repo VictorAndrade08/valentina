@@ -32,7 +32,17 @@ function TabLoader() {
   );
 }
 
-const PASSWORD_ACCESO = "admin123";
+// SHA-256 de la contraseña — el texto plano nunca queda en el bundle.
+// Para rotarla: generar nuevo sha256 y reemplazar acá.
+const PASSWORD_HASH = "774aa4caa879e5f2f9379797d57ccc377f1bd12b4c96a20aec2cc9433acb72ef";
+
+async function sha256Hex(input: string): Promise<string> {
+  const buf = new TextEncoder().encode(input);
+  const hash = await crypto.subtle.digest("SHA-256", buf);
+  return Array.from(new Uint8Array(hash))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
 
 type Proyecto = {
   id: string;
@@ -264,6 +274,9 @@ export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
   const [errorLogin, setErrorLogin] = useState(false);
+  const [checkingLogin, setCheckingLogin] = useState(false);
+  const [wrongTries, setWrongTries] = useState(0);
+  const [lockUntil, setLockUntil] = useState(0);
 
   // Desactiva el mesh gradient del body cuando estamos en /admin (perf)
   useEffect(() => {
@@ -305,15 +318,33 @@ export default function AdminPage() {
   const [reportDesde, setReportDesde] = useState<string>("");
   const [reportHasta, setReportHasta] = useState<string>("");
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (passwordInput === PASSWORD_ACCESO) {
-      setIsAuthenticated(true);
-      setErrorLogin(false);
-      setPasswordInput("");
-    } else {
+    // Bloqueo temporal tras varios intentos fallidos
+    if (Date.now() < lockUntil) {
       setErrorLogin(true);
-      setPasswordInput("");
+      return;
+    }
+    setCheckingLogin(true);
+    try {
+      const hashed = await sha256Hex(passwordInput);
+      if (hashed === PASSWORD_HASH) {
+        setIsAuthenticated(true);
+        setErrorLogin(false);
+        setPasswordInput("");
+        setWrongTries(0);
+      } else {
+        const nextTries = wrongTries + 1;
+        setWrongTries(nextTries);
+        setErrorLogin(true);
+        setPasswordInput("");
+        // Cada 5 intentos fallidos, bloqueamos 30s (anti-brute-force)
+        if (nextTries % 5 === 0) {
+          setLockUntil(Date.now() + 30_000);
+        }
+      }
+    } finally {
+      setCheckingLogin(false);
     }
   };
 
@@ -1404,7 +1435,12 @@ export default function AdminPage() {
                 onChange={(e) => setPasswordInput(e.target.value)}
                 className="w-full p-4 text-center text-xl tracking-[0.5em] bg-[#F5F5F7] border-2 border-[#F5F5F7] rounded-2xl focus:border-[#6F2C91] focus:bg-white outline-none transition-all text-black"
               />
-              {errorLogin && (
+              {errorLogin && Date.now() < lockUntil && (
+                <p className="text-red-500 text-xs font-bold text-center mt-2">
+                  Demasiados intentos. Esperá 30 segundos.
+                </p>
+              )}
+              {errorLogin && Date.now() >= lockUntil && (
                 <p className="text-red-500 text-xs font-bold text-center mt-2">
                   Clave incorrecta. Intenta de nuevo.
                 </p>
@@ -1412,9 +1448,10 @@ export default function AdminPage() {
             </div>
             <button
               type="submit"
-              className="w-full py-4 rounded-2xl bg-[#1D1D1F] text-[#EAE84B] font-black uppercase tracking-widest hover:bg-[#6F2C91] hover:text-white transition-all shadow-lg active:scale-95"
+              disabled={checkingLogin || Date.now() < lockUntil}
+              className="w-full py-4 rounded-2xl bg-[#1D1D1F] text-[#EAE84B] font-black uppercase tracking-widest hover:bg-[#6F2C91] hover:text-white transition-all shadow-lg active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              ENTRAR AL PANEL
+              {checkingLogin ? "VERIFICANDO..." : "ENTRAR AL PANEL"}
             </button>
           </form>
         </div>

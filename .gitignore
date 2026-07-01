@@ -42,3 +42,15 @@ next-env.d.ts
 
 # Playwright screenshots (auditoría — no son código)
 screenshots/
+
+# Reportes de Lighthouse / auditorías (no son código)
+reports/
+
+# Archivos de importación one-time / seeds / dumps
+*.xlsx
+*.csv
+*.zip
+
+# PDFs de contrato / acta — no van en el repo
+*.pdf
+!public/**/*.pdf
