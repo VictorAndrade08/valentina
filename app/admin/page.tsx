@@ -36,6 +36,10 @@ function TabLoader() {
 // Para rotarla: generar nuevo sha256 y reemplazar acá.
 const PASSWORD_HASH = "774aa4caa879e5f2f9379797d57ccc377f1bd12b4c96a20aec2cc9433acb72ef";
 
+// Cuando esté en true, tras el login se muestra un card de "pausa temporal".
+// Para reactivar el panel: cambiar a false y hacer commit + push.
+const PANEL_PAUSED = true;
+
 async function sha256Hex(input: string): Promise<string> {
   const buf = new TextEncoder().encode(input);
   const hash = await crypto.subtle.digest("SHA-256", buf);
@@ -1460,6 +1464,42 @@ export default function AdminPage() {
             __html: `@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap');`,
           }}
         />
+      </section>
+    );
+  }
+
+  if (PANEL_PAUSED) {
+    return (
+      <section className="min-h-screen bg-[#FBFBFD] flex items-center justify-center px-6 py-10">
+        <div className="w-full max-w-[520px] bg-white rounded-[2rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.12)] border border-black/5 overflow-hidden">
+          <div className="bg-[#1D1D1F] px-8 py-6 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#EAE84B] flex items-center justify-center">
+              <span className="font-black text-[#6F2C91] text-sm tracking-tight">VC</span>
+            </div>
+            <div>
+              <p className="text-white text-sm font-bold tracking-widest uppercase">Panel Administrativo</p>
+              <p className="text-white/60 text-xs">Valentina Centeno</p>
+            </div>
+          </div>
+
+          <div className="px-8 py-10 text-center">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F5F5F7] mb-6">
+              <span className="w-2 h-2 rounded-full bg-[#EAE84B]" />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#6F2C91]">Estado del sistema</span>
+            </div>
+
+            <h1 className="text-[#1D1D1F] text-2xl md:text-3xl font-black tracking-tight mb-3">
+              Panel en pausa temporal
+            </h1>
+            <p className="text-[#6E6E73] text-base leading-relaxed max-w-[380px] mx-auto">
+              Contactar al equipo de desarrollo para reactivar el acceso.
+            </p>
+
+            <div className="mt-8 pt-6 border-t border-black/5 text-[11px] text-[#8E8E93] tracking-wider uppercase">
+              Referencia · VC-{new Date().getFullYear()}-A
+            </div>
+          </div>
+        </div>
       </section>
     );
   }
