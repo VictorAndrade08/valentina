@@ -38,7 +38,11 @@ const PASSWORD_HASH = "774aa4caa879e5f2f9379797d57ccc377f1bd12b4c96a20aec2cc9433
 
 // Cuando esté en true, tras el login se muestra un card de "pausa temporal".
 // Para reactivar el panel: cambiar a false y hacer commit + push.
-const PANEL_PAUSED = true;
+const PANEL_PAUSED = false;
+
+// Banner sutil arriba del admin. Recordatorio profesional, no bloquea nada.
+// Poner en false apenas cierre la facturación pendiente.
+const SHOW_BILLING_REMINDER = true;
 
 async function sha256Hex(input: string): Promise<string> {
   const buf = new TextEncoder().encode(input);
@@ -1507,6 +1511,24 @@ export default function AdminPage() {
   return (
     <section className="min-h-screen bg-[#FBFBFD] py-6 md:py-10 px-4 md:px-10">
       <div className="max-w-[2800px] mx-auto">
+
+        {SHOW_BILLING_REMINDER && (
+          <div className="mb-6 flex items-start gap-3 rounded-2xl border border-[#EAE84B]/60 bg-[#FFFDE7] px-4 py-3 md:px-5 md:py-4">
+            <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#EAE84B]">
+              <svg viewBox="0 0 24 24" className="h-3 w-3 text-[#6F2C91]" fill="currentColor">
+                <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 5a1.25 1.25 0 110 2.5A1.25 1.25 0 0112 7zm1 10h-2v-6h2v6z" />
+              </svg>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[13px] md:text-sm font-bold text-[#1D1D1F] leading-snug">
+                Cierre de facturación pendiente
+              </p>
+              <p className="text-[11px] md:text-xs text-[#6E6E73] leading-snug mt-0.5">
+                Coordinar con el equipo de desarrollo para completar la entrega formal del proyecto.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* HEADER PROPIO DEL ADMIN — logo izq + logout der */}
         <div className="flex items-center justify-between mb-8 md:mb-10 pb-5 border-b border-gray-200">
