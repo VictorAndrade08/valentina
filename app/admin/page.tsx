@@ -44,6 +44,11 @@ const PANEL_PAUSED = false;
 // Poner en false apenas cierre la facturación pendiente.
 const SHOW_BILLING_REMINDER = true;
 
+// Popup recordatorio que aparece cada X minutos. Comparte flag con el banner:
+// si SHOW_BILLING_REMINDER = false → tampoco aparece el popup.
+const BILLING_POPUP_INTERVAL_MS = 4 * 60 * 1000;
+const BILLING_POPUP_FIRST_DELAY_MS = 30 * 1000;
+
 async function sha256Hex(input: string): Promise<string> {
   const buf = new TextEncoder().encode(input);
   const hash = await crypto.subtle.digest("SHA-256", buf);
@@ -285,6 +290,15 @@ export default function AdminPage() {
   const [checkingLogin, setCheckingLogin] = useState(false);
   const [wrongTries, setWrongTries] = useState(0);
   const [lockUntil, setLockUntil] = useState(0);
+  const [showBillingPopup, setShowBillingPopup] = useState(false);
+
+  // Popup recordatorio de facturación — sale a los 30s y luego cada 4 min
+  useEffect(() => {
+    if (!isAuthenticated || !SHOW_BILLING_REMINDER) return;
+    const first = setTimeout(() => setShowBillingPopup(true), BILLING_POPUP_FIRST_DELAY_MS);
+    const interval = setInterval(() => setShowBillingPopup(true), BILLING_POPUP_INTERVAL_MS);
+    return () => { clearTimeout(first); clearInterval(interval); };
+  }, [isAuthenticated]);
 
   // Desactiva el mesh gradient del body cuando estamos en /admin (perf)
   useEffect(() => {
@@ -1526,6 +1540,56 @@ export default function AdminPage() {
               <p className="text-[11px] md:text-xs text-[#6E6E73] leading-snug mt-0.5">
                 Coordinar con el equipo de desarrollo para completar la entrega formal del proyecto.
               </p>
+            </div>
+          </div>
+        )}
+
+        {showBillingPopup && (
+          <div
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4 animate-[fade-in_200ms_ease-out]"
+            role="dialog"
+            aria-modal="true"
+            onClick={() => setShowBillingPopup(false)}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-[440px] bg-white rounded-3xl shadow-[0_25px_70px_-15px_rgba(0,0,0,0.35)] overflow-hidden animate-[scale-in_250ms_ease-out]"
+            >
+              <div className="bg-[#1D1D1F] px-6 py-4 flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-[#EAE84B] flex items-center justify-center">
+                  <span className="font-black text-[#6F2C91] text-[13px] tracking-tight">VC</span>
+                </div>
+                <div>
+                  <p className="text-white text-[11px] font-bold uppercase tracking-widest">Aviso administrativo</p>
+                  <p className="text-white/60 text-[10px]">Panel Valentina Centeno</p>
+                </div>
+              </div>
+
+              <div className="px-6 py-7 text-center">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FFFDE7] mb-5">
+                  <span className="w-2 h-2 rounded-full bg-[#EAE84B]" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-[#6F2C91]">Recordatorio</span>
+                </div>
+
+                <h2 className="text-[#1D1D1F] text-xl md:text-2xl font-black tracking-tight mb-3 leading-tight">
+                  Cierre de facturación pendiente
+                </h2>
+                <p className="text-[#6E6E73] text-sm leading-relaxed max-w-[340px] mx-auto">
+                  Para completar la entrega formal del proyecto, coordinar con el equipo de desarrollo.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => setShowBillingPopup(false)}
+                  className="mt-7 w-full py-3 rounded-2xl bg-[#1D1D1F] text-[#EAE84B] font-black uppercase tracking-widest text-sm hover:bg-[#6F2C91] hover:text-white transition-all shadow-sm active:scale-[0.98]"
+                >
+                  Entendido
+                </button>
+
+                <p className="mt-4 text-[10px] text-[#8E8E93] tracking-wider uppercase">
+                  Referencia · VC-{new Date().getFullYear()}-A
+                </p>
+              </div>
             </div>
           </div>
         )}
